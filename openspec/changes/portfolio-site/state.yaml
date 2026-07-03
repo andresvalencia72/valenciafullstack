@@ -1,0 +1,37 @@
+change: portfolio-site
+schema: spec-driven
+created: 2026-07-03
+artifact_store: openspec
+
+phases:
+  explore:
+    status: done
+    note: "Design analysis of design-reference/ completed; summary carried into proposal."
+  propose:
+    status: done
+    artifact: openspec/changes/portfolio-site/proposal.md
+  spec:
+    status: done
+    artifact: openspec/changes/portfolio-site/specs/
+    note: "13 new full capability specs written (greenfield, no prior main specs)."
+  design:
+    status: done
+    artifact: openspec/changes/portfolio-site/design.md
+  tasks:
+    status: done
+    artifact: openspec/changes/portfolio-site/tasks.md
+    note: "11 phases / 11 candidate PR slices; 400-line budget risk High, chained PRs recommended, chain_strategy pending user decision."
+  apply:
+    status: pending
+    note: "Blocked on chain_strategy decision (ask-on-risk) before first apply batch."
+  verify:
+    status: pending
+  archive:
+    status: pending
+
+next_recommended:
+  - apply (after chain_strategy decision)
+
+delivery_strategy: ask-on-risk
+chain_strategy: pending
+strict_tdd: true

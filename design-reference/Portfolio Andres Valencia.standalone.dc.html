@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://api.fontshare.com">
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/devicon.min.css">
+<style>
+@font-face{font-family:'Clash Display';src:url('https://cdn.fontshare.com/wf/2GQIT54GKQY3JRFTSHS4ARTRNRQISSAA/3CIP5EBHRRHE5FVQU3VFROPUERNDSTDF/JTSL5QESUXATU47LCPUNHZQBDDIWDOSW.woff2') format('woff2');font-weight:500;font-display:swap;font-style:normal}
+@font-face{font-family:'Clash Display';src:url('https://cdn.fontshare.com/wf/FPDAZ2S6SW4QMSRIIKNNGTPM6VIXYMKO/5HNPQ453FRLIQWV2FNOBUU3FKTDZQVSG/Z3MGHFHX6DCTLQ55LJYRJ5MDCZPMFZU6.woff2') format('woff2');font-weight:600;font-display:swap;font-style:normal}
+@font-face{font-family:'Clash Display';src:url('https://cdn.fontshare.com/wf/BFBSY7LX5W2U2EROCLVVTQP4VS7S4PC3/IIUX4FGTMD2LK2VWD3RVTAS4SSMUN7B5/53RZKGODFYDW3QHTIL7IPOWTBCSUEZK7.woff2') format('woff2');font-weight:700;font-display:swap;font-style:normal}
+</style>
+<style>
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:96px}
+body{margin:0;background:#D9D7D1;-webkit-font-smoothing:antialiased}
+[data-portfolio-root]{font-family:'Hanken Grotesk',sans-serif !important}
+input,textarea,button{font-family:inherit}
+a{color:inherit}
+::selection{background:#FF5A2C;color:#fff}
+@keyframes pf-marquee{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+@keyframes pf-pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.3;transform:scale(.55)}}
+@keyframes pf-bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(7px)}}
+.pf-bento{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;grid-auto-rows:minmax(148px,auto)}
+.pf-big{grid-column:span 2;grid-row:span 2}
+.pf-wide{grid-column:span 2}
+@media(min-width:780px){.pf-bento{grid-template-columns:repeat(4,1fr)}}
+.pf-ic{font-size:26px;line-height:1}
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+</helmet>
+<template id="__bundler_thumbnail" data-bg-color="#D9D7D1">
+  <svg viewBox="0 0 1200 800" xmlns="http://www.w3.org/2000/svg">
+    <rect width="1200" height="800" fill="#D9D7D1"/>
+    <rect x="470" y="300" width="150" height="150" rx="14" transform="rotate(14 545 375)" fill="#16130F"/>
+    <rect x="500" y="300" width="150" height="150" rx="14" transform="rotate(14 575 375)" fill="#FF5A2C"/>
+    <circle cx="600" cy="400" r="190" fill="#16130F"/>
+    <text x="600" y="478" font-family="Helvetica, Arial, sans-serif" font-size="240" font-weight="700" fill="#D9D7D1" text-anchor="middle">A</text>
+  </svg>
+</template>
+<div data-portfolio-root data-theme="light" style="--bg:#D9D7D1;--band:#CFCDC6;--card:#F5F4F0;--ink:#16130F;--ink-soft:rgba(22,19,15,.62);--ink-faint:rgba(22,19,15,.4);--line:rgba(22,19,15,.14);--coral:#FF5A2C;--coral-ink:#ffffff;--salmon:#F3C7B8;--frame:#16130F;--shadow:rgba(22,19,15,.13);background:var(--bg);color:var(--ink);font-family:'General Sans',sans-serif;min-height:100vh;position:relative;overflow-x:clip;transition:background .55s ease,color .55s ease">
+
+  <div data-progress style="position:fixed;top:0;left:0;height:3px;width:100%;background:var(--coral);transform:scaleX(0);transform-origin:left;z-index:90;will-change:transform"></div>
+
+  <header data-nav style="position:fixed;top:0;left:0;right:0;z-index:80;padding:16px 0;border-bottom:1px solid transparent;transition:background .35s ease,padding .35s ease,border-color .35s ease">
+    <div style="max-width:1280px;margin:0 auto;padding:0 clamp(20px,5vw,72px);display:flex;align-items:center;justify-content:space-between">
+    <a href="#inicio" style="display:flex;align-items:center;gap:11px;text-decoration:none;color:var(--ink)">
+      <span style="width:34px;height:34px;border-radius:50%;background:var(--ink);color:var(--bg);display:grid;place-items:center;font-family:'Clash Display';font-weight:700;font-size:18px;transition:background .55s,color .55s">A</span>
+      <span style="font-family:'Clash Display';font-weight:600;font-size:17px;letter-spacing:-.01em">Andrés Val.</span>
+    </a>
+    <nav data-navlinks style="display:flex;align-items:center;gap:clamp(14px,2vw,30px)">
+      <a data-navlink href="#inicio" style="position:relative;text-decoration:none;color:var(--ink);font-size:15px;font-weight:500;padding:4px 0;transition:color .25s" style-hover="color:var(--coral)">Inicio<span data-underline style="position:absolute;left:0;bottom:-2px;height:2px;width:100%;background:var(--coral);transform:scaleX(0);transform-origin:left;transition:transform .3s"></span></a>
+      <a data-navlink href="#sobre" style="position:relative;text-decoration:none;color:var(--ink);font-size:15px;font-weight:500;padding:4px 0;transition:color .25s" style-hover="color:var(--coral)">Sobre mí<span data-underline style="position:absolute;left:0;bottom:-2px;height:2px;width:100%;background:var(--coral);transform:scaleX(0);transform-origin:left;transition:transform .3s"></span></a>
+      <a data-navlink href="#habilidades" style="position:relative;text-decoration:none;color:var(--ink);font-size:15px;font-weight:500;padding:4px 0;transition:color .25s" style-hover="color:var(--coral)">Habilidades<span data-underline style="position:absolute;left:0;bottom:-2px;height:2px;width:100%;background:var(--coral);transform:scaleX(0);transform-origin:left;transition:transform .3s"></span></a>
+      <a data-navlink href="#proyectos" style="position:relative;text-decoration:none;color:var(--ink);font-size:15px;font-weight:500;padding:4px 0;transition:color .25s" style-hover="color:var(--coral)">Proyectos<span data-underline style="position:absolute;left:0;bottom:-2px;height:2px;width:100%;background:var(--coral);transform:scaleX(0);transform-origin:left;transition:transform .3s"></span></a>
+      <a data-navlink href="#articulos" style="position:relative;text-decoration:none;color:var(--ink);font-size:15px;font-weight:500;padding:4px 0;transition:color .25s" style-hover="color:var(--coral)">Artículos<span data-underline style="position:absolute;left:0;bottom:-2px;height:2px;width:100%;background:var(--coral);transform:scaleX(0);transform-origin:left;transition:transform .3s"></span></a>
+      <a data-navlink href="#contacto" style="position:relative;text-decoration:none;color:var(--ink);font-size:15px;font-weight:500;padding:4px 0;transition:color .25s" style-hover="color:var(--coral)">Contacto<span data-underline style="position:absolute;left:0;bottom:-2px;height:2px;width:100%;background:var(--coral);transform:scaleX(0);transform-origin:left;transition:transform .3s"></span></a>
+      <button data-theme-toggle aria-label="Cambiar tema" style="display:grid;place-items:center;width:38px;height:38px;border:1px solid var(--line);border-radius:50%;background:transparent;color:var(--ink);cursor:pointer;transition:border-color .25s" style-hover="border-color:var(--coral)">
+        <span data-theme-icon style="position:relative;width:17px;height:17px;display:block">
+          <span data-ic-moon style="position:absolute;inset:0;border-radius:50%;box-shadow:inset -5px -3px 0 0 var(--ink)"></span>
+          <span data-ic-sun style="position:absolute;inset:1px;border-radius:50%;border:2px solid var(--ink);display:none"></span>
+        </span>
+      </button>
+    </nav>
+    <button data-burger aria-label="Menú" style="display:none;flex-direction:column;justify-content:center;gap:5px;width:42px;height:42px;border:1px solid var(--line);border-radius:12px;background:transparent;cursor:pointer;padding:0 11px">
+      <span style="height:2px;width:100%;background:var(--ink);border-radius:2px"></span>
+      <span style="height:2px;width:100%;background:var(--ink);border-radius:2px"></span>
+    </button>
+    </div>
+  </header>
+
+  <div data-mobilemenu style="position:fixed;inset:0;z-index:79;background:var(--bg);display:none;opacity:0;flex-direction:column;justify-content:center;gap:6px;padding:0 32px;transition:opacity .35s ease">
+    <button data-menuclose aria-label="Cerrar" style="position:absolute;top:24px;right:28px;width:44px;height:44px;border:1px solid var(--line);border-radius:12px;background:transparent;color:var(--ink);font-size:22px;cursor:pointer">✕</button>
+    <a href="#inicio" style="text-decoration:none;color:var(--ink);font-family:'Clash Display';font-weight:600;font-size:clamp(34px,9vw,56px);letter-spacing:-.02em;line-height:1.15">Inicio</a>
+    <a href="#sobre" style="text-decoration:none;color:var(--ink);font-family:'Clash Display';font-weight:600;font-size:clamp(34px,9vw,56px);letter-spacing:-.02em;line-height:1.15">Sobre mí</a>
+    <a href="#habilidades" style="text-decoration:none;color:var(--ink);font-family:'Clash Display';font-weight:600;font-size:clamp(34px,9vw,56px);letter-spacing:-.02em;line-height:1.15">Habilidades</a>
+    <a href="#proyectos" style="text-decoration:none;color:var(--ink);font-family:'Clash Display';font-weight:600;font-size:clamp(34px,9vw,56px);letter-spacing:-.02em;line-height:1.15">Proyectos</a>
+    <a href="#articulos" style="text-decoration:none;color:var(--ink);font-family:'Clash Display';font-weight:600;font-size:clamp(34px,9vw,56px);letter-spacing:-.02em;line-height:1.15">Artículos</a>
+    <a href="#contacto" style="text-decoration:none;color:var(--coral);font-family:'Clash Display';font-weight:600;font-size:clamp(34px,9vw,56px);letter-spacing:-.02em;line-height:1.15">Contacto</a>
+  </div>
+
+  <section id="inicio" data-section style="position:relative;max-width:1280px;margin:0 auto;padding:clamp(120px,16vh,180px) clamp(20px,5vw,72px) clamp(40px,6vh,72px)">
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr));gap:clamp(32px,5vw,64px);align-items:center">
+      <div style="position:relative;z-index:2">
+        <div data-hero-fade style="opacity:0;display:flex;align-items:center;gap:12px;margin-bottom:26px">
+          <span style="position:relative;width:9px;height:9px"><span style="position:absolute;inset:0;border-radius:50%;background:var(--coral);animation:pf-pulse 2.4s ease-in-out infinite"></span></span>
+          <span style="font-family:ui-monospace,monospace;font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-soft)">Disponible para proyectos · 2026</span>
+        </div>
+        <h1 style="margin:0;font-family:'Clash Display';font-weight:700;font-size:clamp(50px,7.4vw,116px);line-height:.96;letter-spacing:-.025em">
+          <span style="display:block;overflow:hidden;padding:.16em .1em;margin:-.16em -.1em"><span data-reveal-line style="display:block;transform:translateY(120%)">Andrés</span></span>
+          <span style="display:block;overflow:hidden;padding:.16em .1em;margin:-.16em -.1em"><span data-reveal-line style="display:block;transform:translateY(120%)">Valencia</span></span>
+        </h1>
+        <p style="margin:30px 0 0;max-width:30em;font-size:clamp(17px,1.7vw,21px);line-height:1.6;color:var(--ink)">
+          <span style="position:relative;display:inline-block">
+            <span data-hero-highlight style="position:absolute;left:-5px;right:-5px;top:8%;bottom:6%;background:var(--salmon);transform:scaleX(0);transform-origin:left;border-radius:3px;z-index:0"></span>
+            <span data-role style="position:relative;z-index:1;font-weight:600">Full Stack Developer</span>
+          </span>
+          <span style="color:var(--ink-soft)"> que diseña y construye productos web de principio a fin — con criterio visual y obsesión por los detalles.</span>
+        </p>
+        <div data-hero-fade style="opacity:0;display:flex;align-items:center;gap:14px;margin-top:36px;flex-wrap:wrap">
+          <a data-magnetic href="#contacto" style="display:inline-flex;align-items:center;gap:9px;background:var(--ink);color:var(--bg);text-decoration:none;font-weight:600;font-size:15px;padding:15px 26px;border-radius:999px;transition:background .55s,color .55s">
+            <span>Trabajemos juntos</span>
+            <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"></path><path d="m13 6 6 6-6 6"></path></svg>
+          </a>
+          <div style="display:flex;align-items:center;gap:8px">
+            <a href="https://github.com/andresvalencia72" target="_blank" rel="noopener" aria-label="GitHub" style="display:grid;place-items:center;width:46px;height:46px;border:1px solid var(--line);border-radius:50%;color:var(--ink);transition:border-color .25s,color .25s" style-hover="border-color:var(--coral);color:var(--coral)"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.4 5.4 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"></path><path d="M9 18c-4.51 2-5-2-7-2"></path></svg></a>
+            <a href="https://www.linkedin.com/in/andrés-felipe-valencia-ariza-b1009123a" target="_blank" rel="noopener" aria-label="LinkedIn" style="display:grid;place-items:center;width:46px;height:46px;border:1px solid var(--line);border-radius:50%;color:var(--ink);transition:border-color .25s,color .25s" style-hover="border-color:var(--coral);color:var(--coral)"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-4 0v7h-4v-7a6 6 0 0 1 6-6z"></path><rect x="2" y="9" width="4" height="12"></rect><circle cx="4" cy="4" r="2"></circle></svg></a>
+            <a href="https://www.youtube.com/@codeink1" target="_blank" rel="noopener" aria-label="YouTube" style="display:grid;place-items:center;width:46px;height:46px;border:1px solid var(--line);border-radius:50%;color:var(--ink);transition:border-color .25s,color .25s" style-hover="border-color:var(--coral);color:var(--coral)"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 17a24.12 24.12 0 0 1 0-10 2 2 0 0 1 1.4-1.4 49.56 49.56 0 0 1 16.2 0A2 2 0 0 1 21.5 7a24.12 24.12 0 0 1 0 10 2 2 0 0 1-1.4 1.4 49.55 49.55 0 0 1-16.2 0A2 2 0 0 1 2.5 17"></path><path d="m10 15 5-3-5-3z"></path></svg></a>
+          </div>
+        </div>
+      </div>
+
+      <div data-hero-fade style="opacity:0;position:relative;justify-self:center">
+        <svg viewBox="0 0 120 90" width="108" height="80" fill="none" stroke="var(--ink)" stroke-width="2.4" stroke-linecap="round" style="position:absolute;left:-86px;top:34%;transform:scaleX(-1);pointer-events:none">
+          <path data-draw d="M6 12 C 42 2, 74 16, 80 46 C 84 62, 74 72, 58 74"></path>
+          <path data-draw d="M58 74 L 70 66 M58 74 L 68 82"></path>
+        </svg>
+        <div data-tilt style="position:relative;width:min(82vw,400px);aspect-ratio:4/5;transform-style:preserve-3d">
+          <div style="position:absolute;inset:0;transform:translate(16px,16px);border:2px solid var(--frame);border-radius:8px"></div>
+          <div style="position:absolute;inset:0;border-radius:8px;overflow:hidden;background:repeating-linear-gradient(135deg,transparent 0 13px,color-mix(in srgb,var(--ink) 7%,transparent) 13px 14px),var(--card);box-shadow:0 24px 50px -22px var(--shadow);display:grid;place-items:center">
+            <span style="font-family:ui-monospace,monospace;font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-faint);padding:8px 12px;border:1px dashed var(--line);border-radius:6px">foto · retrato</span>
+          </div>
+          <div data-cube style="position:absolute;top:-22px;left:-22px;width:40px;height:40px">
+            <div style="position:absolute;inset:0;background:var(--ink);transform:rotate(12deg) translate(6px,6px)"></div>
+            <div style="position:absolute;inset:0;background:var(--coral);transform:rotate(12deg)"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div data-hero-fade style="opacity:0;display:flex;align-items:center;gap:12px;margin-top:clamp(40px,6vh,72px);color:var(--ink-soft)">
+      <span style="display:grid;place-items:center;width:38px;height:38px;border:1px solid var(--line);border-radius:50%"><span style="display:block;animation:pf-bounce 1.8s ease-in-out infinite"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"></path></svg></span></span>
+      <span style="font-family:ui-monospace,monospace;font-size:12px;letter-spacing:.14em;text-transform:uppercase">Desplázate</span>
+    </div>
+  </section>
+
+  <div style="overflow:hidden;border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:18px 0;background:var(--band);transition:background .55s">
+    <div style="display:flex;width:max-content;animation:pf-marquee 26s linear infinite">
+      <div style="display:flex;align-items:center;gap:34px;padding-right:34px;font-family:'Clash Display';font-weight:500;font-size:clamp(20px,2.6vw,30px);letter-spacing:-.01em;white-space:nowrap">
+        <span>Diseño de interfaces</span><span style="color:var(--coral)">◆</span><span>Desarrollo full stack</span><span style="color:var(--coral)">◆</span><span>Animación & detalle</span><span style="color:var(--coral)">◆</span><span>Productos web de punta a punta</span><span style="color:var(--coral)">◆</span>
+      </div>
+      <div aria-hidden="true" style="display:flex;align-items:center;gap:34px;padding-right:34px;font-family:'Clash Display';font-weight:500;font-size:clamp(20px,2.6vw,30px);letter-spacing:-.01em;white-space:nowrap">
+        <span>Diseño de interfaces</span><span style="color:var(--coral)">◆</span><span>Desarrollo full stack</span><span style="color:var(--coral)">◆</span><span>Animación & detalle</span><span style="color:var(--coral)">◆</span><span>Productos web de punta a punta</span><span style="color:var(--coral)">◆</span>
+      </div>
+    </div>
+  </div>
+
+  <section id="sobre" data-section style="max-width:1280px;margin:0 auto;padding:clamp(80px,12vh,150px) clamp(20px,5vw,72px)">
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr));gap:clamp(36px,5vw,72px);align-items:center">
+      <div data-reveal style="position:relative;justify-self:center">
+        <div data-tilt style="position:relative;width:min(80vw,380px);aspect-ratio:4/5;transform-style:preserve-3d">
+          <div style="position:absolute;inset:0;transform:translate(-16px,16px);border:2px solid var(--frame);border-radius:8px"></div>
+          <div style="position:absolute;inset:0;border-radius:8px;overflow:hidden;background:repeating-linear-gradient(135deg,transparent 0 13px,color-mix(in srgb,var(--ink) 7%,transparent) 13px 14px),var(--card);box-shadow:0 24px 50px -22px var(--shadow);display:grid;place-items:center">
+            <span style="font-family:ui-monospace,monospace;font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-faint);padding:8px 12px;border:1px dashed var(--line);border-radius:6px">foto · trabajando</span>
+          </div>
+          <div data-cube style="position:absolute;bottom:-20px;right:-20px;width:36px;height:36px">
+            <div style="position:absolute;inset:0;background:var(--ink);transform:rotate(-10deg) translate(6px,6px)"></div>
+            <div style="position:absolute;inset:0;background:var(--coral);transform:rotate(-10deg)"></div>
+          </div>
+        </div>
+      </div>
+      <div data-stagger>
+        <div data-stagger-item style="display:flex;align-items:center;gap:14px;margin-bottom:18px">
+          <span style="width:34px;height:3px;background:var(--coral)"></span>
+          <span style="font-family:ui-monospace,monospace;font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-soft)">Sobre mí</span>
+        </div>
+        <h2 data-stagger-item style="margin:0 0 22px;font-family:'Clash Display';font-weight:600;font-size:clamp(34px,5.5vw,62px);letter-spacing:-.025em;line-height:1">
+          Hola, soy
+          <span style="position:relative;display:inline-block">
+            <span data-section-highlight style="position:absolute;left:-6px;right:-6px;top:10%;bottom:8%;background:var(--salmon);transform:scaleX(0);transform-origin:left;border-radius:3px;z-index:0"></span>
+            <span data-name style="position:relative;z-index:1">Andrés</span></span>.
+        </h2>
+        <p data-stagger-item style="margin:0 0 18px;font-size:clamp(16px,1.6vw,19px);line-height:1.7;color:var(--ink-soft);max-width:38em">Desarrollo aplicaciones web de punta a punta: del diseño de la interfaz a la API y la base de datos. Me muevo con soltura entre el front y el back, y disfruto convirtiendo problemas difusos en productos claros, rápidos y bien construidos.</p>
+        <p data-stagger-item style="margin:0 0 30px;font-size:clamp(16px,1.6vw,19px);line-height:1.7;color:var(--ink-soft);max-width:38em">Trabajo a diario con <strong style="color:var(--ink);font-weight:600">JavaScript, TypeScript, React, Node.js, PHP y SQL</strong>, y ahora mismo profundizo en <strong style="color:var(--ink);font-weight:600">Next.js</strong> para llevar mis proyectos un paso más allá.</p>
+        <div data-stagger-item style="display:flex;gap:12px;flex-wrap:wrap">
+          <a data-magnetic href="#contacto" style="display:inline-flex;align-items:center;gap:9px;background:var(--coral);color:var(--coral-ink);text-decoration:none;font-weight:600;font-size:15px;padding:14px 24px;border-radius:999px">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2 11 13"></path><path d="M22 2 15 22l-4-9-9-4z"></path></svg>
+            <span>Contáctame</span>
+          </a>
+          <a href="#" style="display:inline-flex;align-items:center;gap:9px;background:transparent;color:var(--ink);text-decoration:none;font-weight:600;font-size:15px;padding:14px 24px;border-radius:999px;border:1px solid var(--line);transition:border-color .25s" style-hover="border-color:var(--ink)">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><path d="m7 10 5 5 5-5"></path><path d="M12 15V3"></path></svg>
+            <span>Descargar CV</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div style="background:var(--band);transition:background .55s">
+  <section id="habilidades" data-section style="max-width:1280px;margin:0 auto;padding:clamp(80px,12vh,150px) clamp(20px,5vw,72px)">
+    <div data-reveal style="display:flex;align-items:flex-end;justify-content:space-between;gap:24px;flex-wrap:wrap;margin-bottom:clamp(36px,5vh,56px)">
+      <div>
+        <div style="display:flex;align-items:center;gap:14px;margin-bottom:16px">
+          <span style="width:34px;height:3px;background:var(--coral)"></span>
+          <span style="font-family:ui-monospace,monospace;font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-soft)">Stack & herramientas</span>
+        </div>
+        <h2 style="margin:0;font-family:'Clash Display';font-weight:600;font-size:clamp(38px,6vw,72px);letter-spacing:-.025em;line-height:.95">
+          <span style="position:relative;display:inline-block">
+            <span data-section-highlight style="position:absolute;left:-6px;right:-6px;top:12%;bottom:10%;background:var(--salmon);transform:scaleX(0);transform-origin:left;border-radius:3px;z-index:0"></span>
+            <span style="position:relative;z-index:1">Habilidades</span></span>.
+        </h2>
+      </div>
+      <p style="margin:0;max-width:24em;font-size:15px;line-height:1.6;color:var(--ink-soft)">Las herramientas con las que construyo a diario, organizadas por cómo las uso de verdad.</p>
+    </div>
+
+    <div data-stagger class="pf-bento">
+      <div data-stagger-item data-tilt class="pf-big" style="background:var(--ink);color:var(--bg);border-radius:18px;padding:28px;display:flex;flex-direction:column;justify-content:space-between;gap:20px;position:relative;overflow:hidden;transform-style:preserve-3d;min-height:312px;transition:background .55s,color .55s">
+        <div>
+          <span style="font-family:ui-monospace,monospace;font-size:11px;letter-spacing:.14em;text-transform:uppercase;opacity:.6">Stack principal</span>
+          <div style="margin-top:18px;display:flex;flex-direction:column;gap:4px">
+            <span style="font-family:'Clash Display';font-weight:600;font-size:clamp(28px,3.6vw,42px);letter-spacing:-.02em;line-height:1.05">React</span>
+            <span style="font-family:'Clash Display';font-weight:600;font-size:clamp(28px,3.6vw,42px);letter-spacing:-.02em;line-height:1.05">TypeScript</span>
+            <span style="font-family:'Clash Display';font-weight:600;font-size:clamp(28px,3.6vw,42px);letter-spacing:-.02em;line-height:1.05;color:var(--coral)">Node.js</span>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:16px">
+          <p style="margin:0;font-size:14px;line-height:1.55;opacity:.7;max-width:20em">Del cliente al servidor, lo que uso para construir la mayoría de mis productos.</p>
+          <div style="display:flex;gap:14px;flex-shrink:0"><i class="devicon-react-original colored pf-ic"></i><i class="devicon-typescript-plain colored pf-ic"></i><i class="devicon-nodejs-plain colored pf-ic"></i></div>
+        </div>
+        <div style="position:absolute;top:-30px;right:-30px;width:120px;height:120px;border-radius:50%;background:var(--coral);opacity:.14;filter:blur(8px)"></div>
+      </div>
+
+      <div data-stagger-item style="background:var(--card);border:1px solid var(--line);border-radius:18px;padding:22px;display:flex;flex-direction:column;justify-content:space-between;gap:14px;transition:background .55s,border-color .55s">
+        <div style="display:flex;align-items:center;justify-content:space-between"><span style="font-family:ui-monospace,monospace;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-faint)">Lenguaje</span><i class="devicon-javascript-plain colored pf-ic"></i></div>
+        <div><h3 style="margin:0 0 4px;font-family:'Clash Display';font-weight:600;font-size:22px;letter-spacing:-.01em">JavaScript</h3><p style="margin:0;font-size:14px;color:var(--ink-soft);line-height:1.45">El lenguaje en el que pienso.</p></div>
+      </div>
+      <div data-stagger-item style="background:var(--card);border:1px solid var(--line);border-radius:18px;padding:22px;display:flex;flex-direction:column;justify-content:space-between;gap:14px;transition:background .55s,border-color .55s">
+        <div style="display:flex;align-items:center;justify-content:space-between"><span style="font-family:ui-monospace,monospace;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-faint)">Backend</span><i class="devicon-php-plain colored pf-ic"></i></div>
+        <div><h3 style="margin:0 0 4px;font-family:'Clash Display';font-weight:600;font-size:22px;letter-spacing:-.01em">PHP</h3><p style="margin:0;font-size:14px;color:var(--ink-soft);line-height:1.45">Backend sólido y muy vigente.</p></div>
+      </div>
+      <div data-stagger-item style="background:var(--card);border:1px solid var(--line);border-radius:18px;padding:22px;display:flex;flex-direction:column;justify-content:space-between;gap:14px;transition:background .55s,border-color .55s">
+        <div style="display:flex;align-items:center;justify-content:space-between"><span style="font-family:ui-monospace,monospace;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-faint)">Datos</span><i class="devicon-postgresql-plain colored pf-ic"></i></div>
+        <div><h3 style="margin:0 0 4px;font-family:'Clash Display';font-weight:600;font-size:22px;letter-spacing:-.01em">SQL</h3><p style="margin:0;font-size:14px;color:var(--ink-soft);line-height:1.45">PostgreSQL & MySQL.</p></div>
+      </div>
+      <div data-stagger-item style="background:var(--card);border:1px solid var(--line);border-radius:18px;padding:22px;display:flex;flex-direction:column;justify-content:space-between;gap:14px;transition:background .55s,border-color .55s">
+        <div style="display:flex;align-items:center;justify-content:space-between"><span style="font-family:ui-monospace,monospace;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-faint)">Flujo</span><i class="devicon-git-plain colored pf-ic"></i></div>
+        <div><h3 style="margin:0 0 4px;font-family:'Clash Display';font-weight:600;font-size:22px;letter-spacing:-.01em">Git</h3><p style="margin:0;font-size:14px;color:var(--ink-soft);line-height:1.45">Versionado y trabajo en equipo.</p></div>
+      </div>
+
+      <div data-stagger-item class="pf-wide" style="background:var(--coral);color:var(--coral-ink);border-radius:18px;padding:24px;display:flex;align-items:center;justify-content:space-between;gap:16px;position:relative;overflow:hidden">
+        <div>
+          <span style="font-family:ui-monospace,monospace;font-size:11px;letter-spacing:.14em;text-transform:uppercase;opacity:.85">Aprendiendo ahora</span>
+          <h3 style="margin:8px 0 0;font-family:'Clash Display';font-weight:700;font-size:clamp(26px,3.2vw,38px);letter-spacing:-.02em">Next.js · App Router</h3>
+        </div>
+        <i class="devicon-nextjs-plain pf-ic" style="font-size:42px;flex-shrink:0;opacity:.95"></i>
+      </div>
+      <div data-stagger-item style="background:var(--card);border:1px solid var(--line);border-radius:18px;padding:22px;display:flex;flex-direction:column;justify-content:space-between;gap:14px;transition:background .55s,border-color .55s">
+        <div style="display:flex;align-items:center;justify-content:space-between"><span style="font-family:ui-monospace,monospace;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-faint)">Infra</span><i class="devicon-docker-plain colored pf-ic"></i></div>
+        <div><h3 style="margin:0 0 4px;font-family:'Clash Display';font-weight:600;font-size:22px;letter-spacing:-.01em">Docker</h3><p style="margin:0;font-size:14px;color:var(--ink-soft);line-height:1.45">Entornos reproducibles.</p></div>
+      </div>
+      <div data-stagger-item style="background:var(--card);border:1px solid var(--line);border-radius:18px;padding:22px;display:flex;flex-direction:column;justify-content:space-between;gap:14px;transition:background .55s,border-color .55s">
+        <div style="display:flex;align-items:center;justify-content:space-between"><span style="font-family:ui-monospace,monospace;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-faint)">Diseño</span><i class="devicon-figma-plain colored pf-ic"></i></div>
+        <div><h3 style="margin:0 0 4px;font-family:'Clash Display';font-weight:600;font-size:22px;letter-spacing:-.01em">Figma</h3><p style="margin:0;font-size:14px;color:var(--ink-soft);line-height:1.45">Del diseño al código.</p></div>
+      </div>
+    </div>
+  </section>
+  </div>
+
+  <section id="proyectos" data-section style="max-width:1280px;margin:0 auto;padding:clamp(80px,12vh,150px) clamp(20px,5vw,72px)">
+    <div data-reveal style="display:flex;align-items:flex-end;justify-content:space-between;gap:24px;flex-wrap:wrap;margin-bottom:clamp(40px,6vh,68px)">
+      <div>
+        <div style="display:flex;align-items:center;gap:14px;margin-bottom:16px">
+          <span style="width:34px;height:3px;background:var(--coral)"></span>
+          <span style="font-family:ui-monospace,monospace;font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-soft)">Casos de estudio</span>
+        </div>
+        <h2 style="margin:0;font-family:'Clash Display';font-weight:600;font-size:clamp(38px,6vw,72px);letter-spacing:-.025em;line-height:.95">
+          <span style="position:relative;display:inline-block">
+            <span data-section-highlight style="position:absolute;left:-6px;right:-6px;top:12%;bottom:10%;background:var(--salmon);transform:scaleX(0);transform-origin:left;border-radius:3px;z-index:0"></span>
+            <span style="position:relative;z-index:1">Proyectos</span></span>.
+        </h2>
+      </div>
+      <p style="margin:0;max-width:24em;font-size:15px;line-height:1.6;color:var(--ink-soft)">Una selección de productos donde me encargué del diseño y el desarrollo completo.</p>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:clamp(40px,7vh,88px)">
+
+      <article data-reveal style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:clamp(28px,4vw,56px);align-items:center">
+        <div data-tilt style="position:relative;transform-style:preserve-3d">
+          <div style="position:absolute;inset:0;transform:translate(14px,14px);border:2px solid var(--frame);border-radius:10px"></div>
+          <div style="position:relative;aspect-ratio:16/11;border-radius:10px;overflow:hidden;box-shadow:0 24px 50px -24px var(--shadow);background:var(--card)">
+            <div data-parallax style="position:absolute;top:-10%;left:0;right:0;height:120%;background:repeating-linear-gradient(135deg,transparent 0 15px,color-mix(in srgb,var(--ink) 7%,transparent) 15px 16px),var(--card);display:grid;place-items:center"><span style="font-family:ui-monospace,monospace;font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-faint);padding:8px 12px;border:1px dashed var(--line);border-radius:6px">captura · mercado norte</span></div>
+          </div>
+        </div>
+        <div>
+          <div style="display:flex;align-items:center;gap:14px;margin-bottom:14px"><span style="font-family:'Clash Display';font-weight:700;font-size:18px;color:var(--coral)">01</span><span style="font-family:ui-monospace,monospace;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft)">Full Stack · 2025</span></div>
+          <h3 style="margin:0 0 14px;font-family:'Clash Display';font-weight:600;font-size:clamp(28px,3.6vw,42px);letter-spacing:-.02em;line-height:1.02">Mercado Norte</h3>
+          <p style="margin:0 0 18px;font-size:16px;line-height:1.6;color:var(--ink-soft);max-width:34em"><strong style="color:var(--ink);font-weight:600">Problema:</strong> los comercios de barrio no tenían forma de vender online. <strong style="color:var(--ink);font-weight:600">Solución:</strong> un marketplace local con catálogo, pagos y panel para cada vendedor.</p>
+          <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:24px">
+            <span style="display:inline-flex;padding:6px 13px;border:1px solid var(--line);border-radius:999px;font-size:13px;font-weight:500">React</span><span style="display:inline-flex;padding:6px 13px;border:1px solid var(--line);border-radius:999px;font-size:13px;font-weight:500">Node.js</span><span style="display:inline-flex;padding:6px 13px;border:1px solid var(--line);border-radius:999px;font-size:13px;font-weight:500">PostgreSQL</span><span style="display:inline-flex;padding:6px 13px;border:1px solid var(--line);border-radius:999px;font-size:13px;font-weight:500">Stripe</span>
+          </div>
+          <div style="display:flex;gap:14px;flex-wrap:wrap">
+            <a href="#" style="display:inline-flex;align-items:center;gap:8px;color:var(--ink);text-decoration:none;font-weight:600;font-size:15px;border-bottom:2px solid var(--coral);padding-bottom:3px">Ver demo <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7"></path><path d="M7 7h10v10"></path></svg></a>
+            <a href="#" style="display:inline-flex;align-items:center;gap:8px;color:var(--ink-soft);text-decoration:none;font-weight:600;font-size:15px;padding-bottom:3px">Repositorio <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m16 18 6-6-6-6"></path><path d="m8 6-6 6 6 6"></path></svg></a>
+          </div>
+        </div>
+      </article>
+
+      <article data-reveal style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:clamp(28px,4vw,56px);align-items:center">
+        <div style="order:1">
+          <div style="display:flex;align-items:center;gap:14px;margin-bottom:14px"><span style="font-family:'Clash Display';font-weight:700;font-size:18px;color:var(--coral)">02</span><span style="font-family:ui-monospace,monospace;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft)">Full Stack & Diseño · 2025</span></div>
+          <h3 style="margin:0 0 14px;font-family:'Clash Display';font-weight:600;font-size:clamp(28px,3.6vw,42px);letter-spacing:-.02em;line-height:1.02">Aula Viva</h3>
+          <p style="margin:0 0 18px;font-size:16px;line-height:1.6;color:var(--ink-soft);max-width:34em"><strong style="color:var(--ink);font-weight:600">Problema:</strong> estudiar a distancia dispersa apuntes, plazos y temarios. <strong style="color:var(--ink);font-weight:600">Solución:</strong> un espacio que reúne material, calendario y progreso en un solo lugar.</p>
+          <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:24px">
+            <span style="display:inline-flex;padding:6px 13px;border:1px solid var(--line);border-radius:999px;font-size:13px;font-weight:500">Next.js</span><span style="display:inline-flex;padding:6px 13px;border:1px solid var(--line);border-radius:999px;font-size:13px;font-weight:500">TypeScript</span><span style="display:inline-flex;padding:6px 13px;border:1px solid var(--line);border-radius:999px;font-size:13px;font-weight:500">Prisma</span><span style="display:inline-flex;padding:6px 13px;border:1px solid var(--line);border-radius:999px;font-size:13px;font-weight:500">Tailwind</span>
+          </div>
+          <div style="display:flex;gap:14px;flex-wrap:wrap">
+            <a href="#" style="display:inline-flex;align-items:center;gap:8px;color:var(--ink);text-decoration:none;font-weight:600;font-size:15px;border-bottom:2px solid var(--coral);padding-bottom:3px">Ver demo <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7"></path><path d="M7 7h10v10"></path></svg></a>
+            <a href="#" style="display:inline-flex;align-items:center;gap:8px;color:var(--ink-soft);text-decoration:none;font-weight:600;font-size:15px;padding-bottom:3px">Repositorio <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m16 18 6-6-6-6"></path><path d="m8 6-6 6 6 6"></path></svg></a>
+          </div>
+        </div>
+        <div data-tilt style="position:relative;order:0;transform-style:preserve-3d">
+          <div style="position:absolute;inset:0;transform:translate(-14px,14px);border:2px solid var(--frame);border-radius:10px"></div>
+          <div style="position:relative;aspect-ratio:16/11;border-radius:10px;overflow:hidden;box-shadow:0 24px 50px -24px var(--shadow);background:var(--card)">
+            <div data-parallax style="position:absolute;top:-10%;left:0;right:0;height:120%;background:repeating-linear-gradient(135deg,transparent 0 15px,color-mix(in srgb,var(--ink) 7%,transparent) 15px 16px),var(--card);display:grid;place-items:center"><span style="font-family:ui-monospace,monospace;font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-faint);padding:8px 12px;border:1px dashed var(--line);border-radius:6px">captura · aula viva</span></div>
+          </div>
+        </div>
+      </article>
+
+      <article data-reveal style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:clamp(28px,4vw,56px);align-items:center">
+        <div data-tilt style="position:relative;transform-style:preserve-3d">
+          <div style="position:absolute;inset:0;transform:translate(14px,14px);border:2px solid var(--frame);border-radius:10px"></div>
+          <div style="position:relative;aspect-ratio:16/11;border-radius:10px;overflow:hidden;box-shadow:0 24px 50px -24px var(--shadow);background:var(--card)">
+            <div data-parallax style="position:absolute;top:-10%;left:0;right:0;height:120%;background:repeating-linear-gradient(135deg,transparent 0 15px,color-mix(in srgb,var(--ink) 7%,transparent) 15px 16px),var(--card);display:grid;place-items:center"><span style="font-family:ui-monospace,monospace;font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-faint);padding:8px 12px;border:1px dashed var(--line);border-radius:6px">captura · codeink</span></div>
+          </div>
+        </div>
+        <div>
+          <div style="display:flex;align-items:center;gap:14px;margin-bottom:14px"><span style="font-family:'Clash Display';font-weight:700;font-size:18px;color:var(--coral)">03</span><span style="font-family:ui-monospace,monospace;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft)">Full Stack · 2026</span></div>
+          <h3 style="margin:0 0 14px;font-family:'Clash Display';font-weight:600;font-size:clamp(28px,3.6vw,42px);letter-spacing:-.02em;line-height:1.02">CodeInk</h3>
+          <p style="margin:0 0 18px;font-size:16px;line-height:1.6;color:var(--ink-soft);max-width:34em"><strong style="color:var(--ink);font-weight:600">Problema:</strong> compartir lo que aprendo sin pelearme con un CMS. <strong style="color:var(--ink);font-weight:600">Solución:</strong> un blog técnico ligado a mi canal de YouTube donde publico escribiendo Markdown y haciendo commit.</p>
+          <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:24px">
+            <span style="display:inline-flex;padding:6px 13px;border:1px solid var(--line);border-radius:999px;font-size:13px;font-weight:500">Next.js</span><span style="display:inline-flex;padding:6px 13px;border:1px solid var(--line);border-radius:999px;font-size:13px;font-weight:500">MDX</span><span style="display:inline-flex;padding:6px 13px;border:1px solid var(--line);border-radius:999px;font-size:13px;font-weight:500">GSAP</span><span style="display:inline-flex;padding:6px 13px;border:1px solid var(--line);border-radius:999px;font-size:13px;font-weight:500">Vercel</span>
+          </div>
+          <div style="display:flex;gap:14px;flex-wrap:wrap">
+            <a href="https://www.youtube.com/@codeink1" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:8px;color:var(--ink);text-decoration:none;font-weight:600;font-size:15px;border-bottom:2px solid var(--coral);padding-bottom:3px">Ver canal <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7"></path><path d="M7 7h10v10"></path></svg></a>
+            <a href="https://github.com/andresvalencia72" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:8px;color:var(--ink-soft);text-decoration:none;font-weight:600;font-size:15px;padding-bottom:3px">Repositorio <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m16 18 6-6-6-6"></path><path d="m8 6-6 6 6 6"></path></svg></a>
+          </div>
+        </div>
+      </article>
+
+    </div>
+  </section>
+
+  <div style="background:var(--band);transition:background .55s">
+  <section id="articulos" data-section style="max-width:1280px;margin:0 auto;padding:clamp(80px,12vh,150px) clamp(20px,5vw,72px)">
+    <div data-reveal style="display:flex;align-items:flex-end;justify-content:space-between;gap:24px;flex-wrap:wrap;margin-bottom:clamp(36px,5vh,56px)">
+      <div>
+        <div style="display:flex;align-items:center;gap:14px;margin-bottom:16px">
+          <span style="width:34px;height:3px;background:var(--coral)"></span>
+          <span style="font-family:ui-monospace,monospace;font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-soft)">Escribo y grabo</span>
+        </div>
+        <h2 style="margin:0;font-family:'Clash Display';font-weight:600;font-size:clamp(38px,6vw,72px);letter-spacing:-.025em;line-height:.95">
+          <span style="position:relative;display:inline-block">
+            <span data-section-highlight style="position:absolute;left:-6px;right:-6px;top:12%;bottom:10%;background:var(--salmon);transform:scaleX(0);transform-origin:left;border-radius:3px;z-index:0"></span>
+            <span style="position:relative;z-index:1">Artículos</span></span>.
+        </h2>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <span style="display:inline-flex;padding:7px 14px;border-radius:999px;background:var(--coral);color:var(--coral-ink);font-size:13px;font-weight:500">Todos</span>
+        <span style="display:inline-flex;padding:7px 14px;border-radius:999px;border:1px solid var(--line);font-size:13px;font-weight:500;color:var(--ink-soft)">Tecnologías</span>
+        <span style="display:inline-flex;padding:7px 14px;border-radius:999px;border:1px solid var(--line);font-size:13px;font-weight:500;color:var(--ink-soft)">Arquitectura</span>
+        <span style="display:inline-flex;padding:7px 14px;border-radius:999px;border:1px solid var(--line);font-size:13px;font-weight:500;color:var(--ink-soft)">Patrones</span>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:18px">
+      <div data-stagger style="display:flex;flex-direction:column;gap:14px">
+        <a data-stagger-item href="Articulo Andres Valencia.dc.html" style="display:flex;gap:18px;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px;text-decoration:none;color:var(--ink);transition:transform .3s,border-color .3s" style-hover="border-color:var(--coral);transform:translateX(4px)">
+          <div style="flex-shrink:0;width:92px;height:72px;border-radius:10px;background:repeating-linear-gradient(135deg,transparent 0 11px,color-mix(in srgb,var(--ink) 7%,transparent) 11px 12px),var(--bg)"></div>
+          <div style="min-width:0">
+            <div style="display:flex;gap:10px;margin-bottom:7px;font-family:ui-monospace,monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--coral)">Tecnologías · 8 min</div>
+            <h3 style="margin:0;font-family:'Clash Display';font-weight:600;font-size:19px;letter-spacing:-.01em;line-height:1.2">Animaciones que comunican: GSAP con criterio</h3>
+          </div>
+        </a>
+        <a data-stagger-item href="Articulo Andres Valencia.dc.html" style="display:flex;gap:18px;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px;text-decoration:none;color:var(--ink);transition:transform .3s,border-color .3s" style-hover="border-color:var(--coral);transform:translateX(4px)">
+          <div style="flex-shrink:0;width:92px;height:72px;border-radius:10px;background:repeating-linear-gradient(135deg,transparent 0 11px,color-mix(in srgb,var(--ink) 7%,transparent) 11px 12px),var(--bg)"></div>
+          <div style="min-width:0">
+            <div style="display:flex;gap:10px;margin-bottom:7px;font-family:ui-monospace,monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--coral)">Arquitectura · 12 min</div>
+            <h3 style="margin:0;font-family:'Clash Display';font-weight:600;font-size:19px;letter-spacing:-.01em;line-height:1.2">Cómo estructuro un portfolio en Next.js</h3>
+          </div>
+        </a>
+        <a data-stagger-item href="Articulo Andres Valencia.dc.html" style="display:flex;gap:18px;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px;text-decoration:none;color:var(--ink);transition:transform .3s,border-color .3s" style-hover="border-color:var(--coral);transform:translateX(4px)">
+          <div style="flex-shrink:0;width:92px;height:72px;border-radius:10px;background:repeating-linear-gradient(135deg,transparent 0 11px,color-mix(in srgb,var(--ink) 7%,transparent) 11px 12px),var(--bg)"></div>
+          <div style="min-width:0">
+            <div style="display:flex;gap:10px;margin-bottom:7px;font-family:ui-monospace,monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--coral)">Patrones · 6 min</div>
+            <h3 style="margin:0;font-family:'Clash Display';font-weight:600;font-size:19px;letter-spacing:-.01em;line-height:1.2">Patrones de diseño que uso a diario</h3>
+          </div>
+        </a>
+      </div>
+
+      <a data-reveal href="https://www.youtube.com/@codeink1" target="_blank" rel="noopener" data-tilt style="position:relative;display:flex;flex-direction:column;justify-content:space-between;gap:24px;background:var(--ink);color:var(--bg);border-radius:18px;padding:28px;text-decoration:none;overflow:hidden;transform-style:preserve-3d;min-height:240px;transition:background .55s,color .55s">
+        <div style="display:flex;align-items:center;gap:10px;font-family:ui-monospace,monospace;font-size:11px;letter-spacing:.14em;text-transform:uppercase;opacity:.7"><span style="color:var(--coral)">▶</span> YouTube · @codeink1</div>
+        <div>
+          <h3 style="margin:0 0 10px;font-family:'Clash Display';font-weight:700;font-size:clamp(26px,3vw,34px);letter-spacing:-.02em;line-height:1.05">Construyo en público</h3>
+          <p style="margin:0;font-size:15px;line-height:1.55;opacity:.7;max-width:24em">Tutoriales y procesos reales de desarrollo. Suscríbete para ver cómo construyo lo que aparece aquí.</p>
+        </div>
+        <span style="display:inline-flex;align-items:center;gap:9px;align-self:flex-start;background:var(--coral);color:var(--coral-ink);font-weight:600;font-size:14px;padding:11px 18px;border-radius:999px">Ver canal <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"></path><path d="m13 6 6 6-6 6"></path></svg></span>
+        <div style="position:absolute;bottom:-40px;right:-30px;width:150px;height:150px;border-radius:50%;background:var(--coral);opacity:.16;filter:blur(10px)"></div>
+      </a>
+    </div>
+  </section>
+  </div>
+
+  <section id="contacto" data-section style="max-width:1280px;margin:0 auto;padding:clamp(80px,12vh,150px) clamp(20px,5vw,72px)">
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr));gap:clamp(28px,4vw,52px);align-items:start">
+      <div data-reveal style="display:flex;flex-direction:column;gap:clamp(40px,7vh,72px)">
+        <div style="position:relative;background:var(--card);border:1px solid var(--line);border-radius:18px;padding:clamp(26px,3vw,38px);overflow:hidden;transition:background .55s,border-color .55s">
+          <div data-cube style="position:absolute;top:22px;right:22px;width:38px;height:38px">
+            <div style="position:absolute;inset:0;background:var(--ink);transform:rotate(14deg) translate(6px,6px)"></div>
+            <div style="position:absolute;inset:0;background:var(--coral);transform:rotate(14deg)"></div>
+          </div>
+          <div style="display:flex;align-items:center;gap:14px;margin-bottom:18px">
+            <span style="width:34px;height:3px;background:var(--coral)"></span>
+            <span style="font-family:ui-monospace,monospace;font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-soft)">Hablemos</span>
+          </div>
+          <h2 style="margin:0 0 22px;font-family:'Clash Display';font-weight:700;font-size:clamp(40px,6.5vw,76px);letter-spacing:-.03em;line-height:.9">
+            <span style="position:relative;display:inline-block">
+              <span data-section-highlight style="position:absolute;left:-7px;right:-7px;top:14%;bottom:12%;background:var(--salmon);transform:scaleX(0);transform-origin:left;border-radius:3px;z-index:0"></span>
+              <span style="position:relative;z-index:1">Contáctame</span></span>.
+          </h2>
+          <p style="margin:0 0 14px;font-size:16px;line-height:1.6;color:var(--ink);max-width:30em">Todos los correos serán leídos. Envíame cualquier mensaje que desees y te responderé lo antes posible.</p>
+          <p style="margin:0;font-size:15px;line-height:1.6;color:var(--ink-soft);max-width:30em">Cuéntame tu <strong style="color:var(--ink);font-weight:600">nombre</strong> y un <strong style="color:var(--ink);font-weight:600">correo</strong> de contacto. No recibirás ningún otro tipo de comunicación aparte de mi respuesta.</p>
+          <div style="height:4px;background:var(--coral);border-radius:4px;margin:clamp(24px,3vw,34px) 0 0;margin-left:calc(-1 * clamp(26px,3vw,38px));margin-right:calc(-1 * clamp(26px,3vw,38px))"></div>
+        </div>
+
+        <div style="display:flex;align-items:center;gap:22px">
+          <svg viewBox="0 0 90 70" width="74" height="58" fill="none" stroke="var(--ink)" stroke-width="2.4" stroke-linecap="round" style="flex-shrink:0">
+            <path data-draw d="M10 8 C 44 6, 66 18, 64 50"></path>
+            <path data-draw d="M64 50 L 54 40 M64 50 L 74 42"></path>
+          </svg>
+          <div>
+            <p style="margin:0 0 12px;font-size:14px;color:var(--ink-soft);max-width:16em">¿No quieres enviar un email? <strong style="color:var(--ink);font-weight:600">Escríbeme en mis redes.</strong></p>
+            <div style="display:flex;gap:10px">
+              <a data-magnetic href="https://github.com/andresvalencia72" target="_blank" rel="noopener" aria-label="GitHub" style="display:grid;place-items:center;width:48px;height:48px;background:var(--ink);color:var(--bg);border-radius:12px;transition:background .25s,transform .25s" style-hover="background:var(--coral);color:var(--coral-ink)"><svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.4 5.4 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"></path><path d="M9 18c-4.51 2-5-2-7-2"></path></svg></a>
+              <a data-magnetic href="https://www.linkedin.com/in/andrés-felipe-valencia-ariza-b1009123a" target="_blank" rel="noopener" aria-label="LinkedIn" style="display:grid;place-items:center;width:48px;height:48px;background:var(--ink);color:var(--bg);border-radius:12px;transition:background .25s,transform .25s" style-hover="background:var(--coral);color:var(--coral-ink)"><svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-4 0v7h-4v-7a6 6 0 0 1 6-6z"></path><rect x="2" y="9" width="4" height="12"></rect><circle cx="4" cy="4" r="2"></circle></svg></a>
+              <a data-magnetic href="https://www.youtube.com/@codeink1" target="_blank" rel="noopener" aria-label="YouTube" style="display:grid;place-items:center;width:48px;height:48px;background:var(--ink);color:var(--bg);border-radius:12px;transition:background .25s,transform .25s" style-hover="background:var(--coral);color:var(--coral-ink)"><svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 17a24.12 24.12 0 0 1 0-10 2 2 0 0 1 1.4-1.4 49.56 49.56 0 0 1 16.2 0A2 2 0 0 1 21.5 7a24.12 24.12 0 0 1 0 10 2 2 0 0 1-1.4 1.4 49.55 49.55 0 0 1-16.2 0A2 2 0 0 1 2.5 17"></path><path d="m10 15 5-3-5-3z"></path></svg></a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <form data-reveal data-contact-form style="background:var(--ink);color:var(--bg);border-radius:20px;padding:clamp(26px,3vw,42px);display:flex;flex-direction:column;gap:18px;transition:background .55s,color .55s">
+        <h3 style="margin:0 0 6px;font-family:'Clash Display';font-weight:600;font-size:clamp(22px,2.4vw,28px);letter-spacing:-.01em">Envíame un mensaje</h3>
+        <label style="display:flex;flex-direction:column;gap:8px;font-family:ui-monospace,monospace;font-size:11px;letter-spacing:.12em;text-transform:uppercase;opacity:.65">Tu nombre
+          <input type="text" placeholder="Andrés Valencia" style="background:transparent;border:1px solid color-mix(in srgb,var(--bg) 32%,transparent);border-radius:10px;padding:14px 15px;color:var(--bg);font-size:15px;outline:none;transition:border-color .2s" style-focus="border-color:var(--coral)">
+        </label>
+        <label style="display:flex;flex-direction:column;gap:8px;font-family:ui-monospace,monospace;font-size:11px;letter-spacing:.12em;text-transform:uppercase;opacity:.65">Tu email
+          <input type="email" placeholder="tu@correo.com" style="background:transparent;border:1px solid color-mix(in srgb,var(--bg) 32%,transparent);border-radius:10px;padding:14px 15px;color:var(--bg);font-size:15px;outline:none;transition:border-color .2s" style-focus="border-color:var(--coral)">
+        </label>
+        <label style="display:flex;flex-direction:column;gap:8px;font-family:ui-monospace,monospace;font-size:11px;letter-spacing:.12em;text-transform:uppercase;opacity:.65">Asunto
+          <input type="text" placeholder="¿De qué quieres hablar?" style="background:transparent;border:1px solid color-mix(in srgb,var(--bg) 32%,transparent);border-radius:10px;padding:14px 15px;color:var(--bg);font-size:15px;outline:none;transition:border-color .2s" style-focus="border-color:var(--coral)">
+        </label>
+        <label style="display:flex;flex-direction:column;gap:8px;font-family:ui-monospace,monospace;font-size:11px;letter-spacing:.12em;text-transform:uppercase;opacity:.65">Mensaje
+          <textarea rows="5" placeholder="Cuéntame tu idea..." style="background:transparent;border:1px solid color-mix(in srgb,var(--bg) 32%,transparent);border-radius:10px;padding:14px 15px;color:var(--bg);font-size:15px;outline:none;resize:vertical;transition:border-color .2s" style-focus="border-color:var(--coral)"></textarea>
+        </label>
+        <button data-submit data-magnetic type="button" style="display:inline-flex;align-self:flex-start;align-items:center;justify-content:center;gap:9px;background:var(--coral);color:var(--coral-ink);border:none;border-radius:12px;padding:16px 30px;font-weight:600;font-size:15px;cursor:pointer;margin-top:4px">
+          <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2 11 13"></path><path d="M22 2 15 22l-4-9-9-4z"></path></svg>
+          <span data-submit-label>Enviar mensaje</span>
+        </button>
+      </form>
+    </div>
+  </section>
+
+  <footer style="border-top:1px solid var(--line);padding:clamp(36px,5vh,56px) clamp(20px,5vw,72px)">
+    <div style="max-width:1280px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:24px;flex-wrap:wrap">
+      <div style="display:flex;align-items:center;gap:11px">
+        <span style="width:30px;height:30px;border-radius:50%;background:var(--ink);color:var(--bg);display:grid;place-items:center;font-family:'Clash Display';font-weight:700;font-size:16px;transition:background .55s,color .55s">A</span>
+        <span style="font-size:14px;color:var(--ink-soft)">© 2026 <strong data-name style="color:var(--ink);font-weight:600">Andrés Valencia</strong> · Hecho con criterio.</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:22px;flex-wrap:wrap">
+        <a href="#sobre" style="text-decoration:none;color:var(--ink-soft);font-size:14px;transition:color .25s" style-hover="color:var(--coral)">Sobre mí</a>
+        <a href="#proyectos" style="text-decoration:none;color:var(--ink-soft);font-size:14px;transition:color .25s" style-hover="color:var(--coral)">Proyectos</a>
+        <a href="#articulos" style="text-decoration:none;color:var(--ink-soft);font-size:14px;transition:color .25s" style-hover="color:var(--coral)">Artículos</a>
+        <a href="#inicio" style="display:inline-flex;align-items:center;gap:8px;text-decoration:none;color:var(--ink);font-size:14px;font-weight:600">Volver arriba <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m18 15-6-6-6 6"></path></svg></a>
+      </div>
+    </div>
+  </footer>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;accent&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#FF5A2C&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;name&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;Andrés Valencia&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;role&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;Full Stack Developer&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;startDark&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;}}">
+class Component extends DCLogic {
+  componentDidMount() {
+    const root = document.querySelector('[data-portfolio-root]');
+    if (!root) return;
+    this.root = root;
+    this.applyProps(root);
+    this.initTheme(root);
+    this.initNav(root);
+    this.initProgress(root);
+    this.initForm(root);
+    this.waitForGsap(() => this.initGsap(root), () => this.revealFallback(root));
+  }
+
+  themeVars(t) {
+    const light = {
+      '--bg':'#D9D7D1','--band':'#CFCDC6','--card':'#F5F4F0','--ink':'#16130F',
+      '--ink-soft':'rgba(22,19,15,.62)','--ink-faint':'rgba(22,19,15,.4)','--line':'rgba(22,19,15,.14)',
+      '--coral':'#FF5A2C','--coral-ink':'#ffffff','--salmon':'#F3C7B8','--frame':'#16130F','--shadow':'rgba(22,19,15,.13)'
+    };
+    const dark = {
+      '--bg':'#161310','--band':'#1E1A15','--card':'#231F19','--ink':'#EFEBE3',
+      '--ink-soft':'rgba(239,235,227,.6)','--ink-faint':'rgba(239,235,227,.38)','--line':'rgba(239,235,227,.15)',
+      '--coral':'#FF6A3D','--coral-ink':'#161310','--salmon':'rgba(255,120,80,.24)','--frame':'rgba(239,235,227,.85)','--shadow':'rgba(0,0,0,.55)'
+    };
+    return t === 'dark' ? dark : light;
+  }
+
+  applyProps(root) {
+    const p = this.props || {};
+    if (p.role) root.querySelectorAll('[data-role]').forEach(e => e.textContent = p.role);
+    if (p.name) root.querySelectorAll('[data-name]').forEach(e => e.textContent = p.name);
+    this._accent = p.accent || null;
+  }
+
+  initTheme(root) {
+    let saved = null;
+    try { saved = localStorage.getItem('pf-theme'); } catch (e) {}
+    const start = saved || ((this.props && this.props.startDark) ? 'dark' : 'light');
+    this.setTheme(root, start);
+    const btn = root.querySelector('[data-theme-toggle]');
+    if (btn) btn.addEventListener('click', () => {
+      const next = root.dataset.theme === 'dark' ? 'light' : 'dark';
+      this.setTheme(root, next);
+      try { localStorage.setItem('pf-theme', next); } catch (e) {}
+    });
+  }
+
+  setTheme(root, t) {
+    root.dataset.theme = t;
+    const vars = this.themeVars(t);
+    Object.entries(vars).forEach(([k, v]) => root.style.setProperty(k, v));
+    if (this._accent) root.style.setProperty('--coral', this._accent);
+    document.body.style.background = vars['--bg'];
+    const moon = root.querySelector('[data-ic-moon]');
+    const sun = root.querySelector('[data-ic-sun]');
+    if (moon && sun) {
+      moon.style.display = t === 'dark' ? 'none' : 'block';
+      sun.style.display = t === 'dark' ? 'block' : 'none';
+    }
+  }
+
+  initNav(root) {
+    const header = root.querySelector('[data-nav]');
+    const links = root.querySelector('[data-navlinks]');
+    const burger = root.querySelector('[data-burger]');
+    const menu = root.querySelector('[data-mobilemenu]');
+    const close = root.querySelector('[data-menuclose]');
+
+    const onScroll = () => {
+      if (window.scrollY > 16) {
+        header.style.background = 'color-mix(in srgb, var(--bg) 84%, transparent)';
+        header.style.backdropFilter = 'blur(14px)';
+        header.style.webkitBackdropFilter = 'blur(14px)';
+        header.style.borderBottomColor = 'var(--line)';
+        header.style.paddingTop = '13px';
+        header.style.paddingBottom = '13px';
+      } else {
+        header.style.background = 'transparent';
+        header.style.backdropFilter = 'none';
+        header.style.webkitBackdropFilter = 'none';
+        header.style.borderBottomColor = 'transparent';
+        header.style.paddingTop = '';
+        header.style.paddingBottom = '';
+      }
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
+
+    const applyResp = () => {
+      const narrow = window.innerWidth < 880;
+      if (links) links.style.display = narrow ? 'none' : 'flex';
+      if (burger) burger.style.display = narrow ? 'flex' : 'none';
+      if (!narrow && menu) { menu.style.display = 'none'; menu.style.opacity = '0'; }
+    };
+    window.addEventListener('resize', applyResp);
+    applyResp();
+
+    const openMenu = () => { if (!menu) return; menu.style.display = 'flex'; requestAnimationFrame(() => menu.style.opacity = '1'); };
+    const closeMenu = () => { if (!menu) return; menu.style.opacity = '0'; setTimeout(() => { menu.style.display = 'none'; }, 350); };
+    if (burger) burger.addEventListener('click', openMenu);
+    if (close) close.addEventListener('click', closeMenu);
+    if (menu) menu.querySelectorAll('a').forEach(a => a.addEventListener('click', closeMenu));
+
+    // active link via IntersectionObserver
+    const obs = new IntersectionObserver((ents) => {
+      ents.forEach(en => {
+        if (en.isIntersecting) {
+          const id = en.target.id;
+          root.querySelectorAll('[data-navlink]').forEach(a => {
+            const on = a.getAttribute('href') === '#' + id;
+            a.style.color = on ? 'var(--coral)' : '';
+            const u = a.querySelector('[data-underline]');
+            if (u) u.style.transform = on ? 'scaleX(1)' : 'scaleX(0)';
+          });
+        }
+      });
+    }, { rootMargin: '-45% 0px -50% 0px' });
+    root.querySelectorAll('[data-section]').forEach(s => obs.observe(s));
+  }
+
+  initProgress(root) {
+    const bar = root.querySelector('[data-progress]');
+    if (!bar) return;
+    const upd = () => {
+      const h = document.documentElement.scrollHeight - window.innerHeight;
+      const p = h > 0 ? Math.min(1, window.scrollY / h) : 0;
+      bar.style.transform = 'scaleX(' + p + ')';
+    };
+    window.addEventListener('scroll', upd, { passive: true });
+    window.addEventListener('resize', upd);
+    upd();
+  }
+
+  initForm(root) {
+    const btn = root.querySelector('[data-submit]');
+    const label = root.querySelector('[data-submit-label]');
+    if (!btn || !label) return;
+    btn.addEventListener('click', () => {
+      const orig = label.textContent;
+      label.textContent = '¡Gracias! Te respondo pronto';
+      btn.style.opacity = '.85';
+      setTimeout(() => { label.textContent = orig; btn.style.opacity = '1'; }, 2600);
+    });
+  }
+
+  waitForGsap(cb, fail) {
+    let n = 0;
+    const t = setInterval(() => {
+      if (window.gsap && window.ScrollTrigger) { clearInterval(t); cb(); }
+      else if (++n > 70) { clearInterval(t); if (fail) fail(); }
+    }, 45);
+  }
+
+  revealFallback(root) {
+    root.querySelectorAll('[data-reveal-line]').forEach(e => e.style.transform = 'none');
+    root.querySelectorAll('[data-hero-highlight]').forEach(e => e.style.transform = 'scaleX(1)');
+    root.querySelectorAll('[data-hero-fade]').forEach(e => { e.style.opacity = '1'; e.style.transform = 'none'; });
+    root.querySelectorAll('[data-section-highlight]').forEach(e => e.style.transform = 'scaleX(1)');
+  }
+
+  initGsap(root) {
+    const gsap = window.gsap;
+    gsap.registerPlugin(window.ScrollTrigger);
+    const touch = window.matchMedia('(hover: none)').matches;
+
+    // Hero entrance
+    gsap.set(root.querySelectorAll('[data-hero-fade]'), { opacity: 0, y: 18 });
+    const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
+    tl.to(root.querySelectorAll('[data-reveal-line]'), { y: '0%', duration: 0.95, stagger: 0.09 }, 0)
+      .to(root.querySelector('[data-hero-highlight]'), { scaleX: 1, duration: 0.6, ease: 'power2.inOut' }, 0.55)
+      .to(root.querySelectorAll('[data-hero-fade]'), { opacity: 1, y: 0, duration: 0.7, stagger: 0.12 }, 0.35);
+
+    // Arrow draw
+    root.querySelectorAll('[data-draw]').forEach((p, i) => {
+      let len = 320;
+      try { len = p.getTotalLength(); } catch (e) {}
+      p.style.strokeDasharray = len;
+      p.style.strokeDashoffset = len;
+      gsap.to(p, { strokeDashoffset: 0, duration: 1, delay: 0.9 + i * 0.15, ease: 'power2.inOut' });
+    });
+
+    // Generic reveals
+    gsap.utils.toArray(root.querySelectorAll('[data-reveal]')).forEach(el => {
+      gsap.from(el, { opacity: 0, y: 44, duration: 0.85, ease: 'power3.out',
+        scrollTrigger: { trigger: el, start: 'top 87%' } });
+    });
+
+    // Stagger groups
+    gsap.utils.toArray(root.querySelectorAll('[data-stagger]')).forEach(grp => {
+      gsap.from(grp.querySelectorAll('[data-stagger-item]'), { opacity: 0, y: 36, duration: 0.7, stagger: 0.07, ease: 'power3.out',
+        scrollTrigger: { trigger: grp, start: 'top 84%' } });
+    });
+
+    // Section highlight wipes
+    gsap.utils.toArray(root.querySelectorAll('[data-section-highlight]')).forEach(el => {
+      gsap.fromTo(el, { scaleX: 0 }, { scaleX: 1, duration: 0.6, ease: 'power2.inOut',
+        scrollTrigger: { trigger: el, start: 'top 88%' } });
+    });
+
+    // Spinning cubes
+    root.querySelectorAll('[data-cube]').forEach(c => {
+      gsap.to(c, { rotation: '+=360', repeat: -1, duration: 24, ease: 'none' });
+    });
+
+    // Image parallax
+    gsap.utils.toArray(root.querySelectorAll('[data-parallax]')).forEach(img => {
+      gsap.to(img, { yPercent: -8, ease: 'none',
+        scrollTrigger: { trigger: img, start: 'top bottom', end: 'bottom top', scrub: true } });
+    });
+
+    if (touch) return;
+
+    // Magnetic buttons
+    root.querySelectorAll('[data-magnetic]').forEach(el => {
+      el.addEventListener('pointermove', e => {
+        const r = el.getBoundingClientRect();
+        gsap.to(el, { x: (e.clientX - r.left - r.width / 2) * 0.3, y: (e.clientY - r.top - r.height / 2) * 0.5, duration: 0.4, ease: 'power2.out' });
+      });
+      el.addEventListener('pointerleave', () => gsap.to(el, { x: 0, y: 0, duration: 0.6, ease: 'elastic.out(1,0.4)' }));
+    });
+
+    // Tilt cards
+    root.querySelectorAll('[data-tilt]').forEach(card => {
+      card.addEventListener('pointermove', e => {
+        const r = card.getBoundingClientRect();
+        const px = (e.clientX - r.left) / r.width - 0.5;
+        const py = (e.clientY - r.top) / r.height - 0.5;
+        gsap.to(card, { rotateY: px * 7, rotateX: -py * 7, duration: 0.4, transformPerspective: 900, transformOrigin: 'center', ease: 'power2.out' });
+      });
+      card.addEventListener('pointerleave', () => gsap.to(card, { rotateX: 0, rotateY: 0, duration: 0.7, ease: 'power2.out' }));
+    });
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,58 @@
+# SDD config for portfolio
+schema: spec-driven
+
+context: |
+  Project: personal portfolio website with blog section, bilingual (es/en).
+  Doubles as a showcase project for recruiters: clean architecture, design
+  patterns, security, and strict TDD are first-class product goals.
+  Repo state: empty directory, no code yet (scaffolding is the first task group).
+  Stack: Next.js (latest, App Router), TypeScript, Tailwind CSS.
+  Blog content: MDX files in repo (two files per article, one per locale).
+  Dynamic data: Postgres + Drizzle ORM + Zod behind repository interfaces —
+  contact messages, per-article views/reactions, and article full-text search
+  (Postgres FTS). Domain layer never imports Drizzle.
+  Contact form: validated API route persists to Postgres + email notification.
+  Also in scope: SEO pack (dynamic OG images, RSS, bilingual sitemap),
+  GitHub activity feed with ISR caching (last slice), and a visible CI
+  quality pipeline (tests, Playwright e2e, Lighthouse budget, README badges).
+  Routes: single-page home + /blog/[slug]; functional category filters on home.
+  UI design source: design-reference/ (exported from claude.ai/design).
+
+strict_tdd: true
+
+testing:
+  status: pending-scaffold
+  reason: "Repository is empty; test runner lands with scaffolding. Strict TDD is mandated by the user and activates as soon as the runner exists."
+  reevaluate_after: "Project scaffolding (first task group must install and configure the test runner before any feature code)"
+
+rules:
+  proposal:
+    - Include rollback plan for risky changes
+    - Treat engineering quality (architecture, testing, security) as product scope, not incidental
+  specs:
+    - Use Given/When/Then for scenarios
+    - Use RFC 2119 keywords (MUST, SHALL, SHOULD, MAY)
+    - Include security requirements (input validation, rate limiting, headers) for any endpoint
+  design:
+    - Prefer Next.js App Router conventions (app/, layouts, route groups)
+    - Apply screaming architecture: top-level structure organized by feature/domain (blog, contact, home sections), not by framework artifact type
+    - Apply clean architecture layering (domain/application/infrastructure/ui) inside each feature, with documented boundaries
+    - Name design patterns explicitly where applied, with rationale
+    - Document architecture decisions with rationale (ADR-style)
+    - Derive design tokens from design-reference/ (light + dark themes)
+  tasks:
+    - Group by phase, use hierarchical numbering
+    - Keep tasks completable in one session
+    - First task group MUST be project scaffolding including test runner setup (Vitest + Testing Library or equivalent) so strict TDD applies from the first feature task
+  apply:
+    guidelines:
+      - Follow existing code patterns once scaffolding exists
+      - Red-green-refactor; no production code without a failing test first (except pure scaffolding/config)
+    tdd: true
+    test_command: ""  # set by the scaffolding task once the runner exists
+  verify:
+    test_command: ""
+    build_command: ""
+    coverage_threshold: 80
+  archive:
+    - Warn before merging destructive deltas
