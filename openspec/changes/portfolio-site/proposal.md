@@ -7,7 +7,7 @@ Build a greenfield bilingual (es/en) personal portfolio for Andrés Valencia tha
 ## Scope
 
 ### In Scope
-- Single-page home scroller: hero, stack strip, about, skills bento, projects (alternating cards), articles list, contact, footer.
+- Single-page home scroller: hero, stack strip, about, skills bento, projects (alternating cards), articles list, github activity, contact, footer.
 - Article detail route `/blog/[slug]` rendered from MDX (two files per article, one per locale).
 - Functional category filter pills over the home article list.
 - Real contact email delivery via an email service (Resend or similar) behind a Next.js API route, with messages persisted to Postgres.
@@ -50,7 +50,7 @@ None.
 
 Next.js App Router + TypeScript + Tailwind. Screaming architecture at top level (folders by feature: blog, contact, engagement, home sections) with clean layering (domain/application/infrastructure/ui) inside each feature; design patterns named explicitly, ADR-style decisions in design phase. Tokens derived from `design-reference/`.
 
-Hybrid content strategy (ADR): article content stays in MDX (static, versioned, no authoring users); dynamic data lives in Postgres accessed via Drizzle ORM behind repository interfaces — the domain layer never imports Drizzle. Zod validates at every boundary (API routes, env, MDX frontmatter). Contact flow: client form → validated API route → persist message to Postgres → email notification via email service, rate-limited. Engagement flow: view/reaction endpoints with atomic increments and hashed-visitor dedupe.
+Hybrid content strategy (ADR): article content stays in MDX (static, versioned, no authoring users); dynamic data lives in Postgres accessed via Drizzle ORM behind repository interfaces — the domain layer never imports Drizzle. Zod validates at every boundary (API routes, env, MDX frontmatter). Contact flow: client form → validated API route → persist message to Postgres → email notification via email service, rate-limited. Engagement flow: view/reaction endpoints with insert-if-absent writes and hashed-visitor dedupe.
 
 ## Affected Areas
 
@@ -58,7 +58,7 @@ Hybrid content strategy (ADR): article content stays in MDX (static, versioned, 
 |------|--------|-------------|
 | repo root | New | Scaffold Next.js + test runner |
 | `src/features/*` | New | Feature-sliced clean architecture |
-| `app/`, `app/[locale]/blog/[slug]` | New | Routes + layouts |
+| `app/`, `app/[locale]/blog/[slug]`, `app/[locale]/privacy` | New | Routes + layouts (incl. privacy disclosure page) |
 | `app/api/contact` | New | Validated, rate-limited endpoint: persist + email |
 | `app/api/engagement/*` | New | View counter and reaction endpoints |
 | `src/features/*/infrastructure` | New | Drizzle repositories, schema, migrations |

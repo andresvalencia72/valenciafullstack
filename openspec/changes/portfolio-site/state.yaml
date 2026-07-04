@@ -20,7 +20,7 @@ phases:
   tasks:
     status: done
     artifact: openspec/changes/portfolio-site/tasks.md
-    note: "11 phases / 11 candidate PR slices; 400-line budget risk High, chained PRs recommended, chain_strategy pending user decision."
+    note: "11 phases / 11 candidate PR slices; 400-line budget risk High, chained PRs recommended, chain_strategy stacked-to-main (user-selected)."
   apply:
     status: pending
     note: "Blocked on chain_strategy decision (ask-on-risk) before first apply batch."
@@ -33,5 +33,5 @@ next_recommended:
   - apply (after chain_strategy decision)
 
 delivery_strategy: ask-on-risk
-chain_strategy: pending
+chain_strategy: stacked-to-main (user-selected)
 strict_tdd: true
