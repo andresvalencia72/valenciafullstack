@@ -22,15 +22,16 @@ phases:
     artifact: openspec/changes/portfolio-site/tasks.md
     note: "11 phases / 11 candidate PR slices; 400-line budget risk High, chained PRs recommended, chain_strategy stacked-to-main (user-selected)."
   apply:
-    status: pending
-    note: "Blocked on chain_strategy decision (ask-on-risk) before first apply batch."
+    status: in-progress
+    batch: PR1
+    note: "PR1 (Phase 1: scaffolding + test runner + CI) complete — tasks 1.1-1.8 done on branch feat/pr1-scaffolding. Phases 2-11 remain."
   verify:
     status: pending
   archive:
     status: pending
 
 next_recommended:
-  - apply (after chain_strategy decision)
+  - sdd-verify (PR1 scope) or sdd-apply (PR2: design system + i18n)
 
 delivery_strategy: ask-on-risk
 chain_strategy: stacked-to-main (user-selected)
