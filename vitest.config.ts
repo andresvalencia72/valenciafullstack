@@ -7,9 +7,24 @@ const rootDir = path.dirname(fileURLToPath(import.meta.url));
 
 export default defineConfig({
   plugins: [react()],
+  ssr: {
+    // Force Vite to process `next-intl` through its own transform/
+    // resolve pipeline (instead of treating it as an SSR-external raw
+    // Node import) so the `resolve.alias` below actually applies to
+    // its internal `next/navigation` import.
+    noExternal: ["next-intl"],
+  },
   resolve: {
     alias: {
       "@": path.resolve(rootDir, "./src"),
+      // `next` ships without a package.json "exports" map, so bare
+      // extensionless deep imports like "next/navigation" (as used
+      // internally by `next-intl/navigation`) fail Vite's SSR-external
+      // resolution under Vitest, even though real Next.js builds
+      // resolve them fine via the framework's own bundler. Alias to
+      // the concrete file so tests exercising `next-intl`'s
+      // `createNavigation` hooks (locale switcher) can load it.
+      "next/navigation": path.resolve(rootDir, "node_modules/next/navigation.js"),
     },
   },
   test: {
