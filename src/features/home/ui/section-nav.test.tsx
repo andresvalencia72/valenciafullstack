@@ -1,0 +1,48 @@
+import { render, screen } from "@testing-library/react";
+import { NextIntlClientProvider } from "next-intl";
+import { describe, expect, it } from "vitest";
+import es from "@/shared/i18n/messages/es.json";
+import { SectionNav } from "./section-nav";
+
+function renderWithIntl() {
+  return render(
+    <NextIntlClientProvider locale="es" messages={es}>
+      <SectionNav />
+    </NextIntlClientProvider>,
+  );
+}
+
+describe("SectionNav", () => {
+  it("renders an anchor link per implemented section, translated", () => {
+    renderWithIntl();
+
+    expect(screen.getByRole("link", { name: "Inicio" })).toHaveAttribute(
+      "href",
+      "#home",
+    );
+    expect(screen.getByRole("link", { name: "Sobre mí" })).toHaveAttribute(
+      "href",
+      "#about",
+    );
+    expect(screen.getByRole("link", { name: "Habilidades" })).toHaveAttribute(
+      "href",
+      "#skills",
+    );
+  });
+
+  it("renders links in section order, implemented sections only", () => {
+    renderWithIntl();
+
+    const links = screen.getAllByRole("link");
+    expect(links.map((link) => link.getAttribute("href"))).toEqual([
+      "#home",
+      "#about",
+      "#skills",
+    ]);
+  });
+});
+
+// Real smooth-scroll + URL hash update behavior (home-page: In-Page
+// Navigation) is verified against a real browser in
+// e2e/home-sections.spec.ts — jsdom does not implement anchor
+// same-document hash navigation, so it cannot be asserted here.
