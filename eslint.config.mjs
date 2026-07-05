@@ -114,6 +114,18 @@ const boundariesConfig = {
                   captured: { feature: "{{from.captured.feature}}" },
                 },
               },
+              // Same-feature ui -> ui (e.g. a section composing a
+              // sibling sub-component within its own feature's `ui`
+              // folder) is allowed; cross-feature ui -> ui stays
+              // disallowed by the capture match. Verified with
+              // src/features/home/ui (first real feature folder to
+              // exercise this rule) — PR1 only fixture-tested it.
+              {
+                to: {
+                  type: "ui",
+                  captured: { feature: "{{from.captured.feature}}" },
+                },
+              },
               { to: { type: "shared" } },
             ],
           },
