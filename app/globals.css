@@ -11,10 +11,23 @@
   --color-band: var(--band);
   --color-card: var(--card);
   --color-ink: var(--ink);
+  --color-ink-soft: var(--ink-soft);
+  --color-ink-faint: var(--ink-faint);
+  --color-line: var(--line);
   --color-coral: var(--coral);
+  --color-coral-ink: var(--coral-ink);
   --color-salmon: var(--salmon);
+  --color-frame: var(--frame);
   --font-display: var(--font-display);
   --font-body: var(--font-body);
+}
+
+html {
+  /* home-page: In-Page Navigation — anchor links scroll smoothly;
+   * scroll-padding-top keeps the sticky header from covering the
+   * target section's top edge. */
+  scroll-behavior: smooth;
+  scroll-padding-top: 96px;
 }
 
 body {
