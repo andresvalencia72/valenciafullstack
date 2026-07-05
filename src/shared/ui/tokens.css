@@ -1,0 +1,54 @@
+/**
+ * Design tokens (design-system: Token Derivation).
+ *
+ * Colors are derived verbatim from `design-reference/` and MUST NOT be
+ * redefined ad hoc per component — components reference these custom
+ * properties (or the Tailwind theme mapping in `globals.css`), never a
+ * hardcoded hex value.
+ *
+ * Theme switching is attribute-based: `[data-theme="dark"]` overrides the
+ * `:root` (light) values. The inline no-flash script (see
+ * `src/shared/ui/theme/`) sets `data-theme` on `<html>` before first paint.
+ */
+
+:root {
+  /* Colors — light (default) */
+  --bg: #d9d7d1;
+  --band: #cfcdc6;
+  --card: #f5f4f0;
+  --ink: #16130f;
+  --coral: #ff5a2c;
+  --salmon: #f3c7b8;
+
+  /* Spacing scale (relative, rem-based) */
+  --space-xs: 0.5rem;
+  --space-sm: 0.75rem;
+  --space-md: 1.5rem;
+  --space-lg: 2.5rem;
+  --space-xl: 4rem;
+  --space-2xl: 6.5rem;
+
+  /* Typography scale — font-size/line-height pairs */
+  --text-display: 4rem/1.05;
+  --text-h1: 3rem/1.1;
+  --text-h2: 2.25rem/1.15;
+  --text-h3: 1.75rem/1.25;
+  --text-h4: 1.375rem/1.35;
+  --text-body: 1rem/1.6;
+  --text-small: 0.875rem/1.5;
+  --text-caption: 0.75rem/1.4;
+
+  /* Font weights */
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-bold: 700;
+}
+
+[data-theme="dark"] {
+  --bg: #161310;
+  --band: #1e1a15;
+  --card: #231f19;
+  --ink: #efebe3;
+  --coral: #ff6a3d;
+  --salmon: rgba(255, 120, 80, 0.24);
+}
