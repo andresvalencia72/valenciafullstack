@@ -7,5 +7,66 @@
     "label": "Change language",
     "es": "Spanish",
     "en": "English"
+  },
+  "home": {
+    "nav": {
+      "home": "Home",
+      "about": "About",
+      "skills": "Skills"
+    },
+    "hero": {
+      "eyebrow": "Available for projects",
+      "firstName": "Andrés",
+      "lastName": "Valencia",
+      "role": "Full Stack Developer",
+      "description": "who designs and builds web products end to end — with visual judgment and an obsession for detail.",
+      "ctaPrimary": "Let's work together",
+      "photoAlt": "photo · portrait",
+      "social": {
+        "github": "GitHub",
+        "linkedin": "LinkedIn",
+        "youtube": "YouTube"
+      }
+    },
+    "stackStrip": {
+      "items": [
+        "Interface design",
+        "Full stack development",
+        "Animation & detail",
+        "End-to-end web products"
+      ]
+    },
+    "about": {
+      "heading": "Hi, I'm",
+      "name": "Andrés",
+      "paragraph1": "I build web applications end to end: from interface design to the API and the database. I move comfortably between front and back end, and I enjoy turning fuzzy problems into clear, fast, well-built products.",
+      "paragraph2": "I work daily with <strong>JavaScript, TypeScript, React, Node.js, PHP, and SQL</strong>, and right now I'm going deeper into <strong>Next.js</strong> to take my projects a step further.",
+      "ctaPrimary": "Contact me",
+      "ctaSecondary": "Download CV",
+      "photoAlt": "photo · working"
+    },
+    "skills": {
+      "heading": "Skills",
+      "subheading": "The tools I build with every day, organized by how I actually use them.",
+      "categories": {
+        "mainStack": "Main stack",
+        "language": "Language",
+        "backend": "Backend",
+        "data": "Data",
+        "workflow": "Workflow",
+        "learning": "Learning now",
+        "infra": "Infra",
+        "design": "Design"
+      },
+      "descriptions": {
+        "mainStack": "From client to server — what I use to build most of my products.",
+        "language": "The language I think in.",
+        "backend": "Solid backend, still very relevant.",
+        "data": "PostgreSQL & MySQL.",
+        "workflow": "Version control and teamwork.",
+        "infra": "Reproducible environments.",
+        "design": "From design to code."
+      }
+    }
   }
 }

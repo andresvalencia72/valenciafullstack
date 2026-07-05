@@ -7,5 +7,66 @@
     "label": "Cambiar idioma",
     "es": "Español",
     "en": "Inglés"
+  },
+  "home": {
+    "nav": {
+      "home": "Inicio",
+      "about": "Sobre mí",
+      "skills": "Habilidades"
+    },
+    "hero": {
+      "eyebrow": "Disponible para proyectos",
+      "firstName": "Andrés",
+      "lastName": "Valencia",
+      "role": "Full Stack Developer",
+      "description": "que diseña y construye productos web de principio a fin — con criterio visual y obsesión por los detalles.",
+      "ctaPrimary": "Trabajemos juntos",
+      "photoAlt": "foto · retrato",
+      "social": {
+        "github": "GitHub",
+        "linkedin": "LinkedIn",
+        "youtube": "YouTube"
+      }
+    },
+    "stackStrip": {
+      "items": [
+        "Diseño de interfaces",
+        "Desarrollo full stack",
+        "Animación & detalle",
+        "Productos web de punta a punta"
+      ]
+    },
+    "about": {
+      "heading": "Hola, soy",
+      "name": "Andrés",
+      "paragraph1": "Desarrollo aplicaciones web de punta a punta: del diseño de la interfaz a la API y la base de datos. Me muevo con soltura entre el front y el back, y disfruto convirtiendo problemas difusos en productos claros, rápidos y bien construidos.",
+      "paragraph2": "Trabajo a diario con <strong>JavaScript, TypeScript, React, Node.js, PHP y SQL</strong>, y ahora mismo profundizo en <strong>Next.js</strong> para llevar mis proyectos un paso más allá.",
+      "ctaPrimary": "Contáctame",
+      "ctaSecondary": "Descargar CV",
+      "photoAlt": "foto · trabajando"
+    },
+    "skills": {
+      "heading": "Habilidades",
+      "subheading": "Las herramientas con las que construyo a diario, organizadas por cómo las uso de verdad.",
+      "categories": {
+        "mainStack": "Stack principal",
+        "language": "Lenguaje",
+        "backend": "Backend",
+        "data": "Datos",
+        "workflow": "Flujo",
+        "learning": "Aprendiendo ahora",
+        "infra": "Infra",
+        "design": "Diseño"
+      },
+      "descriptions": {
+        "mainStack": "Del cliente al servidor, lo que uso para construir la mayoría de mis productos.",
+        "language": "El lenguaje en el que pienso.",
+        "backend": "Backend sólido y muy vigente.",
+        "data": "PostgreSQL & MySQL.",
+        "workflow": "Versionado y trabajo en equipo.",
+        "infra": "Entornos reproducibles.",
+        "design": "Del diseño al código."
+      }
+    }
   }
 }
