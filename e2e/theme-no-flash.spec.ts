@@ -2,9 +2,11 @@ import { expect, test } from "@playwright/test";
 
 /**
  * design-system: Theme Toggle — "no flash of incorrect theme" (task 2.7).
- * PR2a runs before locale routing exists (PR2b), so assertions target
- * the plain root path `/` served by the interim `app/layout.tsx`
- * shim. Two independent assertions:
+ * Now that locale routing exists (PR2b), assertions target the
+ * locale-prefixed `/es` route served by `app/[locale]/layout.tsx`
+ * (PR2a asserted this against the plain, unlocalized root path
+ * `/` served by its temporary `app/layout.tsx` shim). Two independent
+ * assertions:
  *   (a) the inline theme script is served BEFORE any rendered page
  *       content in the raw HTML — it runs (via `next/script`
  *       `strategy="beforeInteractive"`) ahead of the app's own
@@ -24,7 +26,7 @@ test.describe("theme no-flash", () => {
   test("the inline theme script precedes rendered page content in the served HTML", async ({
     request,
   }) => {
-    const response = await request.get("/");
+    const response = await request.get("/es");
     const html = await response.text();
 
     const scriptIndex = html.indexOf("document.documentElement.dataset.theme");
@@ -42,7 +44,7 @@ test.describe("theme no-flash", () => {
       window.localStorage.setItem("pf-theme", "dark");
     });
 
-    await page.goto("/");
+    await page.goto("/es");
     await page.waitForLoadState("domcontentloaded");
 
     const theme = await page.evaluate(
@@ -59,7 +61,7 @@ test.describe("theme no-flash", () => {
       window.localStorage.setItem("pf-theme", "light");
     });
 
-    await page.goto("/");
+    await page.goto("/es");
     await page.waitForLoadState("domcontentloaded");
 
     const theme = await page.evaluate(
