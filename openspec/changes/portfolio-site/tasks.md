@@ -7,7 +7,7 @@
 | Estimated changed lines | ~4000-6000 total across 13 slices; individual slices ~150-400 each after splitting PR3 and PR5 (PR1 scaffolding is the sole exception, likely exceeding 400 due to generated files/lockfile) |
 | 400-line budget risk | High |
 | Chained PRs recommended | Yes |
-| Suggested split | PR1 -> PR2 -> PR3a -> PR4 -> PR3b -> PR5a -> PR5b -> PR6 -> PR7 -> PR8 -> PR9 -> PR10 -> PR11 (see Suggested Work Units) |
+| Suggested split | PR1 -> PR2a -> PR2b -> PR3a -> PR4 -> PR3b -> PR5a -> PR5b -> PR6 -> PR7 -> PR8 -> PR9 -> PR10 -> PR11 (see Suggested Work Units; PR2 was split into PR2a/PR2b post-apply, see "PR2 split decision" below) |
 | Delivery strategy | ask-on-risk |
 | Chain strategy | stacked-to-main (user-selected) |
 
@@ -21,9 +21,10 @@ Chain strategy: stacked-to-main (user-selected)
 | Unit | Goal | Likely PR | Notes |
 |------|------|-----------|-------|
 | 1 | Scaffold + test runner + CI skeleton | PR1 | Base for all; generated files (lockfile, boilerplate) likely need `size:exception` even after chaining |
-| 2 | Design system tokens + theme + i18n shell | PR2 | Base = PR1 |
-| 3a | Home sections part 1: hero, stack strip, about, skills bento | PR3a | Base = PR2 |
-| 4 | Blog MDX + article route | PR4 | Base = PR2 |
+| 2a | Design system: tokens, fonts, theme, motion, scroll progress | PR2a | Base = PR1. Split from the original "PR2" work unit post-apply — see "PR2 split decision" below |
+| 2b | i18n shell: next-intl routing, `app/[locale]` restructure, locale switcher | PR2b | Base = PR2a. Split from the original "PR2" work unit post-apply — see "PR2 split decision" below |
+| 3a | Home sections part 1: hero, stack strip, about, skills bento | PR3a | Base = PR2b (needs the `app/[locale]` shell) |
+| 4 | Blog MDX + article route | PR4 | Base = PR2b (needs the `app/[locale]` shell) |
 | 3b | Home sections part 2: projects, articles list, article filter | PR3b | Base = PR4 (consumes the real MDX loader/article data shipped in PR4; no longer runs before it) |
 | 5a | Persistence schema + migrations + db client wiring | PR5a | Base = PR1 |
 | 5b | Persistence repository interfaces + implementations | PR5b | Base = PR5a |
@@ -48,17 +49,25 @@ Chain strategy: stacked-to-main (user-selected)
 - [x] 1.7 README badge placeholders; `docs/adr/0001-0007` stubs from design.md
 - [x] 1.8 TDD: full security headers via `next.config` (X-Content-Type-Options, X-Frame-Options, Referrer-Policy, HSTS) plus the full CSP — `script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; object-src 'none'; frame-ancestors 'none'; base-uri 'self'` (see design.md ADR-0007) — unit test on the config or e2e header assertion (security: Security Headers, baseline)
 
-## Phase 2: Design System & i18n (PR2)
+## Phase 2a: Design System (PR2a)
 
-- [ ] 2.1 `shared/ui/tokens.css` light/dark tokens from `design-reference/`
-- [ ] 2.2 `next/font/local`: Clash Display + General Sans
-- [ ] 2.3 TDD: theme toggle + no-flash inline script (design-system: Theme Toggle)
-- [ ] 2.4 next-intl setup, `app/[locale]` layout, `localePrefix: "always"`, `es` default, `/` and unprefixed paths 308-redirect to `es` (i18n: Locale Routing)
-- [ ] 2.5 TDD: scroll progress indicator (design-system: Scroll Progress)
-- [ ] 2.6 TDD: reveal/tilt/magnetic motion + reduced-motion (design-system: Motion Interactions)
-- [ ] 2.7 Playwright: no-flash theme assertion — assert (a) the inline theme script precedes any stylesheet/body content in the served HTML source, and (b) with Playwright `addInitScript`-seeded `localStorage`, `document.documentElement.dataset.theme` equals the stored value at `domcontentloaded` (design-system: Theme Toggle)
-- [ ] 2.8 TDD: locale switcher component — generic behavior only: locale switch + preserves current page (i18n: Locale Persistence on Navigation)
-- [ ] 2.9 TDD: unit tests for `shared/config/env.ts` Zod schema — fail-fast on missing `DATABASE_URL`/`VISITOR_HASH_SECRET`, optional `RESEND_API_KEY`/`GITHUB_TOKEN` (quality-pipeline: Coverage Threshold; this is the first PR with coverage-eligible files under the gate's configured scope, per task 1.6)
+Base = PR1. See "PR2 split decision" below for why Phase 2 (originally
+one PR) now ships as PR2a + PR2b.
+
+- [x] 2.1 `shared/ui/tokens.css` light/dark tokens from `design-reference/`
+- [x] 2.2 `next/font/local`: Clash Display + General Sans
+- [x] 2.3 TDD: theme toggle + no-flash inline script (design-system: Theme Toggle) — ships with hardcoded English labels; PR2b reconnects it to next-intl once the message catalogs land
+- [x] 2.5 TDD: scroll progress indicator (design-system: Scroll Progress)
+- [x] 2.6 TDD: reveal/tilt/magnetic motion + reduced-motion (design-system: Motion Interactions)
+- [x] 2.7 Playwright: no-flash theme assertion — assert (a) the inline theme script precedes any stylesheet/body content in the served HTML source, and (b) with Playwright `addInitScript`-seeded `localStorage`, `document.documentElement.dataset.theme` equals the stored value at `domcontentloaded` (design-system: Theme Toggle) — run against the interim `app/layout.tsx` shim's root path; PR2b repoints it at `/es`
+
+## Phase 2b: i18n Shell (PR2b)
+
+Base = PR2a.
+
+- [x] 2.4 next-intl setup, `app/[locale]` layout, `localePrefix: "always"`, `es` default, `/` and unprefixed paths 308-redirect to `es` (i18n: Locale Routing) — replaces PR2a's temporary `app/layout.tsx`/`app/page.tsx` shim
+- [x] 2.8 TDD: locale switcher component — generic behavior only: locale switch + preserves current page (i18n: Locale Persistence on Navigation)
+- [x] 2.9 TDD: unit tests for `shared/config/env.ts` Zod schema — fail-fast on missing `DATABASE_URL`/`VISITOR_HASH_SECRET`, optional `RESEND_API_KEY`/`GITHUB_TOKEN` (quality-pipeline: Coverage Threshold; this is the first PR with coverage-eligible files under the gate's configured scope, per task 1.6) — already satisfied by PR1's `env.ts` tests (see "PR1 apply findings"); carried here unchanged, no new code
 
 ## Phase 3a: Home Sections Part 1 (PR3a)
 
@@ -161,3 +170,27 @@ Chain strategy: stacked-to-main (user-selected)
 - **eslint-plugin-boundaries@6.0.2 capture-scoped selector gotcha**: the legacy tuple selector form `["domain", { captured: { feature: "{{from.captured.feature}}" } }]` silently never matches (in either direction) when used inside `allow`/`disallow` — no error, no warning, just a no-op that makes the whole rule permissive-by-default-disallow (i.e., everything gets rejected, or with `default: allow`, nothing gets caught). The working form is the object/`DependencySelector` wrapper: `{ to: { type: "domain", captured: { feature: "{{from.captured.feature}}" } } }`. Verified empirically (see `eslint.config.mjs` inline comment) with a throwaway fixture feature exercising same-feature-allowed / cross-feature-blocked / layer-blocked cases before removing the fixture. Also required `settings["import/resolver"] = { typescript: true, node: {...} }` — without a resolver, boundaries can't resolve `@/*`-aliased or extensionless relative imports and silently treats every dependency as "unknown" (never checked).
 - **Folder tree correction applied**: `create-next-app --src-dir` nests `app/` under `src/app`, but design.md's tree places `app/` at the repo root as a sibling to `src/` (screaming architecture: `app/` = composition root only, `src/` = features + shared). PR1 scaffolds with `--src-dir` for the initial `create-next-app` run (so Tailwind/TS/ESLint defaults are generated normally) then moves `src/app` → `app/` immediately after, before writing any feature code. Path alias `@/*` → `./src/*` is unaffected.
 - **`.env.example` could not be created** — the execution sandbox denies writes to any `.env*` path, including example/template files with no real secrets. The full recommended content is documented in `README.md` (Environment variables + Getting started) and in `design.md`'s env matrix; a maintainer with local file access should create `.env.example` from that content in a follow-up commit (or relax the sandbox rule for `.env.example` specifically, since `.gitignore` already special-cases it as safe to commit).
+
+### PR2 split decision (2026-07-05)
+
+The original PR2 (Phase 2, tasks 2.1-2.9, ~1960 hand-written insertions/133 deletions) exceeded the 400-line review budget and was split post-apply into two stacked PRs per user decision (`chain_strategy: stacked-to-main`):
+
+- **PR2a — Design System** (`feat/pr2a-design-system`, base = PR1): tokens, self-hosted fonts, theme (toggle + no-flash script + `use-theme`), motion primitives, scroll progress. Tasks 2.1, 2.2, 2.3, 2.5, 2.6, 2.7. Ships a temporary `app/layout.tsx` + `app/page.tsx` shim (PR1's plain structure, wired with fonts/tokens/theme) since `app/[locale]` belongs to PR2b; `ThemeToggle` ships with hardcoded English labels (no next-intl dependency yet).
+- **PR2b — i18n Shell** (`feat/pr2b-i18n-shell`, base = PR2a): next-intl routing/navigation/request config, message catalogs, locale switcher, the Proxy (307->308 upgrade), and the `app/[locale]` restructure that replaces PR2a's interim shim. Tasks 2.4, 2.8, 2.9 (2.9 was already satisfied by PR1's `env.ts` tests — carried here unchanged). `ThemeToggle` is reconnected to next-intl's `useTranslations` once the message catalogs exist.
+
+Both branches are independently green (lint, typecheck, coverage >=80%, `next build`, Playwright). The split boundary sits at the atomic-unit line: further splitting (e.g. separating fonts from tokens, or theme from motion) would produce non-functional, non-independently-reviewable slices. Each PR still lands above the 400-line budget (~1600-1700 lines each, see PR bodies for the exact estimate) — disclosed honestly rather than forcing an artificial third split.
+
+### PR2a/PR2b apply findings (2026-07-05)
+
+Supersedes "PR2 apply findings" from the original (now-closed) PR2 draft — same technical content, reorganized across the two branches:
+
+- **307-vs-308 redirect decision (RESOLVED, PR2b)**: verified against the installed `next-intl@4.13.1` middleware source — it calls `NextResponse.redirect(url)` with no explicit status, and Next.js's own `NextResponse.redirect` defaults to **307** when no status is given (confirmed in `node_modules/next/dist/server/web/spec-extension/response.js`). Since the i18n spec requires a **308** (permanent) for the unprefixed-to-`es` redirect, `proxy.ts` wraps next-intl's middleware output and upgrades any 307 to 308 before returning it, preserving all other headers. Locked in by a unit-tested pure function (`shared/i18n/middleware-rules.ts#upgradeRedirectStatus`) plus an e2e test (`e2e/locale-routing.spec.ts`).
+- **`middleware.ts` -> `proxy.ts` rename (Next.js 16, PR2b)**: the pinned Next.js version (16.2.10) deprecates the `middleware` file convention in favor of `proxy`. PR2b ships the file as `proxy.ts` from the start.
+- **Real hydration bug found and fixed by the Playwright no-flash test (task 2.7, PR2a)**: the original `useTheme()` implementation read `document.documentElement.dataset.theme` (already mutated by the pre-hydration inline script) via a `useState` lazy initializer, producing a genuine React hydration mismatch. Fixed by always starting client state at the SSR-safe default and syncing the real value in a `useEffect` after mount — the same pattern used by `next-themes`.
+- **Theme script placement (PR2a)**: `next/script` with `strategy="beforeInteractive"` inside `<body>`, not a raw `<script>` in `<head>` — Next.js's App Router always injects its own resource hints and stylesheet `<link>` at the very top of `<head>`, ahead of any user-authored head content (framework-internal, not configurable). `beforeInteractive` still guarantees the script runs before hydration and before rendered content.
+- **Vitest + Node 25 `localStorage` conflict (PR2a)**: Node's built-in global `localStorage` throws `SecurityError` and shadows jsdom's implementation under Vitest. Fixed via `NODE_OPTIONS=--no-webstorage` on the test npm scripts plus a jsdom `environmentOptions.url`.
+- **Vitest + `next-intl/navigation` resolution gotcha (PR2b)**: `next-intl`'s react-client build imports the bare specifier `next/navigation`, which Vite's SSR-external resolver can't resolve since `next` ships no package.json "exports" map. Fixed via `ssr.noExternal: ["next-intl"]` + `resolve.alias["next/navigation"]` pointing at the concrete file.
+- **Font loader (`next/font/local`) cannot run under Vitest (PR2a)** — excluded `src/shared/ui/fonts/index.ts` from the coverage `include` scope, same basis as the `shared/db` bootstrap-file exclusion category.
+- **Fonts (PR2a)**: Clash Display (500/600/700) and General Sans (400/500/600) from Fontshare, committed as `.woff2` with upstream `LICENSE.txt` files.
+- **ThemeToggle i18n coupling discovered during the split**: the original single-PR2 `ThemeToggle` imported `useTranslations` from `next-intl` directly, which would have pulled the i18n runtime into PR2a. PR2a ships a decoupled version with hardcoded English labels; PR2b reconnects it to `next-intl` once the message catalogs exist — this is the one place where the original commits could not be cleanly cherry-picked without a small manual adjustment.
+- **Coverage**: PR2a 98.29% stmts/94% branches/100% funcs/98.29% lines (62 tests); PR2b (cumulative) 95.36%/92.42%/95.65%/95.33% (84 tests) — matches the original single-PR2 numbers exactly, confirming no test coverage was lost in the split. `shared/i18n/request.ts` is the only 0%-covered file in PR2b (next-intl RSC wiring + a dynamic `import()`; its one piece of real logic, locale fallback, is extracted into the fully-tested `resolveRequestLocale` pure function).
