@@ -17,8 +17,14 @@
   --band: #cfcdc6;
   --card: #f5f4f0;
   --ink: #16130f;
+  --ink-soft: rgba(22, 19, 15, 0.62);
+  --ink-faint: rgba(22, 19, 15, 0.4);
+  --line: rgba(22, 19, 15, 0.14);
   --coral: #ff5a2c;
+  --coral-ink: #ffffff;
   --salmon: #f3c7b8;
+  --frame: #16130f;
+  --shadow: rgba(22, 19, 15, 0.13);
 
   /* Spacing scale (relative, rem-based) */
   --space-xs: 0.5rem;
@@ -49,6 +55,12 @@
   --band: #1e1a15;
   --card: #231f19;
   --ink: #efebe3;
+  --ink-soft: rgba(239, 235, 227, 0.6);
+  --ink-faint: rgba(239, 235, 227, 0.38);
+  --line: rgba(239, 235, 227, 0.15);
   --coral: #ff6a3d;
+  --coral-ink: #161310;
   --salmon: rgba(255, 120, 80, 0.24);
+  --frame: rgba(239, 235, 227, 0.85);
+  --shadow: rgba(0, 0, 0, 0.55);
 }
