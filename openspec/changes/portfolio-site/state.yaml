@@ -23,15 +23,15 @@ phases:
     note: "11 phases / 11 candidate PR slices; 400-line budget risk High, chained PRs recommended, chain_strategy stacked-to-main (user-selected)."
   apply:
     status: in-progress
-    batch: PR1
-    note: "PR1 (Phase 1: scaffolding + test runner + CI) complete — tasks 1.1-1.8 done on branch feat/pr1-scaffolding. Phases 2-11 remain."
+    batch: PR2
+    note: "PR1 (Phase 1: scaffolding + test runner + CI) complete on feat/pr1-scaffolding (tasks 1.1-1.8). PR2 (Phase 2: design system + i18n shell) complete — tasks 2.1-2.9 done on branch feat/pr2-design-system-i18n, based on feat/pr1-scaffolding. Phases 3a-11 remain."
   verify:
     status: pending
   archive:
     status: pending
 
 next_recommended:
-  - sdd-verify (PR1 scope) or sdd-apply (PR2: design system + i18n)
+  - sdd-verify (PR1+PR2 scope) or sdd-apply (PR3a: home sections part 1)
 
 delivery_strategy: ask-on-risk
 chain_strategy: stacked-to-main (user-selected)
