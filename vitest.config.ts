@@ -15,6 +15,16 @@ export default defineConfig({
   test: {
     globals: true,
     environment: "jsdom",
+    // jsdom only initializes `localStorage`/`sessionStorage` for an
+    // http(s) origin — the default "about:blank" document throws
+    // `SecurityError: Cannot initialize local storage without a
+    // '--localstorage-file' path`. Theme persistence tests (design-system:
+    // Theme Toggle) need a real storage-capable origin.
+    environmentOptions: {
+      jsdom: {
+        url: "http://localhost:3000",
+      },
+    },
     setupFiles: ["./vitest.setup.ts"],
     include: ["src/**/*.test.{ts,tsx}", "scripts/**/*.test.{ts,tsx}"],
     exclude: ["node_modules", ".next", "e2e/**"],
@@ -31,6 +41,14 @@ export default defineConfig({
         "src/**/*.d.ts",
         "src/shared/db/schema.ts",
         "src/shared/db/client.ts",
+        // `next/font/local` is a Next.js build-pipeline macro (SWC/Turbopack
+        // font-loader transform) — it throws when imported outside that
+        // pipeline (verified: `localFont(...)` is not a function under
+        // plain Vitest/jsdom). Zero business logic lives here (declarative
+        // font declarations only), so it's excluded on the same basis as
+        // the `shared/db` bootstrap files above; font wiring itself is
+        // exercised by `next build` + Playwright, not Vitest.
+        "src/shared/ui/fonts/index.ts",
       ],
       // Vitest v8 coverage always reports every file matched by `include`
       // (there is no `all: false` opt-out in this version). This still
