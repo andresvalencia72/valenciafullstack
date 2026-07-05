@@ -1,0 +1,11 @@
+{
+  "theme": {
+    "switchToLight": "Cambiar a tema claro",
+    "switchToDark": "Cambiar a tema oscuro"
+  },
+  "localeSwitcher": {
+    "label": "Cambiar idioma",
+    "es": "Español",
+    "en": "Inglés"
+  }
+}
