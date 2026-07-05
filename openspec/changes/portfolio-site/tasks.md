@@ -9,11 +9,11 @@
 | Chained PRs recommended | Yes |
 | Suggested split | PR1 -> PR2a -> PR2b -> PR3a -> PR4 -> PR3b -> PR5a -> PR5b -> PR6 -> PR7 -> PR8 -> PR9 -> PR10 -> PR11 (see Suggested Work Units; PR2 was split into PR2a/PR2b post-apply, see "PR2 split decision" below) |
 | Delivery strategy | ask-on-risk |
-| Chain strategy | stacked-to-main (user-selected) |
+| Chain strategy | feature-branch-chain (user-selected mid-apply: merges deferred to project end, each PR targets its parent branch) |
 
 Decision needed before apply: Yes
 Chained PRs recommended: Yes
-Chain strategy: stacked-to-main (user-selected)
+Chain strategy: feature-branch-chain (user-selected mid-apply: merges deferred to project end, each PR targets its parent branch)
 400-line budget risk: High
 
 ### Suggested Work Units
@@ -35,7 +35,7 @@ Chain strategy: stacked-to-main (user-selected)
 | 10 | GitHub activity (last slice) | PR10 | Base = PR3b |
 | 11 | Hardening: headers, Lighthouse, coverage gate, ADRs | PR11 | Base = all prior |
 
-**Chain-strategy note**: the Base column above is valid under `stacked-to-main` (the chosen strategy). Under `feature-branch-chain`, the linear suggested-split order (PR1 -> PR2 -> PR3a -> PR4 -> PR3b -> PR5a -> PR5b -> PR6 -> PR7 -> PR8 -> PR9 -> PR10 -> PR11) is authoritative instead, and each PR bases on its immediate predecessor in that order.
+**Chain-strategy note**: the Base column above was valid under `stacked-to-main`, the strategy in effect through PR1/PR2a/PR2b. **Starting at PR3a, the user switched the chain strategy to `feature-branch-chain` mid-apply**: no PR merges to `main` until project end; each PR targets its immediate predecessor branch instead (linear order: PR1 -> PR2a -> PR2b -> PR3a -> PR4 -> PR3b -> PR5a -> PR5b -> PR6 -> PR7 -> PR8 -> PR9 -> PR10 -> PR11). PR3a's branch (`feat/pr3a-home-core`) targets `feat/pr2b-i18n-shell` accordingly, opened ready (not draft) — under `feature-branch-chain`, only the final tracker PR aggregates everything to `main`; intermediate child PRs are reviewable and mergeable into their parent branch without waiting for `main`.
 
 ## Phase 1: Scaffolding & CI (PR1)
 
@@ -71,9 +71,9 @@ Base = PR2a.
 
 ## Phase 3a: Home Sections Part 1 (PR3a)
 
-- [ ] 3a.1 TDD: `features/home/ui` hero, stack strip, about, skills bento sections (home-page: Section Composition — partial)
-- [ ] 3a.2 TDD: anchor nav smooth scroll (home-page: In-Page Navigation)
-- [ ] 3a.3 Playwright: responsive layout for hero/about/skills across breakpoints (home-page: Responsive Layout — partial)
+- [x] 3a.1 TDD: `features/home/ui` hero, stack strip, about, skills bento sections (home-page: Section Composition — partial)
+- [x] 3a.2 TDD: anchor nav smooth scroll (home-page: In-Page Navigation)
+- [x] 3a.3 Playwright: responsive layout for hero/about/skills across breakpoints (home-page: Responsive Layout — partial)
 
 ## Phase 3b: Home Sections Part 2 & Article Filter (PR3b)
 
@@ -194,3 +194,14 @@ Supersedes "PR2 apply findings" from the original (now-closed) PR2 draft — sam
 - **Fonts (PR2a)**: Clash Display (500/600/700) and General Sans (400/500/600) from Fontshare, committed as `.woff2` with upstream `LICENSE.txt` files.
 - **ThemeToggle i18n coupling discovered during the split**: the original single-PR2 `ThemeToggle` imported `useTranslations` from `next-intl` directly, which would have pulled the i18n runtime into PR2a. PR2a ships a decoupled version with hardcoded English labels; PR2b reconnects it to `next-intl` once the message catalogs exist — this is the one place where the original commits could not be cleanly cherry-picked without a small manual adjustment.
 - **Coverage**: PR2a 98.29% stmts/94% branches/100% funcs/98.29% lines (62 tests); PR2b (cumulative) 95.36%/92.42%/95.65%/95.33% (84 tests) — matches the original single-PR2 numbers exactly, confirming no test coverage was lost in the split. `shared/i18n/request.ts` is the only 0%-covered file in PR2b (next-intl RSC wiring + a dynamic `import()`; its one piece of real logic, locale fallback, is extracted into the fully-tested `resolveRequestLocale` pure function).
+
+### PR3a apply findings (2026-07-05)
+
+- **Chain strategy switched mid-apply**: the user changed the chain strategy from `stacked-to-main` to `feature-branch-chain` starting at this PR — see the "Chain-strategy note" above. `feat/pr3a-home-core` targets `feat/pr2b-i18n-shell` (not `main`), opened ready (not draft); no PR in the chain merges until project end.
+- **ESLint boundaries gap found and fixed**: the `ui` boundary rule (`eslint.config.mjs`) allowed `domain`/`application`/`shared` but had no same-feature-captured entry for `ui` itself, so intra-feature imports (e.g. `hero-section.tsx` importing its own `social-icon.tsx`) were rejected as "ui may not import ui". This is the first real feature folder (`src/features/home/ui`) to exercise the rule beyond PR1's throwaway fixture, and it surfaced immediately. Fixed by adding a same-feature-captured `{ to: { type: "ui", captured: { feature: "{{from.captured.feature}}" } } }` entry to the `ui` allow-list. Re-verified with a temporary cross-feature fixture (not committed): same-feature `ui -> ui` now passes, cross-feature `ui -> ui` still fails.
+- **jsdom does not implement anchor same-document hash navigation**: a unit test asserting that clicking a `SectionNav` link updates `window.location.hash` failed even with a correctly-implemented component — confirmed via an isolated jsdom repro that a dispatched `click` on an `<a href="#x">` never updates `window.location.hash`. Real hash/scroll behavior for `home-page: In-Page Navigation` is verified in `e2e/home-sections.spec.ts` (real browser) instead; the unit test for `SectionNav` covers structure/i18n only (correct hrefs, translated labels, order).
+- **Design tokens extended for the first time since PR2a**: `tokens.css` only carried `bg`/`band`/`card`/`ink`/`coral`/`salmon` (exercised by the theme-toggle demo). Hero/about/skills need `ink-soft`, `ink-faint`, `line`, `frame`, `shadow`, `coral-ink` — derived verbatim from `design-reference/`'s JS theme map (`Portfolio Andres Valencia.standalone.dc.html`, `themeVars()`), not invented ad hoc.
+- **Skill icon fidelity deviation (documented in `skill-badge.tsx`)**: ships monogram badges instead of `devicon`'s colored icon font. Self-hosting devicon would either pull an external CDN stylesheet (blocked by ADR-0007's `style-src 'self'` CSP) or vendor a large multi-hundred-glyph icon font for eight icons; hand-typed brand SVG paths risk visual inaccuracy. The badge component is isolated to one file so real brand SVGs/devicon assets can replace it later without touching the section components.
+- **Stale dev server caught before final e2e verification**: an `npm run dev` process from an earlier, unrelated session was still listening on port 3000. Playwright's `reuseExistingServer: !CI` attached to it instead of starting a fresh `next start` production server, which would have silently validated against dev-mode behavior (HMR, eval()-based React debugging, a dev "issues" overlay) instead of the production build. Caught via a stray "1 Issue" overlay button visible in a manual screenshot check; killed the stale process and re-ran the full suite with `CI=1` (forces a fresh `webServer`) to confirm all 12 e2e tests pass against a genuine production build.
+- **Coverage**: 96.11% stmts/93.15% branches/96.66% funcs/96.08% lines (99 tests, up from 84) — all new `src/features/home/**` and `src/shared/ui/photo-frame/**` files are at 100%; the files below threshold in the report predate this PR (untouched, carried over from PR2a/PR2b).
+- **Review budget**: this PR lands well above the 400-line budget — **997 insertions / 7 deletions (1004 total changed lines)**, `package-lock.json` unchanged (no new dependency). Atomic-unit justification: hero + stack strip + about + skills bento share one message-catalog namespace (`home.*`), one design-token extension, and the same boundaries-config fix required to ship any of them together — splitting further (e.g. hero-only vs. about-only) would fragment a single conceptually atomic "home sections part 1" deliverable without producing an independently reviewable slice. Commits are still organized as one work unit per section (10 commits, see PR body) so a reviewer can review incrementally within the PR.
