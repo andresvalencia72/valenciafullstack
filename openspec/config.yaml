@@ -21,9 +21,12 @@ context: |
 strict_tdd: true
 
 testing:
-  status: pending-scaffold
-  reason: "Repository is empty; test runner lands with scaffolding. Strict TDD is mandated by the user and activates as soon as the runner exists."
-  reevaluate_after: "Project scaffolding (first task group must install and configure the test runner before any feature code)"
+  status: active
+  reason: "PR1 (task 1.2) installed and configured the test runner (Vitest + Testing Library + Playwright). Strict TDD is now enforced for all feature tasks from PR2 onward."
+  test_command: "npm test"
+  coverage_command: "npm run test:coverage"
+  e2e_command: "npm run test:e2e"
+  build_command: "npm run build"
 
 rules:
   proposal:
@@ -49,10 +52,10 @@ rules:
       - Follow existing code patterns once scaffolding exists
       - Red-green-refactor; no production code without a failing test first (except pure scaffolding/config)
     tdd: true
-    test_command: ""  # set by the scaffolding task once the runner exists
+    test_command: "npm test"
   verify:
-    test_command: ""
-    build_command: ""
+    test_command: "npm run test:coverage"
+    build_command: "npm run build"
     coverage_threshold: 80
   archive:
     - Warn before merging destructive deltas
