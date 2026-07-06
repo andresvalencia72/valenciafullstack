@@ -1,5 +1,54 @@
 import "@testing-library/jest-dom/vitest";
 
+// Node >= 25 ships a built-in WebStorage `localStorage` global that
+// shadows jsdom's and throws SecurityError unless the process runs with
+// `--localstorage-file`. The previous escape hatch
+// (NODE_OPTIONS=--no-webstorage) is rejected by Node 22 on CI, so the
+// conflict is neutralized here instead: an in-memory Storage replaces
+// the global on every Node version.
+class InMemoryStorage implements Storage {
+  private store = new Map<string, string>();
+
+  get length(): number {
+    return this.store.size;
+  }
+
+  clear(): void {
+    this.store.clear();
+  }
+
+  getItem(key: string): string | null {
+    return this.store.has(key) ? (this.store.get(key) as string) : null;
+  }
+
+  key(index: number): string | null {
+    return [...this.store.keys()][index] ?? null;
+  }
+
+  removeItem(key: string): void {
+    this.store.delete(key);
+  }
+
+  setItem(key: string, value: string): void {
+    this.store.set(key, String(value));
+  }
+}
+
+for (const target of [globalThis, typeof window === "undefined" ? undefined : window]) {
+  if (target) {
+    Object.defineProperty(target, "localStorage", {
+      configurable: true,
+      writable: true,
+      value: new InMemoryStorage(),
+    });
+    Object.defineProperty(target, "sessionStorage", {
+      configurable: true,
+      writable: true,
+      value: new InMemoryStorage(),
+    });
+  }
+}
+
 // jsdom does not implement `window.matchMedia`. Default to "no match"
 // (i.e. the visitor does not prefer reduced motion / dark scheme) so
 // component tests that read OS preferences (design-system: Theme
