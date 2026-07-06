@@ -68,5 +68,28 @@
         "design": "From design to code."
       }
     }
+  },
+  "blog": {
+    "backToPortfolio": "Back to portfolio",
+    "readingTime": "{minutes} min read",
+    "authorName": "Andrés Valencia",
+    "authorRole": "Full Stack Developer",
+    "coverPlaceholder": "cover · 1600×900",
+    "fallbackNotice": "This article is only available in {language}.",
+    "languageNames": {
+      "es": "Spanish",
+      "en": "English"
+    },
+    "categories": {
+      "architecture": "Architecture",
+      "patterns": "Patterns",
+      "technologies": "Technologies"
+    },
+    "nextArticle": "Next article",
+    "viewAllArticles": "View all articles",
+    "youtube": {
+      "label": "Watch on YouTube",
+      "watching": "Playing YouTube video"
+    }
   }
 }
