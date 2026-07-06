@@ -85,6 +85,17 @@ const boundariesConfig = {
                   captured: { feature: "{{from.captured.feature}}" },
                 },
               },
+              // Same-feature application -> application (a use-case's
+              // co-located `*.test.ts` importing the module it tests)
+              // is allowed; cross-feature stays disallowed by the
+              // capture match. Symmetric with the `ui` same-feature
+              // fix found in PR3a — see eslint boundaries note there.
+              {
+                to: {
+                  type: "application",
+                  captured: { feature: "{{from.captured.feature}}" },
+                },
+              },
             ],
           },
           {
@@ -93,6 +104,14 @@ const boundariesConfig = {
               {
                 to: {
                   type: "domain",
+                  captured: { feature: "{{from.captured.feature}}" },
+                },
+              },
+              // Same-feature infrastructure -> infrastructure, same
+              // rationale as the `application` same-feature entry above.
+              {
+                to: {
+                  type: "infrastructure",
                   captured: { feature: "{{from.captured.feature}}" },
                 },
               },
@@ -137,6 +156,12 @@ const boundariesConfig = {
               { to: { type: "application" } },
               { to: { type: "infrastructure" } },
               { to: { type: "shared" } },
+              // Composition roots wire a feature's infrastructure repo
+              // into its application use cases and need the domain
+              // entity/locale types to type that wiring correctly
+              // (e.g. `app/[locale]/blog/[slug]/page.tsx` importing
+              // `ArticleLocale`) — first exercised in PR4.
+              { to: { type: "domain" } },
             ],
           },
           {

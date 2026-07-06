@@ -1,0 +1,50 @@
+---
+title: "Design Patterns I Use Every Day"
+description: "Repository, Adapter, Use Case, and Factory aren't exam theory: they're the four patterns I reach for in almost every feature of this portfolio."
+date: "2026-07-01"
+category: "patterns"
+tags: ["patterns", "typescript"]
+---
+
+Design patterns are usually taught like an exam: memorize the UML diagram and move on. In real code, a small handful of patterns covers 90% of the problems that show up every single day.
+
+## Repository: separating the "what" from the "how"
+
+Every feature that needs persistence defines an interface in its `domain` and a concrete implementation in `infrastructure`:
+
+```ts
+// domain (interface)
+interface ArticleRepository {
+  findArticle(slug: string, locale: ArticleLocale): Promise<Article | null>;
+}
+
+// infrastructure (real implementation, MDX in this case)
+function createMdxArticleRepository(loader: MdxLoader): ArticleRepository {
+  return {
+    async findArticle(slug, locale) {
+      /* ... */
+    },
+  };
+}
+```
+
+The use case (`application`) only ever knows the interface. Testing it with an in-memory fake repository is trivial — no need to spin up Postgres or the filesystem.
+
+## Adapter: the real world is noisy
+
+Every `app/*` route is a thin adapter: it takes Next.js's HTTP request or route params, translates them into something the use case understands, and translates the result back into JSX or JSON. Business logic never learns that Next.js exists.
+
+- `app/api/contact/route.ts` adapts an HTTP `Request` into a use case call.
+- `app/[locale]/blog/[slug]/page.tsx` adapts route params into `getArticle`.
+
+## Use Case (interactor): one action, one function
+
+Every `application/*.ts` does *one* thing: `getArticle`, `getNextArticle`, `resolveArticleSeoAlternates`. No five-hundred-line service classes that do a little bit of everything.
+
+> A pattern that doesn't solve a concrete problem in your code is just decoration. The four above solve real problems: testability, framework isolation, and single-responsibility functions.
+
+## Factory: instantiating without coupling
+
+`shared/db/client.ts` exposes a single factory function for the Drizzle client — a lazy per-runtime singleton, without the rest of the code ever knowing how the connection is built.
+
+Four patterns, zero unnecessary ceremony.

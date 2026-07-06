@@ -1,0 +1,17 @@
+---
+title: "Notas breves: por qué este artículo todavía no tiene versión en inglés"
+description: "Un artículo corto, solo en español por ahora, que sirve además como caso real del aviso de traducción faltante."
+date: "2026-07-10"
+category: "patterns"
+tags: ["notas"]
+---
+
+Este artículo es intencionalmente corto y, por ahora, solo existe en español. No todos los artículos se traducen el mismo día que se publican — a veces la traducción llega después.
+
+Cuando entrás a `/en/blog/notas-breves`, el sitio **no** te muestra un error 404. En cambio, te muestra este mismo contenido en español, con un aviso visible arriba indicando que todavía no está disponible en inglés.
+
+- Ningún visitante se queda con una página rota.
+- El contenido sigue siendo indexable por buscadores en el idioma que sí existe.
+- La traducción en inglés puede llegar en cualquier momento, sin cambiar la URL.
+
+Ese es el comportamiento exacto que describe la especificación de `blog`: **Missing-Translation Fallback**.

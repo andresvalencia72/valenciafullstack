@@ -1,0 +1,42 @@
+---
+title: "Arquitectura limpia en Next.js"
+description: "Cómo organizo un proyecto Next.js en features con capas domain/application/infrastructure/ui, en lugar de carpetas por tipo de archivo."
+date: "2026-06-01"
+category: "architecture"
+tags: ["nextjs", "architecture"]
+---
+
+Cuando un proyecto Next.js crece, la tentación más común es organizar carpetas por **tipo de archivo**: `components/`, `hooks/`, `utils/`. Funciona los primeros meses. Después, cualquier cambio en una funcionalidad te obliga a saltar entre seis carpetas distintas para entender qué pasa.
+
+La alternativa que uso es la *screaming architecture*: las carpetas de primer nivel gritan el **negocio**, no el framework. `features/blog`, `features/contact`, `features/engagement` — cada una con sus propias capas internas.
+
+## Las cuatro capas de una feature
+
+Dentro de cada feature repito siempre la misma estructura:
+
+- `domain`: entidades e interfaces puras, sin imports de nada más.
+- `application`: casos de uso que dependen solo del `domain` propio.
+- `infrastructure`: implementaciones concretas (Drizzle, MDX, APIs externas).
+- `ui`: componentes de React que consumen `domain`/`application`.
+
+```ts
+// features/blog/domain/article-repository.ts
+export interface ArticleRepository {
+  findArticle(slug: string, locale: ArticleLocale): Promise<Article | null>;
+  listSlugs(): Promise<string[]>;
+}
+```
+
+El `domain` no sabe que existe MDX, Drizzle ni Next.js. Eso es exactamente lo que lo hace fácil de testear con un repositorio falso en memoria.
+
+> La arquitectura no se trata de tener razón sobre patrones de diseño. Se trata de que un cambio de negocio no te obligue a tocar quince archivos no relacionados.
+
+## Reglas de dependencia, no sugerencias
+
+Sin un `eslint-plugin-boundaries` que las haga cumplir, estas reglas se degradan en semanas. En este portfolio, `domain` no puede importar nada, `application` solo su propio `domain`, `ui` no puede tocar `infrastructure`, y las features nunca se importan entre sí — solo a través de `shared/*`.
+
+<YoutubeEmbed videoId="" />
+
+Si te interesa verlo construido paso a paso, lo explico en el canal (vídeo próximamente).
+
+**El resultado**: cuando cambio cómo se guardan las vistas de un artículo, toco un archivo en `features/engagement/infrastructure`. Nada más se entera.

@@ -1,0 +1,42 @@
+---
+title: "Clean Architecture in Next.js"
+description: "How I organize a Next.js project into features with domain/application/infrastructure/ui layers, instead of folders by file type."
+date: "2026-06-01"
+category: "architecture"
+tags: ["nextjs", "architecture"]
+---
+
+When a Next.js project grows, the most common temptation is to organize folders by **file type**: `components/`, `hooks/`, `utils/`. It works for the first few months. After that, any change to a single feature forces you to jump across six unrelated folders just to understand what's going on.
+
+The alternative I use is *screaming architecture*: top-level folders name the **business**, not the framework. `features/blog`, `features/contact`, `features/engagement` — each with its own internal layers.
+
+## The four layers of a feature
+
+Inside each feature I always repeat the same structure:
+
+- `domain`: pure entities and interfaces, no imports from anything else.
+- `application`: use cases that depend only on their own `domain`.
+- `infrastructure`: concrete implementations (Drizzle, MDX, external APIs).
+- `ui`: React components that consume `domain`/`application`.
+
+```ts
+// features/blog/domain/article-repository.ts
+export interface ArticleRepository {
+  findArticle(slug: string, locale: ArticleLocale): Promise<Article | null>;
+  listSlugs(): Promise<string[]>;
+}
+```
+
+`domain` doesn't know MDX, Drizzle, or Next.js exist. That's exactly what makes it easy to test with an in-memory fake repository.
+
+> Architecture isn't about being right about design patterns. It's about making sure a business change doesn't force you to touch fifteen unrelated files.
+
+## Dependency rules, not suggestions
+
+Without an `eslint-plugin-boundaries` enforcing them, these rules degrade within weeks. In this portfolio, `domain` can import nothing, `application` only its own `domain`, `ui` can never touch `infrastructure`, and features never import each other — only through `shared/*`.
+
+<YoutubeEmbed videoId="" />
+
+If you want to see it built step by step, I walk through it on the channel (video coming soon).
+
+**The result**: when I change how an article's views are stored, I touch one file in `features/engagement/infrastructure`. Nothing else notices.
