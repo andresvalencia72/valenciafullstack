@@ -28,6 +28,18 @@ describe("SectionNav", () => {
       "href",
       "#skills",
     );
+    expect(screen.getByRole("link", { name: "Proyectos" })).toHaveAttribute(
+      "href",
+      "#projects",
+    );
+    expect(screen.getByRole("link", { name: "Artículos" })).toHaveAttribute(
+      "href",
+      "#articles",
+    );
+    expect(screen.getByRole("link", { name: "Contacto" })).toHaveAttribute(
+      "href",
+      "#contact",
+    );
   });
 
   it("renders links in section order, implemented sections only", () => {
@@ -38,6 +50,9 @@ describe("SectionNav", () => {
       "#home",
       "#about",
       "#skills",
+      "#projects",
+      "#articles",
+      "#contact",
     ]);
   });
 });

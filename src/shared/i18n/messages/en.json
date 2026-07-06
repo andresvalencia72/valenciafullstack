@@ -12,7 +12,10 @@
     "nav": {
       "home": "Home",
       "about": "About",
-      "skills": "Skills"
+      "skills": "Skills",
+      "projects": "Projects",
+      "articles": "Articles",
+      "contact": "Contact"
     },
     "hero": {
       "eyebrow": "Available for projects",
@@ -67,7 +70,63 @@
         "infra": "Reproducible environments.",
         "design": "From design to code."
       }
+    },
+    "projects": {
+      "heading": "Projects",
+      "subheading": "A selection of products where I owned both the design and the full build.",
+      "demoLabel": "View demo",
+      "repoLabel": "Repository",
+      "placeholderBadge": "Placeholder — replace with a real project",
+      "items": {
+        "portfolio": {
+          "title": "Valencia Fullstack — this portfolio",
+          "problem": "I needed a fast, bilingual portfolio with its own technical blog, without depending on an external CMS.",
+          "solution": "This very site: Next.js App Router with screaming architecture, MDX content, and Postgres for dynamic data."
+        },
+        "placeholderTwo": {
+          "title": "Project 2 (placeholder)",
+          "problem": "Replace this entry with a real project.",
+          "solution": "Placeholder — update title, copy, tech stack, and links before publishing."
+        },
+        "placeholderThree": {
+          "title": "Project 3 (placeholder)",
+          "problem": "Replace this entry with a real project.",
+          "solution": "Placeholder — update title, copy, tech stack, and links before publishing."
+        }
+      }
+    },
+    "articles": {
+      "heading": "Articles",
+      "subheading": "The latest I've written, straight from the repository.",
+      "empty": "No articles published yet.",
+      "filterAll": "All",
+      "readMore": "Read article",
+      "youtube": {
+        "eyebrow": "YouTube · @codeink1",
+        "title": "Building in public",
+        "description": "Tutorials and real development process. Subscribe to see how I build what shows up here.",
+        "cta": "Watch the channel"
+      }
+    },
+    "contact": {
+      "heading": "Contact me",
+      "paragraph1": "Every email gets read. Send me whatever message you'd like and I'll get back to you as soon as possible.",
+      "paragraph2": "Tell me your <strong>name</strong> and a contact <strong>email</strong>. You won't receive any other kind of communication besides my reply.",
+      "altPrompt": "Don't want to send an email? <strong>Reach me on my socials.</strong>",
+      "formHeading": "Send me a message",
+      "nameLabel": "Your name",
+      "namePlaceholder": "Andrés Valencia",
+      "emailLabel": "Your email",
+      "emailPlaceholder": "you@email.com",
+      "messageLabel": "Message",
+      "messagePlaceholder": "Tell me your idea...",
+      "submit": "Send message",
+      "submitTodo": "Submission isn't wired up yet — it lands in a later project phase."
     }
+  },
+  "footer": {
+    "tagline": "Made with care.",
+    "backToTop": "Back to top"
   },
   "blog": {
     "backToPortfolio": "Back to portfolio",

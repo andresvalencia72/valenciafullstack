@@ -4,16 +4,19 @@ import { useTranslations } from "next-intl";
 
 interface SectionNavItem {
   id: string;
-  labelKey: "home" | "about" | "skills";
+  labelKey: "home" | "about" | "skills" | "projects" | "articles" | "contact";
 }
 
-// Sections implemented to date (home-page: Section Composition — partial,
-// PR3a). Growing with each later slice: PR3b adds projects/articles/
-// contact, PR10 adds github activity — see home-page spec.
+// Sections implemented to date (home-page: Section Composition — PR3a +
+// PR3b). PR10 adds github activity between articles and contact — see
+// home-page spec.
 const SECTIONS: SectionNavItem[] = [
   { id: "home", labelKey: "home" },
   { id: "about", labelKey: "about" },
   { id: "skills", labelKey: "skills" },
+  { id: "projects", labelKey: "projects" },
+  { id: "articles", labelKey: "articles" },
+  { id: "contact", labelKey: "contact" },
 ];
 
 /**

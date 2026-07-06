@@ -12,7 +12,10 @@
     "nav": {
       "home": "Inicio",
       "about": "Sobre mí",
-      "skills": "Habilidades"
+      "skills": "Habilidades",
+      "projects": "Proyectos",
+      "articles": "Artículos",
+      "contact": "Contacto"
     },
     "hero": {
       "eyebrow": "Disponible para proyectos",
@@ -67,7 +70,63 @@
         "infra": "Entornos reproducibles.",
         "design": "Del diseño al código."
       }
+    },
+    "projects": {
+      "heading": "Proyectos",
+      "subheading": "Una selección de productos donde me encargué del diseño y el desarrollo completo.",
+      "demoLabel": "Ver demo",
+      "repoLabel": "Repositorio",
+      "placeholderBadge": "Marcador de posición — reemplázalo por un proyecto real",
+      "items": {
+        "portfolio": {
+          "title": "Valencia Fullstack — este portfolio",
+          "problem": "Necesitaba un portfolio rápido, bilingüe y con blog técnico propio, sin depender de un CMS externo.",
+          "solution": "Este mismo sitio: Next.js App Router con arquitectura gritona, contenido en MDX y Postgres para los datos dinámicos."
+        },
+        "placeholderTwo": {
+          "title": "Proyecto 2 (placeholder)",
+          "problem": "Reemplaza esta entrada por un proyecto real.",
+          "solution": "Marcador de posición — actualiza título, copy, tecnologías y enlaces antes de publicar."
+        },
+        "placeholderThree": {
+          "title": "Proyecto 3 (placeholder)",
+          "problem": "Reemplaza esta entrada por un proyecto real.",
+          "solution": "Marcador de posición — actualiza título, copy, tecnologías y enlaces antes de publicar."
+        }
+      }
+    },
+    "articles": {
+      "heading": "Artículos",
+      "subheading": "Lo último que escribí, directo desde el repositorio.",
+      "empty": "Todavía no hay artículos publicados.",
+      "filterAll": "Todos",
+      "readMore": "Leer artículo",
+      "youtube": {
+        "eyebrow": "YouTube · @codeink1",
+        "title": "Construyo en público",
+        "description": "Tutoriales y procesos reales de desarrollo. Suscríbete para ver cómo construyo lo que aparece aquí.",
+        "cta": "Ver canal"
+      }
+    },
+    "contact": {
+      "heading": "Contáctame",
+      "paragraph1": "Todos los correos serán leídos. Envíame cualquier mensaje que desees y te responderé lo antes posible.",
+      "paragraph2": "Cuéntame tu <strong>nombre</strong> y un <strong>correo</strong> de contacto. No recibirás ningún otro tipo de comunicación aparte de mi respuesta.",
+      "altPrompt": "¿No quieres enviar un email? <strong>Escríbeme en mis redes.</strong>",
+      "formHeading": "Envíame un mensaje",
+      "nameLabel": "Tu nombre",
+      "namePlaceholder": "Andrés Valencia",
+      "emailLabel": "Tu email",
+      "emailPlaceholder": "tu@correo.com",
+      "messageLabel": "Mensaje",
+      "messagePlaceholder": "Cuéntame tu idea...",
+      "submit": "Enviar mensaje",
+      "submitTodo": "El envío todavía no está conectado — llega en una fase posterior del proyecto."
     }
+  },
+  "footer": {
+    "tagline": "Hecho con criterio.",
+    "backToTop": "Volver arriba"
   },
   "blog": {
     "backToPortfolio": "Volver al portfolio",

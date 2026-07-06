@@ -23,15 +23,15 @@ phases:
     note: "11 phases / 11 candidate PR slices; 400-line budget risk High, chained PRs recommended, chain_strategy feature-branch-chain (user-selected mid-apply at PR3a: merges deferred to project end, each PR targets its parent branch; was stacked-to-main through PR1/PR2a/PR2b)."
   apply:
     status: in-progress
-    batch: PR4
-    note: "PR1 (Phase 1) complete on feat/pr1-scaffolding (tasks 1.1-1.8). PR2 split post-apply into PR2a (feat/pr2a-design-system, base=PR1, tasks 2.1/2.2/2.3/2.5/2.6/2.7) and PR2b (feat/pr2b-i18n-shell, base=PR2a, tasks 2.4/2.8/2.9). PR3a (Phase 3a: home sections part 1 — hero, stack strip, about, skills bento; tasks 3a.1-3a.3) complete on feat/pr3a-home-core, base=feat/pr2b-i18n-shell. PR4 (Phase 4: blog MDX content pipeline + article route; tasks 4.1-4.6) complete on feat/pr4-blog, base=feat/pr3a-home-core (feature-branch-chain — see tasks.md). Green: lint, typecheck, 176/176 unit tests, 96.89% coverage, build (8 article routes prerendered), 23/23 e2e. ~2856 hand-written changed lines, disclosed with atomic-unit justification (see PR4 apply findings). Phases 3b, 5a-11 remain."
+    batch: PR3b
+    note: "PR1 (Phase 1) complete on feat/pr1-scaffolding (tasks 1.1-1.8). PR2 split post-apply into PR2a (feat/pr2a-design-system, base=PR1, tasks 2.1/2.2/2.3/2.5/2.6/2.7) and PR2b (feat/pr2b-i18n-shell, base=PR2a, tasks 2.4/2.8/2.9). PR3a (Phase 3a: home sections part 1 — hero, stack strip, about, skills bento; tasks 3a.1-3a.3) complete on feat/pr3a-home-core, base=feat/pr2b-i18n-shell. PR4 (Phase 4: blog MDX content pipeline + article route; tasks 4.1-4.6) complete on feat/pr4-blog, base=feat/pr3a-home-core. PR3b (Phase 3b: home sections part 2 — projects, embedded articles list, category filter, contact static shell, footer; tasks 3b.1-3b.4) complete on feat/pr3b-home-content, base=feat/pr4-blog (feature-branch-chain — see tasks.md). Green: lint, typecheck, 204/204 unit tests, 97.33% coverage, build (13 routes prerendered), 27/27 e2e. ~1450 hand-written changed lines, disclosed with atomic-unit justification (see PR3b apply findings). Phases 5a-11 remain."
   verify:
     status: pending
   archive:
     status: pending
 
 next_recommended:
-  - "sdd-verify (PR1+PR2a+PR2b+PR3a+PR4 scope) or sdd-apply (PR3b: home sections part 2, base=PR4 per the suggested split now that PR4 has shipped the real MDX loader/article data)"
+  - "sdd-verify (PR1+PR2a+PR2b+PR3a+PR4+PR3b scope) or sdd-apply (PR5a: persistence schema + migrations + db client wiring, base=PR1)"
 
 delivery_strategy: ask-on-risk
 chain_strategy: "feature-branch-chain (user-selected mid-apply at PR3a: merges deferred to project end, each PR targets its parent branch)"
