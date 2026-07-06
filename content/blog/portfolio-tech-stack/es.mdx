@@ -1,0 +1,35 @@
+---
+title: "Cómo estructuro este portfolio en Next.js"
+description: "El stack técnico detrás de este sitio: Next.js, Tailwind, next-intl, Drizzle y MDX, y por qué elegí cada pieza."
+date: "2026-06-15"
+category: "technologies"
+tags: ["nextjs", "tailwind", "drizzle"]
+---
+
+Este portfolio es también una demo técnica en sí mismo: cada decisión de stack quedó documentada como si fuera un ADR real, no una elección improvisada.
+
+## El contenido: MDX + Postgres, no todo-CMS
+
+El cuerpo de los artículos vive en archivos `.mdx` versionados junto al código — un archivo por idioma, por slug. Los datos dinámicos (vistas, reacciones, mensajes de contacto) viven en Postgres vía Drizzle. Nada de un CMS externo para dos docenas de artículos que yo mismo escribo.
+
+```ts
+// content/blog/{slug}/{locale}.mdx
+// content/blog/clean-architecture-nextjs/es.mdx
+// content/blog/clean-architecture-nextjs/en.mdx
+```
+
+## Internacionalización sin negociación de idioma
+
+Uso `next-intl` con `localePrefix: "always"`: **todas** las rutas, incluido el idioma por defecto (`es`), llevan prefijo explícito. Nada de negociar `Accept-Language` — el visitante siempre sabe en qué idioma está parado por la URL.
+
+- `/es/blog/mi-post` y `/en/blog/mi-post` conviven siempre.
+- Si un artículo no tiene traducción, se muestra el idioma disponible con un aviso visible — nunca un 404.
+- El selector de idioma preserva la página actual al cambiar.
+
+## Estilos: Tailwind + tokens propios
+
+Los tokens de diseño (colores, tipografía, espaciado) viven en variables CSS propias, no en la config de Tailwind directamente — así el cambio de tema claro/oscuro es un simple `data-theme` en el `<html>`, sin duplicar componentes.
+
+> Elegir el stack correcto no es elegir lo más nuevo. Es elegir lo que puedas defender línea por línea en una entrevista técnica.
+
+Drizzle sobre Prisma, pglite para tests de integración sin Docker, Playwright para los flujos reales de usuario — cada pieza tiene una razón escrita, no solo una preferencia.

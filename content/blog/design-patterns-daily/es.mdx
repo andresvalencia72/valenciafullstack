@@ -1,0 +1,50 @@
+---
+title: "Patrones de diseño que uso todos los días"
+description: "Repository, Adapter, Use Case y Factory no son teoría de examen: son los cuatro patrones que uso en casi cada feature de este portfolio."
+date: "2026-07-01"
+category: "patterns"
+tags: ["patterns", "typescript"]
+---
+
+Los patrones de diseño se enseñan como si fueran un examen: memorizás el diagrama UML y listo. En el código real, un puñado de patrones cubre el 90% de los problemas que aparecen todos los días.
+
+## Repository: separar el "qué" del "cómo"
+
+Cada feature que necesita persistencia define una interfaz en su `domain` y una implementación concreta en `infrastructure`:
+
+```ts
+// domain (interfaz)
+interface ArticleRepository {
+  findArticle(slug: string, locale: ArticleLocale): Promise<Article | null>;
+}
+
+// infrastructure (implementación real, MDX en este caso)
+function createMdxArticleRepository(loader: MdxLoader): ArticleRepository {
+  return {
+    async findArticle(slug, locale) {
+      /* ... */
+    },
+  };
+}
+```
+
+El caso de uso (`application`) solo conoce la interfaz. Testearlo con un repositorio falso en memoria es trivial — no hace falta levantar Postgres ni el sistema de archivos.
+
+## Adapter: el mundo real es ruidoso
+
+Cada `app/*` es un adaptador delgado: toma la petición HTTP o los parámetros de ruta de Next.js, los traduce a algo que el caso de uso entiende, y traduce el resultado de vuelta a JSX o JSON. La lógica de negocio nunca sabe que existe Next.js.
+
+- `app/api/contact/route.ts` adapta un `Request` HTTP a un caso de uso.
+- `app/[locale]/blog/[slug]/page.tsx` adapta parámetros de ruta a `getArticle`.
+
+## Use Case (interactor): una acción, una función
+
+Cada `application/*.ts` hace *una* cosa: `getArticle`, `getNextArticle`, `resolveArticleSeoAlternates`. Nada de clases de servicio de quinientas líneas que hacen de todo un poco.
+
+> Un patrón que no resuelve un problema concreto de tu código es solo decoración. Los cuatro de arriba resuelven problemas reales: testabilidad, aislamiento del framework, y funciones con una sola responsabilidad.
+
+## Factory: instanciar sin acoplar
+
+`shared/db/client.ts` expone una única función factory para el cliente de Drizzle — un singleton perezoso por runtime, sin que el resto del código sepa cómo se construye la conexión.
+
+Cuatro patrones, cero ceremonia innecesaria.
