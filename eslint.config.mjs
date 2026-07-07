@@ -96,6 +96,15 @@ const boundariesConfig = {
                   captured: { feature: "{{from.captured.feature}}" },
                 },
               },
+              // Added in PR6: cross-cutting `shared/rate-limit/*`
+              // (RateLimitRepository, checkRateLimit) is designed to be
+              // injected into feature application-layer orchestration —
+              // PR5b's own findings explicitly anticipate this ("gives
+              // PR6/PR7/PR8 a ready-made ... primitive to call from
+              // their application-layer orchestration"). Without this
+              // entry, the contact/engagement/search use-cases could
+              // not accept a `RateLimitRepository` dependency at all.
+              { to: { type: "shared" } },
             ],
           },
           {
