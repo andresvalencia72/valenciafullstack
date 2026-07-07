@@ -1,0 +1,33 @@
+import { hmacSha256Hex } from "./hmac-sha256";
+
+/**
+ * NUL separator between IP and user-agent signals — chosen because it
+ * cannot appear in either a valid IP literal or a browser-supplied
+ * `User-Agent` header value, which prevents two distinct (ip, userAgent)
+ * pairs from concatenating to the same combined string (e.g. without a
+ * delimiter, ("ab", "c") and ("a", "bc") would hash identically).
+ */
+const VISITOR_SIGNAL_SEPARATOR = "\u0000";
+
+/**
+ * `visitor_hash` value object (engagement: Privacy-Respecting Visitor
+ * Identity; security: Hashed Visitor Keys, No Tracking Cookies) — an
+ * HMAC-SHA256 of IP + user agent, keyed by `VISITOR_HASH_SECRET`.
+ *
+ * Placed under `shared/security` alongside `hmacSha256Hex`/
+ * `resolveClientIp` rather than inside `features/engagement/domain`:
+ * the `security` spec lists "Hashed Visitor Keys, No Tracking Cookies"
+ * as its own cross-cutting requirement (not engagement-only), and
+ * hashing requires `node:crypto`, which the `domain` layer's "may
+ * import nothing" rule (see design.md Boundary Rules) already pushed
+ * `hmacSha256Hex` itself out of `contact/domain` in PR6. This mirrors
+ * that precedent instead of re-deriving it. `visitor_hash` MUST NOT be
+ * reused as the rate-limiting key (that's `ip_hash` — HMAC of IP only).
+ */
+export function deriveVisitorHash(
+  ip: string,
+  userAgent: string,
+  secret: string,
+): string {
+  return hmacSha256Hex(`${ip}${VISITOR_SIGNAL_SEPARATOR}${userAgent}`, secret);
+}

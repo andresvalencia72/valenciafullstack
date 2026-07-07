@@ -14,6 +14,15 @@ interface ArticlePageProps {
   /** Result from the `getArticle` use case; MUST NOT be `kind: "not-found"` — the caller (`app/[locale]/blog/[slug]/page.tsx`) handles that with `notFound()` before rendering this component. */
   result: Exclude<GetArticleResult, { kind: "not-found" }>;
   nextArticle: ArticleTeaser | null;
+  /**
+   * Composition-root slot rendered between the article body and the
+   * next-article card — the `app/` route passes `engagement`'s
+   * `EngagementPanel` here (task 7.5) rather than `blog/ui` importing
+   * it directly: cross-feature `ui -> ui` imports are eslint-boundaries-
+   * disallowed (only same-feature `ui -> ui` is allowed), the same rule
+   * PR6's `ContactSection` children-composition already established.
+   */
+  children?: React.ReactNode;
 }
 
 /**
@@ -24,7 +33,11 @@ interface ArticlePageProps {
  * repository or filesystem directly (design.md: `app/` routes are
  * composition roots, `ui` never imports `infrastructure`).
  */
-export async function ArticlePage({ result, nextArticle }: ArticlePageProps) {
+export async function ArticlePage({
+  result,
+  nextArticle,
+  children,
+}: ArticlePageProps) {
   const { article } = result;
   const body = await ArticleBody({ source: article.content });
 
@@ -61,6 +74,10 @@ export async function ArticlePage({ result, nextArticle }: ArticlePageProps) {
           <TagPills tags={article.tags} />
         </div>
       </article>
+
+      {children && (
+        <div className="mt-11 border-t border-line pt-9">{children}</div>
+      )}
 
       {nextArticle && (
         <div className="mt-11 border-t border-line pt-9">
