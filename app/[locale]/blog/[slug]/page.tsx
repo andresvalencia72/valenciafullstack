@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { getArticle } from "@/features/blog/application/get-article";
 import { getNextArticle } from "@/features/blog/application/get-next-article";
 import { resolveArticleSeoAlternates } from "@/features/blog/application/resolve-article-seo-alternates";
+import { resolveAvailableArticleLocales } from "@/features/blog/application/resolve-available-locales";
 import type { ArticleLocale } from "@/features/blog/domain/article-repository";
 import { createMdxArticleRepository } from "@/features/blog/infrastructure/mdx-article-repository";
 import { ArticlePage } from "@/features/blog/ui/article-page";
@@ -44,19 +45,6 @@ export function generateStaticParams() {
   );
 }
 
-async function resolveAvailableLocales(
-  slug: string,
-): Promise<ArticleLocale[]> {
-  const checks = await Promise.all(
-    locales.map(async (locale) => ({
-      locale,
-      exists: (await repository.findArticle(slug, locale)) !== null,
-    })),
-  );
-
-  return checks.filter((entry) => entry.exists).map((entry) => entry.locale);
-}
-
 function articleUrl(locale: ArticleLocale, slug: string): string {
   return new URL(
     `/${locale}/blog/${slug}`,
@@ -79,7 +67,11 @@ export async function generateMetadata({
     return {};
   }
 
-  const availableLocales = await resolveAvailableLocales(slug);
+  const availableLocales = await resolveAvailableArticleLocales(
+    repository,
+    slug,
+    locales,
+  );
   const { canonicalLocale, hreflangLocales, xDefaultLocale } =
     resolveArticleSeoAlternates(requestedLocale, availableLocales);
 
