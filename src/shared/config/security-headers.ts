@@ -12,38 +12,62 @@
  * — see the `security` capability spec and design.md > Resolved
  * Decisions for the full rationale. No further tightening is planned
  * beyond PR11's verification pass.
+ *
+ * Dev-only exception: React dev mode requires `eval()` for debugging
+ * features (e.g. reconstructing component stacks); Next.js dev (Turbopack)
+ * violates a strict `script-src` CSP without it, printing a console error
+ * on every page load. `'unsafe-eval'` is appended to `script-src` ONLY when
+ * `isDev` is true — the production policy below is never affected.
  */
-const contentSecurityPolicy = [
-  "default-src 'self'",
-  "script-src 'self' 'unsafe-inline'",
-  "style-src 'self' 'unsafe-inline'",
-  "img-src 'self' data: https:",
-  "font-src 'self' data:",
-  "connect-src 'self'",
-  "object-src 'none'",
-  "frame-ancestors 'none'",
-  "base-uri 'self'",
-].join("; ");
+function buildContentSecurityPolicy(isDev: boolean): string {
+  const scriptSrc = isDev
+    ? "script-src 'self' 'unsafe-inline' 'unsafe-eval'"
+    : "script-src 'self' 'unsafe-inline'";
 
-export const securityHeaders: { key: string; value: string }[] = [
-  {
-    key: "X-Content-Type-Options",
-    value: "nosniff",
-  },
-  {
-    key: "X-Frame-Options",
-    value: "DENY",
-  },
-  {
-    key: "Referrer-Policy",
-    value: "strict-origin-when-cross-origin",
-  },
-  {
-    key: "Strict-Transport-Security",
-    value: "max-age=63072000; includeSubDomains; preload",
-  },
-  {
-    key: "Content-Security-Policy",
-    value: contentSecurityPolicy,
-  },
-];
+  return [
+    "default-src 'self'",
+    scriptSrc,
+    "style-src 'self' 'unsafe-inline'",
+    "img-src 'self' data: https:",
+    "font-src 'self' data:",
+    "connect-src 'self'",
+    "object-src 'none'",
+    "frame-ancestors 'none'",
+    "base-uri 'self'",
+  ].join("; ");
+}
+
+/**
+ * Builds the full security header set. `isDev` defaults to `false` so any
+ * accidental call without an argument still ships the hardened, production
+ * CSP (no `'unsafe-eval'`).
+ */
+export function buildSecurityHeaders(
+  isDev = false,
+): { key: string; value: string }[] {
+  return [
+    {
+      key: "X-Content-Type-Options",
+      value: "nosniff",
+    },
+    {
+      key: "X-Frame-Options",
+      value: "DENY",
+    },
+    {
+      key: "Referrer-Policy",
+      value: "strict-origin-when-cross-origin",
+    },
+    {
+      key: "Strict-Transport-Security",
+      value: "max-age=63072000; includeSubDomains; preload",
+    },
+    {
+      key: "Content-Security-Policy",
+      value: buildContentSecurityPolicy(isDev),
+    },
+  ];
+}
+
+export const securityHeaders: { key: string; value: string }[] =
+  buildSecurityHeaders(process.env.NODE_ENV === "development");

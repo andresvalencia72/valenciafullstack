@@ -26,3 +26,15 @@ verifies the header set and Lighthouse.
 
 See `design.md` (Resolved Decisions) and `specs/security/spec.md` (Security Headers) for
 the full write-up.
+
+## Dev-only exception: `'unsafe-eval'`
+
+React's development build requires `eval()` for debugging features (e.g. reconstructing
+component stacks), so `next dev` (Turbopack) violates a strict `script-src` CSP without it,
+printing a console error on every page load. `src/shared/config/security-headers.ts` exposes
+`buildSecurityHeaders(isDev)`, which appends `'unsafe-eval'` to `script-src` only when
+`isDev` is true; the exported `securityHeaders` derives `isDev` from
+`process.env.NODE_ENV === "development"`. `buildSecurityHeaders()` defaults `isDev` to
+`false`, and the production CSP string is unchanged and covered by a unit test asserting
+byte-for-byte equality with the canonical policy above. React never uses `eval()` in
+production, so this exception is never shipped.
