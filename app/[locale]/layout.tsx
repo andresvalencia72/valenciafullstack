@@ -4,6 +4,7 @@ import { getMessages, setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
 import Script from "next/script";
 import type { ReactNode } from "react";
+import { publicEnv } from "@/shared/config/env.public";
 import { locales } from "@/shared/i18n/routing";
 import { clashDisplay, generalSans } from "@/shared/ui/fonts";
 import { buildThemeInitScript } from "@/shared/ui/theme/theme-init-script";
@@ -14,6 +15,11 @@ export function generateStaticParams() {
 }
 
 export const metadata: Metadata = {
+  // Resolves relative/auto-injected asset URLs (e.g. the per-article
+  // `opengraph-image.tsx` convention route's `og:image` meta tag,
+  // task 9.1) against the real site origin instead of Next's
+  // "http://localhost:3000" fallback (seo: Dynamic OG Images).
+  metadataBase: new URL(publicEnv.NEXT_PUBLIC_SITE_URL),
   title: "Andrés Valencia — Software Engineer",
   description:
     "Portfolio of Andrés Valencia: software engineering, architecture, and writing.",
