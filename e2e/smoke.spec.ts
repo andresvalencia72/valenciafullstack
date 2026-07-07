@@ -32,4 +32,24 @@ test.describe("scaffolding smoke test", () => {
     expect(csp).toContain("frame-ancestors 'none'");
     expect(csp).toContain("base-uri 'self'");
   });
+
+  /**
+   * security: Security Headers — "GIVEN any page or API response" (not just
+   * pages). `next.config.ts`'s `headers()` matches `source: "/(.*)"`, which
+   * structurally already covers `/api/*`, but PR11 (task 11.1) adds an
+   * explicit assertion against a real API route response rather than
+   * inferring API coverage from the page-only smoke test above.
+   */
+  test("security headers are present on API responses too, not just pages", async ({
+    request,
+  }) => {
+    const response = await request.get("/api/search?q=next&locale=es");
+    const headers = response.headers();
+
+    expect(headers["x-content-type-options"]).toBe("nosniff");
+    expect(headers["x-frame-options"]).toBe("DENY");
+    expect(headers["content-security-policy"]).toContain(
+      "frame-ancestors 'none'",
+    );
+  });
 });

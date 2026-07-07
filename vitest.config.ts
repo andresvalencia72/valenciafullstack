@@ -43,6 +43,19 @@ export default defineConfig({
     setupFiles: ["./vitest.setup.ts"],
     include: ["src/**/*.test.{ts,tsx}", "scripts/**/*.test.{ts,tsx}"],
     exclude: ["node_modules", ".next", "e2e/**"],
+    // pglite integration tests (persistence: Infrastructure Repository
+    // Implementations) each cold-start a fresh in-memory WASM Postgres
+    // instance and apply the real migration in their first test/hook.
+    // Under full-suite parallelism with v8 coverage instrumentation, that
+    // cold start can exceed Vitest's 5000ms default test timeout —
+    // observed as intermittent, file-rotating timeouts across different
+    // pglite-backed test files on repeated runs (a coverage-gate
+    // integrity bug found during PR11 hardening, not a regression in any
+    // single feature's logic). Raised globally; this only changes how
+    // long a genuinely hung test is allowed to run before failing, not
+    // how long the fast majority of unit tests actually take.
+    testTimeout: 20000,
+    hookTimeout: 20000,
     coverage: {
       provider: "v8",
       reporter: ["text", "lcov", "html"],

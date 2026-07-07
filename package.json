@@ -14,7 +14,9 @@
     "test:e2e": "playwright test",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
-    "db:sync-search": "tsx scripts/sync-search.ts"
+    "db:sync-search": "tsx --env-file-if-exists=.env scripts/sync-search.ts",
+    "verify:no-client-secrets": "tsx scripts/verify-no-client-secrets.ts",
+    "lighthouse": "lhci autorun"
   },
   "dependencies": {
     "drizzle-orm": "^0.45.2",
@@ -35,6 +37,7 @@
     "@electric-sql/pglite": "^0.5.4",
     "@emnapi/core": "^1.11.2",
     "@emnapi/runtime": "^1.11.2",
+    "@lhci/cli": "^0.15.1",
     "@playwright/test": "^1.61.1",
     "@swc/helpers": "^0.5.23",
     "@tailwindcss/postcss": "^4",

@@ -58,4 +58,25 @@ describe("HeroSection", () => {
 
     expect(screen.getByText("photo · portrait")).toBeInTheDocument();
   });
+
+  it("does not gate above-the-fold hero content behind a scroll-triggered reveal animation (quality-pipeline: Lighthouse Performance Budget — LCP)", () => {
+    // The hero is the first thing visible on page load — nothing needs
+    // to be scrolled into view for it to matter. `Reveal` (framer-motion
+    // `whileInView`) renders its initial, pre-animation state as literal
+    // inline `opacity: 0`ux (verified: `<div data-motion="active"
+    // style="opacity: 0; ...">`) until client JS hydrates and an
+    // IntersectionObserver fires — real Lighthouse measurement showed
+    // this adds ~3.4s of pure "Render Delay" to the hero paragraph's LCP
+    // (88% of the metric), enough on its own to drop the home page below
+    // the Performance >= 90 budget. No element in the hero section may
+    // start invisible this way. `Tilt`/`Magnetic` (interaction-only —
+    // pointer-driven transform, no opacity gating) remain unaffected.
+    const { container } = renderWithIntl();
+
+    const hiddenOnMount = Array.from(
+      container.querySelectorAll<HTMLElement>("[style]"),
+    ).filter((element) => element.style.opacity === "0");
+
+    expect(hiddenOnMount).toEqual([]);
+  });
 });

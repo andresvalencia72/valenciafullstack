@@ -1,212 +1,142 @@
-# Verification Report — INTERIM (PR1–PR5b + CSP dev fix)
+# Verification Report — TERMINAL (PR1–PR11, full scope)
 
 **Change**: portfolio-site
 **Date**: 2026-07-07
-**Scope**: This is a MID-CHAIN evidence-refresh verify, NOT the terminal verify. It covers only the 35/62 completed tasks (Phases 1, 2a, 2b, 3a, 4, 3b, 5a, 5b, plus the unplanned CSP dev-mode hotfix on `fix/csp-dev-unsafe-eval`). Phases 6–11 (27 unchecked tasks) are out of scope and are NOT evaluated for correctness — see "Out-of-Scope / Pending" below.
-**Branch verified**: `fix/csp-dev-unsafe-eval` (current checkout; contains all PR1–PR5b commits + the CSP fix). Nothing merged to `main` (feature-branch-chain).
+**Scope**: Full terminal verification, all 11 phases / 62 tasks (PR1 through PR11), superseding the interim PR1–PR5b report dated 2026-07-07. This is the last gate before `sdd-archive`.
+**Branch verified**: `feat/pr11-hardening` (tip of the feature-branch-chain; contains the cumulative implementation of PR1–PR11). Nothing merged to `main` — each PR targets its parent branch per `chain_strategy: feature-branch-chain`.
 **Mode**: Strict TDD
 
-## Completeness (in-scope tasks only)
+> **This report supersedes** `verify-report.md`'s prior interim version (PR1–PR5b + CSP hotfix only). All findings below are independent, this-session evidence — re-derived from source inspection and real command execution, not carried over from the interim report except where explicitly noted as "confirmed unchanged."
+
+## Completeness
 | Metric | Value |
 |--------|-------|
-| Total tasks in tasks.md | 62 |
-| Tasks checked complete | 35 (Phases 1, 2a, 2b, 3a, 4, 3b, 5a, 5b) |
-| Tasks unchecked (out of scope, PR6–PR11) | 27 |
-| Checked tasks with code evidence found | 35/35 |
+| Tasks total | 62 |
+| Tasks checked complete | 62 |
+| Tasks unchecked | 0 |
+| Checked tasks with code evidence found | 62/62 (spot-checked by capability; see Correctness section) |
 | Checked tasks with missing/contradicted code | 0 |
 
 ## Build & Tests Execution
 
+**Lint**: ✅ Passed (`npm run lint` — 0 errors, 0 warnings, repo-wide)
+
 **Typecheck**: ✅ Passed (`npm run typecheck` — `tsc --noEmit`, 0 errors)
 
-**Lint**: ✅ Passed (`npm run lint` — 0 errors, 0 warnings)
-
-**Build**: ✅ Passed (`npm run build` — Next.js 16.2.10, 13 routes, static/SSG as expected: `/es`, `/en`, 8 article routes, `/_not-found`, proxy middleware)
-
-**Tests**: ✅ 221 passed / 0 failed / 0 skipped (57 test files)
+**Tests**: ✅ 440 passed / 0 failed / 0 skipped (100 test files)
 ```text
 npm run test:coverage
-Test Files  57 passed (57)
-     Tests  221 passed (221)
+Test Files  100 passed (100)
+     Tests  440 passed (440)
 ```
+Matches the count claimed in `state.yaml`'s PR11 apply note exactly.
 
-**Coverage**: 97.48% stmts / 92.16% branch / 97.95% funcs / 97.44% lines — threshold 80% → ✅ Above (all metrics)
+**Coverage**: 97.47% stmts / 93.48% branch / 96.18% funcs / 97.42% lines — threshold 80% (lines+branches, `vitest.config.ts`) → ✅ Above on all four metrics. Matches the exact numbers claimed in `state.yaml`.
 
-**E2E (Playwright)**: ✅ 27/27 passed against a real `next build` + `next start` production server (per `playwright.config.ts`), no DB required — none of the shipped PR1–PR5b surface consumes the database yet (contact/engagement routes land in PR6/PR7).
+**Build**: ✅ Passed (`npm run build` — Next.js 16.2.10 Turbopack, 22 routes, matches PR11's claimed route count: `/[locale]` dynamic, `/[locale]/blog/[slug]` + `/opengraph-image` SSG, `/[locale]/privacy`, `/[locale]/rss.xml`, 5 `/api/*` route handlers, `/sitemap.xml` static — no `app/robots.ts`, see Issues)
+
+**E2E (Playwright)**: ❌ **46/48 passed, 2 FAILED** (deterministic across 3 attempts each, `CI=1`, real production `next build` + `next start`, real local Docker Postgres, `npm run db:migrate` + `npm run db:sync-search` already applied)
 ```text
-npm run test:e2e
-27 passed (3.5s)
+[chromium] e2e/home-sections.spec.ts:45 › mobile viewport (375px): sections stack with no horizontal overflow — FAILED (all 3 attempts)
+[chromium] e2e/home-sections.spec.ts:62 › mobile viewport (375px): projects, articles, and filter pills stack with no horizontal overflow — FAILED (all 3 attempts)
+46 passed, 2 failed
 ```
-Ran despite the "skip unless cheap" guidance because Chromium was already cached locally (no download needed) and multiple completed tasks (2.7, 3a.3, 3b.4, 4.x) explicitly claim e2e coverage — worth confirming with real runtime evidence rather than trusting the apply-progress report alone.
+This directly contradicts `state.yaml`'s PR11 apply note ("48/48 e2e"). The discrepancy is real and explained, not a flake — see CRITICAL-1 below. All other e2e files (`blog`, `contact`, `engagement`, `locale-routing`, `privacy`, `search`, `seo`, `smoke`, `theme-no-flash`) passed in full, matching PR11's claims.
 
-## Spec Compliance Matrix (in-scope capabilities)
+**Lighthouse CI** (`npm run lighthouse`, `lhci autorun`, real production server, mobile default, `numberOfRuns: 3`): ✅ Gate passes, exit 0, all 3 URLs (`/es`, `/en`, `/es/blog/clean-architecture-nextjs`) clear all 4 thresholds on the median-of-3 assertion. Fresh evidence (2 independent 3-run sets, 6 samples/URL, this session): `/es` Performance 0.89–0.90 (individual runs dipped to 0.89, below the 0.90 threshold, twice out of 6 samples), Accessibility 0.96, Best Practices 0.96, SEO 1.00; `/en` Performance 0.90 (stable, 6/6 runs), Accessibility 0.96, Best Practices 0.96, SEO 1.00; article page Performance 0.95–0.96, Accessibility 0.96, Best Practices 1.00, SEO 1.00. Confirms the residual flagged in the apply brief ("Lighthouse Performance margin thin, 0.90–0.92 locally") is real, not overstated — see WARNING-1.
 
-### design-system
-| Requirement | Scenario | Test | Result |
-|---|---|---|---|
-| Token Derivation | Token usage | `tokens.css` + component usage (static review, no hardcoded hex found in reviewed files) | ✅ COMPLIANT |
-| Theme Toggle | Persists across reload | `use-theme.test.ts`, `e2e/theme-no-flash.spec.ts` (3 tests) | ✅ COMPLIANT |
-| Scroll Progress Indicator | Progress updates on scroll | `scroll-progress.test.tsx` | ✅ COMPLIANT |
-| Motion Interactions Respect Reduced Motion | Reduced motion honored | `use-reduced-motion.test.ts` | ✅ COMPLIANT |
+**`npm run verify:no-client-secrets`**: ✅ 0 leaked secrets found against the real production `.next/static` build (exit 0).
 
-### i18n
-| Requirement | Scenario | Test | Result |
-|---|---|---|---|
-| Locale Routing | Root → 308 to `/es`; unprefixed → 308; `/api/*` excluded | `e2e/locale-routing.spec.ts` (4 tests, all passing) | ✅ COMPLIANT |
-| Locale-Matched MDX Resolution | Locale switch on article page | `e2e/blog.spec.ts` ("switching locale on an article page preserves the slug...") | ✅ COMPLIANT |
-| Locale Persistence on Navigation | Locale switch preserves context | `locale-switcher.test.tsx` (unit, generic behavior) | ✅ COMPLIANT (unit-level; full "preserve scroll position" is a SHOULD, not verified end-to-end — acceptable per spec wording) |
-| SEO Metadata Consistency | Hreflang alternates present / canonical for fallback | `e2e/blog.spec.ts` (hreflang + canonical tests, both passing) | ✅ COMPLIANT |
+## Spec Compliance Matrix (by capability, representative scenarios + full e2e cross-reference)
 
-### home-page
-| Requirement | Scenario | Test | Result |
-|---|---|---|---|
-| Section Composition (partial, no github-activity yet) | Full page render, sections in order | `e2e/home-sections.spec.ts` ("renders the implemented sections in spec order") | ✅ COMPLIANT (partial set, as scoped — github-activity correctly absent, PR10) |
-| In-Page Navigation | Anchor navigation | `e2e/home-sections.spec.ts` (anchor nav test) | ✅ COMPLIANT |
-| Embedded Article List (no search yet) | Articles list renders inline / locale exclusion | `articles-section.test.tsx`, `list-published-articles.test.ts` | ✅ COMPLIANT (search-input scenarios correctly deferred to PR8 — no search code present, matches spec's "prior to PR8" carve-out) |
-| Responsive Layout (partial) | Mobile/tablet/desktop viewports | `e2e/home-sections.spec.ts` (4 viewport tests, all passing) | ✅ COMPLIANT |
+| Capability | Requirements verified | Result |
+|---|---|---|
+| design-system | Token derivation, theme toggle no-flash, scroll progress, reduced-motion | ✅ COMPLIANT — `e2e/theme-no-flash.spec.ts` (3/3), unit suites (`use-theme`, `scroll-progress`, `use-reduced-motion`) |
+| i18n | Locale routing (308, `localePrefix: always`), locale-matched MDX resolution, SEO metadata consistency | ✅ COMPLIANT — `e2e/locale-routing.spec.ts` (4/4), `e2e/blog.spec.ts` hreflang/canonical cases; ⚠️ PARTIAL — "SHOULD preserve scroll position" on locale switch remains unit-tested (generic behavior) only, no dedicated e2e (carried from interim report, still accurate) |
+| home-page | Section composition (9 sections incl. github-activity), in-page nav, embedded article list + search integration | ❌ **NON-COMPLIANT on Responsive Layout** — `e2e/home-sections.spec.ts` mobile-viewport scenarios FAIL deterministically when the github-activity section renders real data (see CRITICAL-1). Section composition/order and desktop/tablet layout scenarios remain ✅ COMPLIANT |
+| blog | MDX rendering, missing-translation fallback, frontmatter validation, cross-locale consistency, no blog index | ✅ COMPLIANT — `e2e/blog.spec.ts` (11/11) |
+| article-filter | Category filtering, reset, empty-result handling, search interaction | ✅ COMPLIANT — `e2e/home-sections.spec.ts` filter-pill case, `e2e/search.spec.ts` (4/4) |
+| persistence | Domain repo interfaces (zero drizzle imports), infra impls, versioned migrations, env fail-fast | ✅ COMPLIANT — verified structurally (`domain: allow: []` eslint rule + spot-read of 4 domain repo files, zero imports), pglite integration suites all passing |
+| contact | Server-side validation, persistence-independent-of-email, rate limit + honeypot check order, no PII leakage, privacy disclosure | ✅ COMPLIANT — spot-read `submit-contact-message.ts` confirms exact check order (rate-limit → honeypot → validation → persist → email, 503 reserved for persistence only, 202 for email degradation); `e2e/contact.spec.ts` (3/3), `e2e/privacy.spec.ts` (2/2) |
+| engagement | View/reaction permanent dedupe, visitor-hash privacy, endpoint validation, public aggregate read, graceful degradation | ✅ COMPLIANT — spot-read confirms `onConflictDoNothing` insert-if-absent pattern in both `drizzle-article-view-repository.ts` and `drizzle-article-reaction-repository.ts`; `e2e/engagement.spec.ts` (3/3, newly added in PR11) |
+| search | Full-text query (per-locale regconfig, `websearch_to_tsquery`), relevance ranking, input validation/rate limit, no-match handling, index sync full reconcile, graceful degradation | ✅ COMPLIANT — `e2e/search.spec.ts` (4/4), pglite integration tests for ranking/special-chars/prune |
+| seo | Dynamic OG images, per-locale RSS, bilingual sitemap+hreflang | ✅ COMPLIANT — `e2e/seo.spec.ts` (8/8) |
+| github-activity | Server-side fetch, ISR/fetch-level caching, non-blocking Suspense render, graceful failure handling | ✅ COMPLIANT on data-fetch/fallback behavior (unit-tested exhaustively: token-absent, client-reject, non-OK status, timeout all collapse to the same fallback); ❌ **its "available" (success) rendering state breaks the home-page Responsive Layout requirement on mobile** — see CRITICAL-1. This capability's own spec has no responsive-layout scenario of its own (that requirement lives in `home-page`), but the bug lives inside `github-activity`'s UI component |
+| security | Input validation, per-endpoint rate limiting, no PII/internal leakage, security headers/CSP, no client-side secrets, hashed visitor keys | ✅ COMPLIANT — `e2e/smoke.spec.ts` (3/3, incl. the PR11-added API-response header assertion), `npm run verify:no-client-secrets` (0 leaks), spot-read of `security-headers.ts` wiring into `next.config.ts` |
+| quality-pipeline | Unit/e2e/Lighthouse gates, coverage threshold (80%, `src/**`+`scripts/**`), visible badges, test-first development | ⚠️ PARTIAL — coverage/lint/typecheck/build gates all genuinely green; Lighthouse gate passes but with a confirmed-thin margin (WARNING-1); the e2e gate itself is currently RED in this session's real configuration (CRITICAL-1), which is exactly what quality-pipeline's own "End-to-End Test Gate" requirement exists to catch — the gate is doing its job, the code under test has a real defect |
 
-### blog
-| Requirement | Scenario | Test | Result |
-|---|---|---|---|
-| MDX Article Rendering | Article renders in requested locale | `e2e/blog.spec.ts` (es/en render tests) | ✅ COMPLIANT |
-| Missing-Translation Fallback | Falls back with notice, no 404 | `e2e/blog.spec.ts` ("falls back to the available locale with a visible notice") | ✅ COMPLIANT |
-| Frontmatter Validation | Valid/invalid frontmatter, reserved slugs, category catalog check | `frontmatter-schema.test.ts`, `real-content-tree.test.ts`, `category-catalog.test.ts` | ✅ COMPLIANT |
-| Cross-Locale Frontmatter Consistency | Divergent category fails build | `mdx-loader.test.ts` (`validateContentTree`) | ✅ COMPLIANT |
-| No Blog Index Route | `/blog` 308s, `/es/blog` and `/en/blog` 404 | `e2e/blog.spec.ts` ("no blog index route exists at either locale") | ✅ COMPLIANT |
-
-### article-filter (task 3b.3 scope)
-| Requirement | Scenario | Test | Result |
-|---|---|---|---|
-| Category Filtering | Filter by category, no reload | `e2e/home-sections.spec.ts` ("selecting a category filter pill filters the visible articles") | ✅ COMPLIANT |
-| Reset Filter | "All" clears filter | `category-filter-pills.test.tsx` | ✅ COMPLIANT |
-| Empty Result Handling | Empty-state on no match | Covered only at unit level per tasks.md note ("full empty-result e2e lands with PR8's search input") | ⚠️ PARTIAL — consistent with the documented deferral, not a gap |
-
-### persistence
-| Requirement | Scenario | Test | Result |
-|---|---|---|---|
-| Domain Repository Interfaces | Zero drizzle/db imports in domain | Verified structurally: `rg "^import"` on all 4 domain repo files returns zero results; ESLint `domain: allow: []` enforces this on every lint run | ✅ COMPLIANT |
-| Infrastructure Repository Implementations | Drizzle impl satisfies interface | `drizzle-contact-message-repository.test.ts`, `drizzle-article-view-repository.test.ts` (4 cases), `drizzle-article-reaction-repository.test.ts` (3 cases), `drizzle-rate-limit-repository.test.ts` (3 cases) — all pglite integration tests, all passing | ✅ COMPLIANT |
-| Versioned Schema and Migrations | Schema change ships with migration | `drizzle/0000_persistence_schema.sql` + `drizzle/meta/*` committed alongside `schema.ts` | ✅ COMPLIANT |
-| Boundary Validation | Invalid data rejected before persistence | N/A yet — no API route consumes these repos until PR6/PR7 (correctly out of scope) | ➖ NOT YET APPLICABLE |
-| Environment-Only Credentials | Fail-fast on missing `DATABASE_URL` | `env.test.ts` (fail-fast tests for `DATABASE_URL`/`VISITOR_HASH_SECRET`) | ✅ COMPLIANT |
-
-### security
-| Requirement | Scenario | Test | Result |
-|---|---|---|---|
-| Security Headers (incl. CSP baseline) | Headers present with restrictive values | `security-headers.test.ts` (18 assertions), `e2e/smoke.spec.ts` ("security headers are present on every response") | ✅ COMPLIANT |
-| CSP baseline directives (production) | `script-src`/`style-src` = `'self' 'unsafe-inline'`, `object-src none`, `frame-ancestors none`, `base-uri self` | `security-headers.test.ts` — explicit byte-for-byte equality assertion against the canonical production CSP string, `buildSecurityHeaders(false)` and the no-arg default both verified | ✅ COMPLIANT |
-| Dev-only `unsafe-eval` exception (unplanned hotfix) | Dev CSP adds `'unsafe-eval'` to `script-src` only, production untouched | `security-headers.test.ts` (5 new tests: dev-adds-eval, prod-excludes-eval, default-matches-prod, dev-equals-prod-except-script-src, all-other-headers-identical) | ✅ COMPLIANT |
-| Input Validation / Rate Limiting / No PII Leakage / No Client-Side Secrets / Hashed Visitor Keys | — | No API routes exist yet (PR6/PR7/PR8) | ➖ OUT OF SCOPE (correctly deferred) |
-
-### quality-pipeline
-| Requirement | Scenario | Test | Result |
-|---|---|---|---|
-| Unit Test Gate | CI fails on test failure | `.github/workflows/ci.yml` `quality` job runs `npm run test:coverage` | ✅ COMPLIANT (config verified; CI execution itself not observable from this sandbox) |
-| End-to-End Test Gate | CI runs Playwright, flow list grows per slice | `.github/workflows/ci.yml` `e2e` job wired with a real Postgres service container + migration step | ✅ COMPLIANT |
-| Lighthouse Performance Budget | Non-blocking stub until PR11 | `.github/workflows/ci.yml` `lighthouse` job, `continue-on-error: true`, explicit "stub" naming | ✅ COMPLIANT |
-| Coverage Threshold | 80% gate, correct exclude scope | `vitest.config.ts` — `include: src/**, scripts/**`; excludes `schema.ts`, `client.ts`, `database.ts`, `create-pglite-test-db.ts`, `fonts/index.ts`, test files, `.d.ts` — matches spec's named exclusion list exactly; actual run: 97.44% lines, well above 80% | ✅ COMPLIANT |
-| Visible Status Badges | README badges present | `README.md` (3 placeholder badges: CI, Coverage, Lighthouse) | ✅ COMPLIANT (placeholder state correct — real status updates land at PR11 per spec) |
-| Test-First Development | Red-green-refactor followed | Apply-progress "TDD Cycle Evidence" table (PR5b) present with RED/GREEN/TRIANGULATE columns; cross-checked against actual test files — all referenced test files exist and pass | ✅ COMPLIANT |
-
-### seo (task 4.5 cross-ref only — full seo capability is PR9)
-| Requirement | Scenario | Test | Result |
-|---|---|---|---|
-| Bilingual Sitemap with Hreflang (per-route metadata only, task 4.5) | Hreflang alternates present on blog routes | `e2e/blog.spec.ts` (hreflang + canonical tests) | ✅ COMPLIANT (route-level `generateMetadata`; the dedicated `/sitemap.ts`/RSS/OG routes are PR9, correctly absent) |
-
-**Compliance summary**: 27/28 in-scope scenarios fully COMPLIANT, 1 PARTIAL (documented, expected deferral), 0 UNTESTED, 0 FAILING.
+**Compliance summary**: 12/13 capabilities fully compliant on direct inspection; 1 capability (`home-page`, cross-cutting into `github-activity`) has a confirmed, reproducible CRITICAL violation of its Responsive Layout requirement. 0 UNTESTED scenarios found beyond the two already-carried, low-severity SHOULD-level items from the interim report.
 
 ## TDD Compliance
 | Check | Result | Details |
 |-------|--------|---------|
-| TDD Evidence reported | ✅ | Found in apply-progress (Engram #30) for PR5b; earlier PRs' findings sections in tasks.md describe RED/GREEN/coverage narratively rather than in the strict table format, but are consistent and verifiable |
-| All tasks have tests | ✅ | 35/35 checked tasks have corresponding test files or documented, spec-compliant TDD exceptions (domain interfaces — pure types, zero runtime behavior) |
-| RED confirmed (tests exist) | ✅ | All test files referenced in PR5b's TDD Cycle Evidence table exist in the codebase |
-| GREEN confirmed (tests pass) | ✅ | 221/221 tests pass on execution (this run), matching/exceeding the reported 215/215 at PR5b (+6 from the CSP fix) |
-| Triangulation adequate | ✅ | PR5b: 2–4 cases per repository; spot-checked other layers (e.g. `hero-section.test.tsx`, `security-headers.test.ts`) show multiple distinct assertions, not single-case smoke tests |
-| Safety Net for modified files | ✅ | `security-headers.ts` (modified by the CSP fix) has 18 total assertions post-fix, including 5 new ones and all 13 pre-existing ones re-verified passing |
+| TDD Evidence reported | ✅ | Every PR (PR1 through PR11) has a "TDD Cycle Evidence" table in `tasks.md` with RED/GREEN/TRIANGULATE/REFACTOR columns |
+| All tasks have tests | ✅ | 62/62 checked tasks have corresponding test files or documented, spec-compliant TDD exceptions (domain interfaces, thin `app/` adapters, pure config changes) |
+| RED confirmed (tests exist) | ✅ | Spot-checked test files referenced across PR6/PR7/PR8/PR11's evidence tables all exist in the codebase |
+| GREEN confirmed (tests pass) | ✅ | 440/440 unit+integration tests pass on this run |
+| Triangulation adequate | ✅ | Consistently 2–12 cases per behavior across all PRs' evidence tables; single-case entries are explicitly annotated with a documented reason (structural interfaces, single-literal config) |
+| Safety Net for modified files | ✅ | Every PR's evidence table shows pre-existing test counts re-run as a safety net before/after modification (e.g. PR11's hero-section 4/4 pre-existing re-run after the `Reveal` removal) |
 
-**TDD Compliance**: 6/6 checks passed
-
----
-
-### Test Layer Distribution
-| Layer | Tests | Files | Tools |
-|-------|-------|-------|-------|
-| Unit | ~194 | ~52 | Vitest + Testing Library |
-| Integration | 12 | 4 | Vitest + pglite (`@electric-sql/pglite`) |
-| E2E | 27 | 5 | Playwright (real `next build` + `next start`) |
-| **Total** | **221 unit/integration + 27 e2e = 248** | 57 (+5 e2e) | |
-
-Note: exact unit-vs-integration split above the 4 pglite files is approximate (based on directory naming, not machine-classified per file).
-
----
-
-### Changed File Coverage (representative — full report in `npm run test:coverage` output above)
-| File | Line % | Branch % | Uncovered Lines | Rating |
-|------|--------|----------|-----------------|--------|
-| `src/shared/config/security-headers.ts` | 100% | 100% | — | ✅ Excellent |
-| `src/features/*/domain/*-repository.ts` (4 files) | 100% | 100% | — | ✅ Excellent (declarative interfaces) |
-| `src/features/*/infrastructure/drizzle-*-repository.ts` (4 files) | 100% | 75–100% | see below | ✅ Excellent / ⚠️ Acceptable |
-| `src/shared/i18n/request.ts` | 0% | 100% | 11-16 | ❌ Below threshold in isolation, but is next-intl RSC bootstrap wiring (its one logic branch, locale fallback, is extracted and fully tested in `resolveRequestLocale`) — pre-existing from PR2b, not a PR5b/CSP regression |
-
-**Average changed file coverage**: 97.44% (aggregate, all files) — above the 80% gate.
+**TDD Compliance**: 6/6 checks passed. Note: TDD process compliance does not by itself guarantee spec-level correctness — CRITICAL-1 below is a real gap in test **environment coverage** (the success-path mobile layout was never exercised with a live token), not a TDD-process failure; the component's own unit tests pass because they never render real (long) GitHub data at a constrained viewport.
 
 ---
 
 ### Assertion Quality
-Manually scanned all test files for tautologies, ghost loops, mock-heavy tests, and smoke-test-only patterns:
-- **Tautologies**: 0 found (`expect(true).toBe(true)` pattern search returned zero matches)
-- **Ghost loops**: 0 found — the only `for...of`/`forEach` loops in test files (`stack-strip.test.tsx`, `skills-section.test.tsx`) iterate over hardcoded, non-empty local fixture arrays, not over DOM query results that could be empty
-- **Mock-heavy tests**: 0 found (no file has mocks > 2× assertions)
-- **Smoke-test-only**: 0 found — spot-checked `hero-section.test.tsx` and others with high `toBeInTheDocument()` counts; all assert specific content/attributes (text, hrefs, ids), not bare "renders without crash"
+No new trivial-assertion patterns found on spot-check of PR11's new test files (`find-leaked-secrets.test.ts`, `verify-no-client-secrets.test.ts`, `hero-section.test.tsx`'s new case, `engagement.spec.ts`). Consistent with the interim report's prior clean finding for PR1–PR5b.
 
-**Assertion quality**: ✅ All assertions verify real behavior
+**Assertion quality**: ✅ No new issues found in this pass.
 
 ---
 
-### Quality Metrics
-**Linter**: ✅ No errors (`npm run lint`, repo-wide)
-**Type Checker**: ✅ No errors (`npm run typecheck`, repo-wide)
-
-## Correctness (Static Evidence)
+## Correctness (Static Evidence, spot-checked this session)
 | Requirement | Status | Notes |
 |------------|--------|-------|
-| ESLint boundaries (`domain: allow: []`) | ✅ Implemented | Structurally enforces zero-import domain layers; verified in `eslint.config.mjs` |
-| Repository factory-function pattern | ✅ Implemented | Consistent across `blog` (PR4), `contact`/`engagement`/`rate-limit` (PR5b) |
-| `next.config.ts` wires `securityHeaders` | ✅ Implemented | `headers()` async function applies to `/(.*)` — all routes |
-| ADR-0007 updated for the CSP dev exception | ✅ Implemented | `docs/adr/0007-csp-script-src-strategy.md` documents the dev-only `'unsafe-eval'` addition with rationale |
-| No `app/api/*` routes present yet | ✅ Confirmed | Correctly matches PR6+ scope — no premature API surface |
+| Contact check-order (rate-limit → honeypot → validation → persist → email) | ✅ Implemented | Read `submit-contact-message.ts` directly — matches the spec's literal ordering and status-code mapping exactly |
+| Engagement insert-if-absent dedupe | ✅ Implemented | `onConflictDoNothing()` confirmed in both `drizzle-article-view-repository.ts` and `drizzle-article-reaction-repository.ts` |
+| i18n 307→308 redirect upgrade | ✅ Implemented | `upgradeRedirectStatus()` in `middleware-rules.ts`, documented and unit-tested |
+| Coverage gate config (`src/**`+`scripts/**`, 80% lines+branches) | ✅ Implemented | `vitest.config.ts` `coverage.thresholds` + `include`/`exclude` match the quality-pipeline spec's named exclusion list exactly |
+| Security headers/CSP wiring | ✅ Implemented | `next.config.ts` imports `securityHeaders` from `shared/config/security-headers.ts`, applies via `headers()` to `/(.*)` |
+| `app/robots.ts` | ❌ **Not implemented** | Confirmed via live request: `GET /robots.txt` → **404**. No route file exists. See WARNING-1... *(renumbered below, see WARNING-2)* |
 
 ## Coherence (Design)
 | Decision | Followed? | Notes |
 |----------|-----------|-------|
-| Screaming architecture (`app/` composition root, `src/features/*` clean layers) | ✅ Yes | Verified folder tree matches design.md |
-| `RateLimitRepository` under `shared/rate-limit/` (deviation from literal task wording) | ✅ Yes, documented | Cross-cutting concern, justified in apply findings; `shared -> shared` and `infrastructure -> shared` are allowed boundary edges |
-| `search_vector` as plain (non-generated) column | ✅ Yes, documented | `to_tsvector` is `STABLE` not `IMMUTABLE` — Postgres constraint, correctly worked around |
-| pglite as integration-test DB (no testcontainers fallback) | ✅ Yes | Verified parity claim is consistent with passing pglite-backed repository tests in this run |
-| CSP dev-only `'unsafe-eval'` exception | ✅ Yes, documented | Not in original design.md (unplanned hotfix), but ADR-0007 updated in the same change — acceptable |
+| Screaming architecture, clean layers, `app/` composition root | ✅ Yes | Consistent across all 11 PRs' apply findings and this session's spot-reads |
+| `feature-branch-chain` delivery, no merges until project end | ✅ Yes | `git log` confirms linear commit chain on `feat/pr11-hardening`, nothing merged to `main` |
+| ADR-0001–0007 finalized (PR11, task 11.5) | ✅ Yes | All seven ADRs flipped to `Accepted` with Consequences sections per PR11's findings (not re-read line-by-line this session, but file existence + status confirmed via prior interim report and PR11's own detailed findings) |
+| design.md folder tree — `app/robots.ts` | ❌ **Diverged, undelivered** | design.md's folder tree lists it as a sibling of `app/sitemap.ts`; no task in any of the 11 phases owns it; no capability spec has a MUST scenario requiring it. See WARNING-2 |
 
 ## Issues Found
 
-**CRITICAL**: None.
+### CRITICAL
 
-**WARNING**:
-1. **CSP dev-mode hotfix not reflected in `tasks.md` or `state.yaml`.** The fix on `fix/csp-dev-unsafe-eval` (commit `d849955`, base = `feat/pr5b-persistence-repos`) shipped real code, tests, and an ADR update, but `tasks.md` has no corresponding task entry or "apply findings" subsection documenting it (findings sections stop at "PR5b apply findings"), and `state.yaml`'s `apply.note` still cites the pre-fix test count (215/215) rather than the current 221/221. This is a documentation-consistency gap, not a functional one — the Engram session summary (#41) does document it. Recommend adding a short "CSP dev fix" note to `tasks.md` and refreshing `state.yaml`'s test count before the terminal verify/archive, so the openspec artifact trail (the team-shareable record) matches what actually shipped.
-2. **`i18n` spec's Locale Persistence on Navigation "SHOULD preserve scroll position" is only unit-tested at the generic-behavior level** (locale switch + path preservation), not verified end-to-end for actual scroll-position restoration. This is a SHOULD (not MUST) in the spec, so it is not a compliance failure, but flagging for completeness since it's the one scenario without direct runtime evidence of the specific "preserve scroll position" clause.
+**CRITICAL-1: `home-page` Responsive Layout requirement is violated on mobile when `github-activity` renders real data — reproducible, not a flake.**
 
-**SUGGESTION**:
-1. `src/shared/i18n/request.ts` shows 0% coverage in the report (next-intl RSC bootstrap + a dynamic `import()`). This is pre-existing from PR2b and already justified (its one real logic branch is extracted into a separately-tested pure function), but as the codebase grows it may be worth a lightweight integration test directly exercising this file to avoid it becoming a blind spot.
-2. Test Layer Distribution is unit-heavy (~194 unit vs 12 integration vs 27 e2e) — appropriate for the current feature mix, but as PR6+ (contact, engagement APIs) land, ensure integration-level coverage keeps pace with the growing number of route handlers rather than relying solely on e2e for API-layer behavior.
+- **Evidence**: `npm run test:e2e` (real production build, real Docker Postgres, `CI=1`) fails deterministically on `e2e/home-sections.spec.ts`'s two mobile-viewport (375px) scenarios, across 3 consecutive attempts each (initial + 2 retries), identical failure both times this session's full suite was run.
+- **Root cause** (confirmed via direct DOM inspection at 375px): this session's `.env` has a working `GITHUB_TOKEN` — unlike every prior PR1–PR11 apply session, which explicitly recorded "no `GITHUB_TOKEN` configured" and therefore only ever exercised the fallback (`kind: "unavailable"`) rendering path. With a live token, `GithubActivityPanel` (`src/features/github-activity/ui/github-activity-panel.tsx`) renders real repository cards inside a `<ul className="grid ... md:grid-cols-2 lg:grid-cols-3">`. At the base (mobile) breakpoint the grid has no explicit column count, so its single implicit column is sized by the browser's default automatic minimum sizing for grid items — which is content-based (`min-width: auto` ≈ `min-content`), not `0`. The repo card's `<p className="truncate text-sm text-ink-soft">{repo.description}</p>` (line 78) uses Tailwind's `truncate` (`white-space: nowrap; overflow: hidden; text-overflow: ellipsis`), which visually clips but does **not** reduce the element's *min-content* width — that stays the full, un-wrapped description text width. Because neither the `<p>` itself nor any ancestor in its flex/grid chain (`<a class="flex h-full flex-col ...">` → `<li>` → `<ul class="grid ...">`) sets `min-w-0`, that full-text min-content width propagates all the way up and forces the grid track — and with it, the whole `#github-activity` section and the page body — to a computed width of **~552px on a 375px viewport** (confirmed: `getComputedStyle(ul).gridTemplateColumns === "551.828px"`, `document.documentElement.scrollWidth === 584` vs `window.innerWidth === 375`, a 209px overflow). This is the textbook CSS Grid/Flexbox `min-width: auto` overflow gotcha, and it is a real, deterministic bug in shipped PR10 code — not touched by PR11.
+- **Why this was never caught before**: `home-page: Responsive Layout` ("Every section MUST render correctly across mobile, tablet, and desktop breakpoints without horizontal overflow") is a MUST-level scenario, and `e2e/home-sections.spec.ts` genuinely does assert it at 375px — but every prior CI run and every documented local apply/verify session (including the interim PR1–PR5b verify and all of PR10/PR11's own apply sessions) ran with no `GITHUB_TOKEN`, so the section only ever rendered its trivial, single-`<p>` fallback state, which cannot overflow. This terminal verify session is the first with a live token (most likely a direct, if unintended, consequence of PR11's own late README fix, commit `070787d`, which added a link to GitHub's fine-grained PAT generation page for `GITHUB_TOKEN` — plausibly prompting a real token to be configured locally for the first time). The "success" rendering path of a shipped, spec-covered feature has therefore never had real mobile-viewport verification until now.
+- **Spec impact**: this is a genuine violation of `home-page`'s Responsive Layout MUST requirement, which will manifest in production for any real visitor on a narrow viewport once `GITHUB_TOKEN` is configured in the deployment environment — which is the intended, documented production configuration per design.md's env matrix (`GITHUB_TOKEN`: optional in dev, present in prod as a PAT). This is not a hypothetical edge case; it is the feature's primary intended state.
+- **Suggested fix locus** (not applied — verify phase reports, does not fix): add `min-w-0` to the grid item chain in `github-activity-panel.tsx` (the `<li>` and/or the `<a>` flex container), which is the standard, well-established fix for this class of CSS Grid/Flexbox overflow.
+- **Blocks archive**: yes, per the Decision Gates (a test command exited with real, reproducible failures against a MUST-level spec scenario).
 
-## Out-of-Scope / Pending (PR6–PR11, 27 tasks — NOT verified, listed for context only)
-- **PR6 (Contact)**: 6.1–6.6 — API validation, persistence+email, rate limiting/honeypot, form UI wiring, e2e, privacy page. Not started; no `app/api/contact` route exists.
-- **PR7 (Engagement)**: 7.1–7.5 — visitor-hash, views/reactions API routes, public read endpoint, UI. Not started.
-- **PR8 (Search)**: 8.1–8.4 — sync script, search route, ranking, UI search input. Not started; `article_search` repository deliberately deferred here per PR5b findings.
-- **PR9 (SEO pack)**: 9.1–9.3 — OG images, RSS feeds, sitemap route. Not started (route-level metadata for blog only, task 4.5, is already in scope and verified above).
-- **PR10 (GitHub Activity)**: 10.1–10.4 — last slice, home page section-order test update pending.
-- **PR11 (Hardening)**: 11.1–11.5 — full CSP/Lighthouse verification, coverage gate integrity review, full Playwright pass, ADR finalization.
+### WARNING
 
-None of these were treated as failures; they are simply not yet built, consistent with their unchecked status in `tasks.md`.
+**WARNING-1 (carried forward, confirmed with fresh evidence): Lighthouse Performance margin is genuinely thin.** Fresh measurement this session (2 independent 3-run sets, 6 samples per URL): `/es` Performance scored 0.89 on 2 of 6 samples — below the 0.90 threshold — with the gate still passing overall only because `numberOfRuns: 3` + median-based assertion smooths over single noisy runs. `/en` was more stable (0.90 on 6/6). This confirms the residual flagged in the apply brief is accurate, not overstated. The gate's own design (median-of-3) is a reasonable mitigation, but a genuinely bad CI run (2 of 3 samples below threshold) could still tip the median under 0.90 and fail the build. Not blocking archive — the gate is correctly designed and currently passing — but worth tracking as ongoing technical debt (e.g., further hero-section LCP tuning, or `numberOfRuns: 5`).
+
+**WARNING-2: `app/robots.ts` was never shipped — a design.md deliverable gap, not a spec violation.** Confirmed via live request: `GET /robots.txt` → 404 (verified this session against a real production server), while `GET /sitemap.xml` → 200. `design.md`'s folder tree lists `app/robots.ts` as a sibling of `app/sitemap.ts`, and `middleware-rules.ts` explicitly excludes `/robots.txt` from locale-prefixing (implying something is expected to serve it), but no task across all 11 phases owns creating it, and none of the 13 capability specs (`seo`, `i18n`, or otherwise) has a MUST scenario requiring its existence. This was correctly self-flagged in PR9's apply findings and carried as an open residual through PR10/PR11 without being picked up. **Classification**: WARNING, not CRITICAL — it is a design.md/deliverable-completeness gap with mild real-world SEO impact (no `Sitemap:` directive discoverable via the conventional `/robots.txt` location; search engines still default-allow crawling absent the file), not a violation of any written, testable spec requirement. Recommend either adding a small dedicated task before a real production launch, or explicitly moving it to proposal-level Out of Scope if it's intentionally deferred.
+
+**WARNING-3 (carried forward from interim report, unchanged): i18n's "SHOULD preserve scroll position" on locale switch remains untested at the e2e/behavioral level** — only the generic locale-switch-preserves-path behavior is unit-tested. This is a SHOULD, not a MUST, in the spec, so it is not a compliance failure, but it's the one i18n scenario without direct runtime evidence of the specific scroll-position clause.
+
+### SUGGESTION
+
+**SUGGESTION-1 (carried forward, unchanged)**: `src/shared/i18n/request.ts` still shows 0% direct coverage (next-intl RSC bootstrap + a dynamic `import()`); its one real logic branch (locale fallback) is extracted and separately tested. Pre-existing since PR2b, already justified — as the codebase grows, a lightweight integration test directly exercising this file would close a minor blind spot.
+
+**SUGGESTION-2**: The late PR11 documentation/tooling commits (`6b06a4d` README setup rewrite, `070787d` PAT link, `e3cbfe3` `db:sync-search` `.env` loading fix) are all consistent with the `quality-pipeline` and `security` specs — no PII/secret exposure, no CI behavior change (CI still supplies env vars via job env, not a `.env` file; `--env-file-if-exists` is a no-op when no `.env` is present). Worth noting as a nice catch: `070787d`'s PAT-link addition is very plausibly what caused this verify session to be the first with a real `GITHUB_TOKEN` configured — which is exactly what surfaced CRITICAL-1. This is a good example of documentation improvements indirectly improving test coverage quality; recommend keeping a `GITHUB_TOKEN`-present CI/e2e lane (even if only run periodically, not on every PR) going forward so the success-path UI doesn't silently regress again.
+
+**SUGGESTION-3**: Consider adding a dedicated component-level (Testing Library) or e2e test for `GithubActivityPanel`'s "available" (real-data) rendering state at a narrow viewport, using fixture data with a realistically long repo description — this is the actual regression-prevention fix for CRITICAL-1's root cause (in addition to the CSS fix itself), since the current unit tests for this component never exercise a long, unwrapped description string.
+
+## Out-of-Scope / Pending
+None. All 11 phases (PR1–PR11) are implemented, all 62 tasks are checked, and this is confirmed to be the final planned implementation slice per `tasks.md`'s PR table and PR11's own apply findings ("no further PRs are planned").
 
 ## Verdict
-**PASS WITH WARNINGS** — all in-scope (35/62) tasks have verifiable, passing, spec-compliant implementations with strong test/coverage evidence (221/221 unit+integration tests, 27/27 e2e, 97.44% line coverage, clean lint/typecheck/build). Two WARNINGs are documentation-consistency gaps (task/state artifact drift for the CSP hotfix, one SHOULD-clause without dedicated e2e evidence) — neither blocks continued development on PR6, but both should be closed before the terminal verify/archive for full artifact trail integrity.
+**FAIL** — one CRITICAL finding (CRITICAL-1: a real, deterministic, reproducible violation of the `home-page` capability's Responsive Layout MUST requirement, surfaced for the first time by this session's live `GITHUB_TOKEN`) blocks archive readiness. All quality gates that don't depend on this specific bug are genuinely green: lint, typecheck, 440/440 unit+integration tests at 97%+ coverage on every metric, a clean production build, zero leaked client-side secrets, and a passing (if thin-margin) Lighthouse budget. 46/48 e2e scenarios pass; the 2 failures are a real, well-diagnosed regression, not flakes or environment noise (reproduced identically across 3 attempts, and independently confirmed via direct DOM/CSS inspection). Recommend: fix the `min-w-0` CSS gap in `github-activity-panel.tsx`, add a regression test with realistic (longer) fixture data at a mobile viewport, decide on `app/robots.ts` (WARNING-2), then re-run this verify phase before proceeding to `sdd-archive`.
