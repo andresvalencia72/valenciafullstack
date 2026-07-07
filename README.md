@@ -64,8 +64,14 @@ Open [http://localhost:3000](http://localhost:3000).
 ## Environment variables
 
 See `.env.example` for the full list. `DATABASE_URL` and `VISITOR_HASH_SECRET` are
-required at runtime (server fails fast if missing); `RESEND_API_KEY` and `GITHUB_TOKEN`
-are optional — the affected features degrade gracefully when absent.
+required at runtime (server fails fast if missing); `RESEND_API_KEY`, `GITHUB_TOKEN`,
+and `CONTACT_EMAIL_TO` are optional — the affected features degrade gracefully when
+absent (the contact form still persists messages and returns HTTP 202 without a
+configured email destination). `EMAIL_DRIVER` (`resend` | `fake`, default `resend`)
+selects the contact email sender; CI sets it to `fake` for a deterministic e2e happy
+path with no real Resend calls. `CONTACT_EMAIL_FROM` defaults to Resend's sandbox
+sender (`Portfolio Contact <onboarding@resend.dev>`), which works without a verified
+domain — override it once a custom domain is verified in Resend.
 
 ## CI
 

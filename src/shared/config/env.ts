@@ -15,7 +15,13 @@ import { z } from "zod";
  * fails fast the first time `getEnv()` is called if either is missing.
  * `RESEND_API_KEY` and `GITHUB_TOKEN` are optional; each feature degrades
  * gracefully at runtime when they are absent (see design.md Persistence
- * and GitHub Activity sections).
+ * and GitHub Activity sections). `CONTACT_EMAIL_TO` is optional with no
+ * default — the contact email sender factory treats an absent
+ * destination address the same as an absent `RESEND_API_KEY` (email
+ * delivery degrades gracefully to HTTP 202, see contact spec). `CONTACT_
+ * EMAIL_FROM` defaults to Resend's sandbox sender (`onboarding@resend.
+ * dev`, valid without a verified domain) so contact email works out of
+ * the box before a custom domain is configured.
  */
 const envSchema = z.object({
   DATABASE_URL: z.string().min(1, "DATABASE_URL is required"),
@@ -23,6 +29,11 @@ const envSchema = z.object({
   RESEND_API_KEY: z.string().min(1).optional(),
   GITHUB_TOKEN: z.string().min(1).optional(),
   EMAIL_DRIVER: z.enum(["resend", "fake"]).default("resend"),
+  CONTACT_EMAIL_TO: z.string().email().optional(),
+  CONTACT_EMAIL_FROM: z
+    .string()
+    .min(1)
+    .default("Portfolio Contact <onboarding@resend.dev>"),
 });
 
 export type Env = z.infer<typeof envSchema>;
