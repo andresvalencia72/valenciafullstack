@@ -101,6 +101,12 @@
       "empty": "Todavía no hay artículos publicados.",
       "filterAll": "Todos",
       "readMore": "Leer artículo",
+      "search": {
+        "placeholder": "Buscar artículos…",
+        "loading": "Buscando…",
+        "empty": "Ningún artículo coincide con tu búsqueda.",
+        "unavailable": "La búsqueda no está disponible en este momento."
+      },
       "youtube": {
         "eyebrow": "YouTube · @codeink1",
         "title": "Construyo en público",

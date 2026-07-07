@@ -75,8 +75,7 @@ jobs:
         run: npm run db:migrate
 
       - name: Sync search index
-        run: |
-          echo "scripts/sync-search.ts wires in here per task 8.1 — no-op until PR8."
+        run: npm run db:sync-search
 
       - name: Run Playwright e2e
         run: npm run test:e2e

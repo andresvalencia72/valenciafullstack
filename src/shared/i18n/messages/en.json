@@ -101,6 +101,12 @@
       "empty": "No articles published yet.",
       "filterAll": "All",
       "readMore": "Read article",
+      "search": {
+        "placeholder": "Search articles…",
+        "loading": "Searching…",
+        "empty": "No articles match your search.",
+        "unavailable": "Search is temporarily unavailable."
+      },
       "youtube": {
         "eyebrow": "YouTube · @codeink1",
         "title": "Building in public",

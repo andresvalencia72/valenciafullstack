@@ -74,7 +74,25 @@ const boundariesConfig = {
         rules: [
           {
             from: { type: "domain" },
-            allow: [],
+            allow: [
+              // Same-feature domain -> domain (PR8: a domain file's own
+              // co-located test importing the pure function it tests,
+              // e.g. `regconfig-for-locale.test.ts` importing
+              // `regconfig-for-locale.ts`). Every domain file before PR8
+              // was a purely structural interface/type export with no
+              // branching logic, so this gap (unlike the same-feature
+              // carve-outs already present for application/
+              // infrastructure/ui) was never exercised until `search`'s
+              // `regconfigForLocale` — the first domain file with real
+              // logic that needs a dedicated unit test. Cross-feature
+              // domain -> domain stays disallowed by the capture match.
+              {
+                to: {
+                  type: "domain",
+                  captured: { feature: "{{from.captured.feature}}" },
+                },
+              },
+            ],
           },
           {
             from: { type: "application" },

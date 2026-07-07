@@ -1,6 +1,5 @@
 import { setRequestLocale } from "next-intl/server";
 import { AboutSection } from "@/features/home/ui/about-section";
-import { ArticlesSection } from "@/features/home/ui/articles-section";
 import { ContactSection } from "@/features/home/ui/contact-section";
 import { HeroSection } from "@/features/home/ui/hero-section";
 import { ProjectsSection } from "@/features/home/ui/projects-section";
@@ -16,6 +15,7 @@ import { LocaleSwitcher } from "@/shared/i18n/ui/locale-switcher";
 import type { Locale } from "@/shared/i18n/routing";
 import { ScrollProgress } from "@/shared/ui/scroll-progress/scroll-progress";
 import { ThemeToggle } from "@/shared/ui/theme/theme-toggle";
+import { ArticlesWithSearch } from "./_components/articles-with-search";
 
 interface HomePageProps {
   params: Promise<{ locale: string }>;
@@ -70,7 +70,7 @@ export default async function HomePage({ params }: HomePageProps) {
       <AboutSection />
       <SkillsSection />
       <ProjectsSection />
-      <ArticlesSection articles={articles} />
+      <ArticlesWithSearch articles={articles} locale={locale as Locale} />
       <ContactSection>
         <ContactForm />
       </ContactSection>

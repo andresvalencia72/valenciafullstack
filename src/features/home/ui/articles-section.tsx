@@ -1,13 +1,16 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, type ReactNode } from "react";
 import { useTranslations } from "next-intl";
 import { Link } from "@/shared/i18n/navigation";
 import { Reveal } from "@/shared/ui/motion/reveal";
 import { Tilt } from "@/shared/ui/motion/tilt";
 import { ARTICLE_CATEGORY_IDS } from "@/shared/content/categories";
 import type { HomeArticleSummary } from "../domain/article-summary";
+import type { HomeSearchResultSummary } from "../domain/search-result-summary";
 import { CategoryFilterPills } from "./category-filter-pills";
+
+export type HomeSearchStatus = "idle" | "loading" | "ok" | "error" | "unavailable";
 
 interface ArticlesSectionProps {
   /** Latest-first, locale-filtered article summaries (home-page:
@@ -15,15 +18,42 @@ interface ArticlesSectionProps {
    * `shared/content` — `home` never imports the `blog` feature
    * directly. */
   articles: HomeArticleSummary[];
+  /**
+   * The search feature's input widget (`features/search/ui/ArticleSearchInput`),
+   * composed at the `app/` level — `home/ui` never imports the `search`
+   * feature directly (same children-composition rule as PR6's
+   * ContactSection/PR7's ArticlePage; see home-page: Embedded Article
+   * List — search input). Rendered above the category filter pills.
+   * Optional so this component degrades gracefully with zero search UI
+   * when not provided (matches the pre-PR8 behavior exactly).
+   */
+  searchInputSlot?: ReactNode;
+  /** True while a non-empty search query is active (home-page: Search
+   * input filters visible articles) — visually deactivates the category
+   * pill selection and swaps the list body for `searchResults`. */
+  searchActive?: boolean;
+  searchStatus?: HomeSearchStatus;
+  searchResults?: HomeSearchResultSummary[];
+  /** Called when a category pill is selected while a search is active —
+   * clears the injected search widget's own internal query text
+   * (article-filter: Selecting a pill clears an active search query). */
+  onSearchReset?: () => void;
 }
 
 /**
  * Embedded articles list with a functional category filter (home-page:
  * Embedded Article List; article-filter: Category Filtering, Reset
- * Filter, Empty Result Handling). The search input (home-page spec:
- * "ships in PR8") is intentionally not built here.
+ * Filter, Empty Result Handling) and, since PR8, an injected search
+ * input whose results replace this list's body while a query is active.
  */
-export function ArticlesSection({ articles }: ArticlesSectionProps) {
+export function ArticlesSection({
+  articles,
+  searchInputSlot,
+  searchActive = false,
+  searchStatus = "idle",
+  searchResults = [],
+  onSearchReset,
+}: ArticlesSectionProps) {
   const t = useTranslations("home.articles");
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
 
@@ -43,6 +73,13 @@ export function ArticlesSection({ articles }: ArticlesSectionProps) {
     [articles, activeCategory],
   );
 
+  function handleCategorySelect(category: string | null) {
+    setActiveCategory(category);
+    if (searchActive) {
+      onSearchReset?.();
+    }
+  }
+
   return (
     <section
       id="articles"
@@ -57,16 +94,20 @@ export function ArticlesSection({ articles }: ArticlesSectionProps) {
             {availableCategories.length > 0 && (
               <CategoryFilterPills
                 categories={availableCategories}
-                active={activeCategory}
-                onSelect={setActiveCategory}
+                active={searchActive ? null : activeCategory}
+                onSelect={handleCategorySelect}
               />
             )}
           </div>
         </Reveal>
 
+        {searchInputSlot && <div className="mb-6">{searchInputSlot}</div>}
+
         <div className="grid gap-4.5 lg:grid-cols-[minmax(0,1fr)_minmax(0,22rem)]">
           <div className="flex flex-col gap-3.5">
-            {visibleArticles.length === 0 ? (
+            {searchActive ? (
+              <SearchResultsBody status={searchStatus} results={searchResults} />
+            ) : visibleArticles.length === 0 ? (
               <p className="rounded-2xl border border-dashed border-line p-8 text-center text-sm text-ink-soft">
                 {t("empty")}
               </p>
@@ -81,6 +122,66 @@ export function ArticlesSection({ articles }: ArticlesSectionProps) {
         </div>
       </div>
     </section>
+  );
+}
+
+function SearchResultsBody({
+  status,
+  results,
+}: {
+  status: HomeSearchStatus;
+  results: HomeSearchResultSummary[];
+}) {
+  const t = useTranslations("home.articles.search");
+
+  if (status === "unavailable") {
+    return <SearchStatusMessage text={t("unavailable")} />;
+  }
+
+  if (status === "loading") {
+    return <SearchStatusMessage text={t("loading")} />;
+  }
+
+  if (results.length === 0) {
+    return <SearchStatusMessage text={t("empty")} />;
+  }
+
+  return (
+    <>
+      {results.map((result) => (
+        <SearchResultRow key={`${result.locale}-${result.slug}`} result={result} />
+      ))}
+    </>
+  );
+}
+
+function SearchStatusMessage({ text }: { text: string }) {
+  return (
+    <p className="rounded-2xl border border-dashed border-line p-8 text-center text-sm text-ink-soft">
+      {text}
+    </p>
+  );
+}
+
+function SearchResultRow({ result }: { result: HomeSearchResultSummary }) {
+  const categoryLabel = useTranslations("blog.categories")(result.category);
+
+  return (
+    <Link
+      href={`/blog/${result.slug}`}
+      locale={result.locale}
+      className="flex items-center gap-4.5 rounded-2xl border border-line bg-card p-4.5 no-underline transition-[border-color,transform] hover:translate-x-1 hover:border-coral"
+    >
+      <div className="min-w-0">
+        <div className="mb-1.5 flex gap-2.5 font-mono text-xs tracking-wide text-coral uppercase">
+          {categoryLabel}
+        </div>
+        <h3 className="m-0 font-display text-lg leading-tight font-semibold tracking-tight text-ink">
+          {result.title}
+        </h3>
+        <p className="mt-1 truncate text-sm text-ink-soft">{result.description}</p>
+      </div>
+    </Link>
   );
 }
 
