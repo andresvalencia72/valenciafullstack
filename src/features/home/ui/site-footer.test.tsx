@@ -30,6 +30,15 @@ describe("SiteFooter", () => {
     );
   });
 
+  it("renders a link to the privacy disclosure page (contact: Privacy Disclosure)", () => {
+    renderWithIntl();
+
+    expect(screen.getByRole("link", { name: "Privacy" })).toHaveAttribute(
+      "href",
+      "/en/privacy",
+    );
+  });
+
   it("renders a back-to-top link", () => {
     renderWithIntl();
 
