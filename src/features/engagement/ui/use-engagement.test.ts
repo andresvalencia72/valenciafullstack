@@ -1,4 +1,6 @@
 import { act, renderHook, waitFor } from "@testing-library/react";
+import { createElement } from "react";
+import { renderToString } from "react-dom/server";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { useEngagement } from "./use-engagement";
 
@@ -270,6 +272,24 @@ describe("useEngagement (hook)", () => {
       ).toHaveLength(1);
     });
     expect(result.current.reactions?.heart).toBe(1);
+  });
+
+  it("produces the same initial render output as the server even with a persisted reacted flag (hydration safety: reacted state must load post-hydration)", () => {
+    window.localStorage.setItem(`engagement:reacted:${SLUG}:heart`, "1");
+
+    function Harness() {
+      const { hasReacted } = useEngagement(SLUG);
+      return createElement("span", null, hasReacted("heart") ? "reacted" : "not-reacted");
+    }
+
+    // renderToString runs state initializers but no effects — exactly the
+    // server pass of SSR. On the real server `window` is undefined, so any
+    // initializer reading localStorage renders "not reacted" there but
+    // "reacted" on the client's hydration render, mismatching aria-pressed.
+    // The initial render must therefore ignore localStorage entirely.
+    const serverHtml = renderToString(createElement(Harness));
+
+    expect(serverHtml).toContain("not-reacted");
   });
 
   it("restores the reacted flag from localStorage across a remount (residual: persisted reacted flag)", async () => {

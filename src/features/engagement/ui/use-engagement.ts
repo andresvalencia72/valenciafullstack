@@ -57,13 +57,26 @@ export function useEngagement(slug: string): UseEngagementResult {
   const [status, setStatus] = useState<EngagementStatus>("loading");
   const [views, setViews] = useState<number | null>(null);
   const [reactions, setReactions] = useState<ReactionCounts | null>(null);
+  // Starts empty and hydrates from localStorage inside the effect below:
+  // reading the flag in the useState initializer would render
+  // `aria-pressed` differently on the server (no localStorage, always
+  // false) than on the client's hydration render, causing a React
+  // hydration mismatch. The SSR-safe default is "not yet reacted".
   const [reactedKinds, setReactedKinds] = useState<ReadonlySet<ReactionKind>>(
-    () => new Set(REACTION_KINDS.filter((kind) => readReactedFlag(slug, kind))),
+    () => new Set(),
   );
   const viewFired = useRef(false);
 
   useEffect(() => {
     let cancelled = false;
+
+    // Intentional one-time sync from an external system (localStorage)
+    // into React state — the same carve-out `useTheme` documents for
+    // this rule. See the comment on `reactedKinds` above: reading the
+    // flag any earlier reproduces the PR2 `aria-pressed` hydration
+    // mismatch.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setReactedKinds(new Set(REACTION_KINDS.filter((kind) => readReactedFlag(slug, kind))));
 
     async function loadSummary() {
       try {
