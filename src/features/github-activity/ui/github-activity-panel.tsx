@@ -64,12 +64,19 @@ export function GithubActivityPanel({ result }: GithubActivityPanelProps) {
           </div>
           <ul className="grid list-none gap-3.5 p-0 md:grid-cols-2 lg:grid-cols-3">
             {result.data.topRepositories.map((repo) => (
-              <li key={repo.name}>
+              // `min-w-0` on both the grid item (`li`) and its flex-container
+              // child (`a`) resets the CSS Grid/Flexbox "automatic minimum
+              // size" default (`min-width: auto`), which otherwise sizes
+              // this track by the un-truncated min-content width of the
+              // `truncate` description below — forcing horizontal overflow
+              // on mobile (home-page: Responsive Layout MUST requirement;
+              // see verify-report.md CRITICAL-1).
+              <li key={repo.name} className="min-w-0">
                 <a
                   href={repo.url}
                   target="_blank"
                   rel="noopener"
-                  className="flex h-full flex-col gap-2 rounded-2xl border border-line bg-card p-4.5 no-underline transition-[border-color,transform] hover:translate-x-1 hover:border-coral"
+                  className="flex h-full min-w-0 flex-col gap-2 rounded-2xl border border-line bg-card p-4.5 no-underline transition-[border-color,transform] hover:translate-x-1 hover:border-coral"
                 >
                   <h3 className="m-0 font-display text-lg leading-tight font-semibold tracking-tight text-ink">
                     {repo.name}

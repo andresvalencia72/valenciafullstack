@@ -55,4 +55,33 @@ describe("GithubActivityPanel", () => {
     expect(fallback).toHaveAttribute("aria-live", "polite");
     expect(screen.queryByRole("link")).not.toBeInTheDocument();
   });
+
+  it("guards the repo-card grid item chain with min-w-0 so a long truncated description cannot force horizontal overflow (home-page: Responsive Layout)", () => {
+    renderWithIntl({
+      kind: "available",
+      data: {
+        username: "andresvalencia72",
+        publicRepoCount: 12,
+        followerCount: 5,
+        recentContributionCount: 7,
+        topRepositories: [
+          {
+            name: "valenciafullstack",
+            url: "https://github.com/andresvalencia72/valenciafullstack",
+            description:
+              "A very long, realistic repository description that would force a CSS Grid item to expand to its min-content width on mobile viewports if nothing in the flex/grid ancestor chain resets min-width to 0",
+            stars: 3,
+            language: "TypeScript",
+          },
+        ],
+      },
+    });
+
+    const repoLink = screen.getByRole("link", { name: /valenciafullstack/ });
+    const repoListItem = repoLink.closest("li");
+
+    expect(repoListItem).not.toBeNull();
+    expect(repoListItem).toHaveClass("min-w-0");
+    expect(repoLink).toHaveClass("min-w-0");
+  });
 });
