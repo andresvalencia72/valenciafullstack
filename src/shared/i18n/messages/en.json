@@ -15,6 +15,7 @@
       "skills": "Skills",
       "projects": "Projects",
       "articles": "Articles",
+      "githubActivity": "GitHub",
       "contact": "Contact"
     },
     "hero": {
@@ -113,6 +114,15 @@
         "description": "Tutorials and real development process. Subscribe to see how I build what shows up here.",
         "cta": "Watch the channel"
       }
+    },
+    "githubActivity": {
+      "heading": "GitHub activity",
+      "subheading": "A live snapshot of what I've been building, straight from GitHub.",
+      "publicRepos": "{count} public repos",
+      "followers": "{count} followers",
+      "recentActivity": "{count} recent events",
+      "unavailable": "GitHub activity is temporarily unavailable.",
+      "loading": "Loading GitHub activity…"
     },
     "contact": {
       "heading": "Contact me",

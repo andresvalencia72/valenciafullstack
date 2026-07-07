@@ -2,13 +2,16 @@ import { expect, test } from "@playwright/test";
 
 /**
  * home-page: Section Composition, In-Page Navigation, Responsive Layout
- * — scoped to the sections implemented to date (PR3a: hero, stack strip,
- * about, skills bento; PR3b: projects, articles list + category filter,
- * contact, footer). This section-order assertion grows once more with
- * PR10 (github activity) per the home-page spec's "Full page render"
- * scenario.
+ * — the full nine-section set (PR3a: hero, stack strip, about, skills
+ * bento; PR3b: projects, articles list + category filter, contact,
+ * footer; PR10: github activity, streamed between articles and contact)
+ * per the home-page spec's "Full page render" scenario. In CI, no
+ * `GITHUB_TOKEN` is configured for the e2e job, so the github activity
+ * section always resolves to its fallback panel (github-activity:
+ * Graceful Failure Handling) — still rendered with `id="github-activity"`,
+ * so the section-order assertion below holds either way.
  */
-test.describe("home sections (PR3a + PR3b)", () => {
+test.describe("home sections (PR3a + PR3b + PR10)", () => {
   test("renders the implemented sections in spec order", async ({ page }) => {
     await page.goto("/es");
 
@@ -22,6 +25,7 @@ test.describe("home sections (PR3a + PR3b)", () => {
       "skills",
       "projects",
       "articles",
+      "github-activity",
       "contact",
     ]);
   });
