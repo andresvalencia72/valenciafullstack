@@ -1,4 +1,5 @@
 import { useTranslations } from "next-intl";
+import type { ReactNode } from "react";
 import { Magnetic } from "@/shared/ui/motion/magnetic";
 import { Reveal } from "@/shared/ui/motion/reveal";
 import { SocialIcon } from "./social-icon";
@@ -16,15 +17,26 @@ function boldChunk(chunks: React.ReactNode) {
   return <strong className="font-semibold text-ink">{chunks}</strong>;
 }
 
+interface ContactSectionProps {
+  /**
+   * The functional contact form (`features/contact/ui/ContactForm`),
+   * composed at the `app/` level (home-page: Section Composition —
+   * contact). `home/ui` never imports the `contact` feature directly —
+   * cross-feature UI composition happens only through the `app/`
+   * composition root, same rule as `home` never importing `blog`
+   * (task 3b.2) — so `ContactSection` receives the form as `children`
+   * instead.
+   */
+  children: ReactNode;
+}
+
 /**
  * Contact section (contact: Server-Side Input Validation — field shape
- * only; home-page: Section Composition — contact). **Static shell for
- * PR3b**: fields render but the form does not submit anywhere yet — the
- * submit button is disabled and the connecting API route, validation,
- * and error handling ship in PR6 (task 6.4), which wires this exact
- * markup up to `POST /api/contact`.
+ * only; home-page: Section Composition — contact). Owns the heading/
+ * copy/social-links column; the interactive form itself is injected via
+ * `children` (see `ContactSectionProps`).
  */
-export function ContactSection() {
+export function ContactSection({ children }: ContactSectionProps) {
   const t = useTranslations("home.contact");
 
   return (
@@ -75,61 +87,7 @@ export function ContactSection() {
         </div>
       </Reveal>
 
-      <Reveal>
-        {/* TODO(PR6, task 6.4): wire this form to POST /api/contact — Zod
-         * validation, rate limiting, honeypot, and generic-only error
-         * responses land there. Submit stays disabled until then. */}
-        <form className="flex flex-col gap-4.5 rounded-2xl bg-ink p-7 text-bg lg:p-10">
-          <h3 className="mb-1.5 font-display text-2xl font-semibold tracking-tight">
-            {t("formHeading")}
-          </h3>
-
-          <label className="flex flex-col gap-2 font-mono text-xs tracking-wide text-bg/65 uppercase">
-            {t("nameLabel")}
-            <input
-              type="text"
-              name="name"
-              placeholder={t("namePlaceholder")}
-              disabled
-              className="rounded-lg border border-bg/30 bg-transparent px-3.5 py-3 text-sm text-bg outline-none"
-            />
-          </label>
-
-          <label className="flex flex-col gap-2 font-mono text-xs tracking-wide text-bg/65 uppercase">
-            {t("emailLabel")}
-            <input
-              type="email"
-              name="email"
-              placeholder={t("emailPlaceholder")}
-              disabled
-              className="rounded-lg border border-bg/30 bg-transparent px-3.5 py-3 text-sm text-bg outline-none"
-            />
-          </label>
-
-          <label className="flex flex-col gap-2 font-mono text-xs tracking-wide text-bg/65 uppercase">
-            {t("messageLabel")}
-            <textarea
-              name="message"
-              rows={5}
-              placeholder={t("messagePlaceholder")}
-              disabled
-              className="resize-vertical rounded-lg border border-bg/30 bg-transparent px-3.5 py-3 text-sm text-bg outline-none"
-            />
-          </label>
-
-          <button
-            type="submit"
-            disabled
-            aria-describedby="contact-submit-todo"
-            className="mt-1 inline-flex w-fit items-center gap-2 rounded-xl bg-coral px-7.5 py-4 text-sm font-semibold text-coral-ink disabled:cursor-not-allowed disabled:opacity-60"
-          >
-            {t("submit")}
-          </button>
-          <p id="contact-submit-todo" className="text-xs text-bg/50">
-            {t("submitTodo")}
-          </p>
-        </form>
-      </Reveal>
+      <Reveal>{children}</Reveal>
     </section>
   );
 }

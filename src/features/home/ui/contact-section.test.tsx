@@ -7,7 +7,9 @@ import { ContactSection } from "./contact-section";
 function renderWithIntl() {
   return render(
     <NextIntlClientProvider locale="en" messages={en}>
-      <ContactSection />
+      <ContactSection>
+        <div data-testid="injected-form">form goes here</div>
+      </ContactSection>
     </NextIntlClientProvider>,
   );
 }
@@ -19,18 +21,12 @@ describe("ContactSection", () => {
     expect(document.getElementById("contact")).not.toBeNull();
   });
 
-  it("renders the name, email, and message fields (contact: Server-Side Input Validation shape)", () => {
+  it("renders the form passed as children — cross-feature composition happens at the app/ level, not via a direct home -> contact import (home-page: Section Composition)", () => {
     renderWithIntl();
 
-    expect(screen.getByLabelText("Your name")).toBeInTheDocument();
-    expect(screen.getByLabelText("Your email")).toBeInTheDocument();
-    expect(screen.getByLabelText("Message")).toBeInTheDocument();
-  });
-
-  it("renders a disabled submit button — PR3b ships a static shell only, PR6 wires the functional form", () => {
-    renderWithIntl();
-
-    expect(screen.getByRole("button", { name: "Send message" })).toBeDisabled();
+    expect(screen.getByTestId("injected-form")).toHaveTextContent(
+      "form goes here",
+    );
   });
 
   it("renders social links to reach the site owner without email", () => {

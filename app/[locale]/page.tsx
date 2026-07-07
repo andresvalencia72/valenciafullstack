@@ -9,6 +9,7 @@ import { SiteFooter } from "@/features/home/ui/site-footer";
 import { SkillsSection } from "@/features/home/ui/skills-section";
 import { StackStrip } from "@/features/home/ui/stack-strip";
 import type { HomeArticleSummary } from "@/features/home/domain/article-summary";
+import { ContactForm } from "@/features/contact/ui/contact-form";
 import { listPublishedArticles } from "@/shared/content/list-published-articles";
 import { mdxLoader } from "@/shared/content/mdx-loader";
 import { LocaleSwitcher } from "@/shared/i18n/ui/locale-switcher";
@@ -70,7 +71,9 @@ export default async function HomePage({ params }: HomePageProps) {
       <SkillsSection />
       <ProjectsSection />
       <ArticlesSection articles={articles} />
-      <ContactSection />
+      <ContactSection>
+        <ContactForm />
+      </ContactSection>
       <SiteFooter />
     </main>
   );

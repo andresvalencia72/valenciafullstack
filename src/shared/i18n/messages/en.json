@@ -121,12 +121,25 @@
       "messageLabel": "Message",
       "messagePlaceholder": "Tell me your idea...",
       "submit": "Send message",
-      "submitTodo": "Submission isn't wired up yet — it lands in a later project phase."
+      "successMessage": "Thanks — your message is on its way. I'll get back to you soon.",
+      "errorGenericMessage": "Something went wrong on our side. Please try again in a moment.",
+      "errorRateLimitedMessage": "You're sending messages a bit too fast. Please wait a few minutes and try again."
     }
   },
   "footer": {
     "tagline": "Made with care.",
-    "backToTop": "Back to top"
+    "backToTop": "Back to top",
+    "privacyLink": "Privacy"
+  },
+  "privacy": {
+    "title": "Privacy",
+    "intro": "This page explains what personal data this site stores and why, and how to request its deletion.",
+    "contactStorageHeading": "Contact messages",
+    "contactStorageBody": "When you submit the contact form, we store your name, email address, message, and a hashed version of your IP address (never the raw IP) — kept to help investigate abuse if this form is ever misused.",
+    "engagementHeading": "Article views and reactions",
+    "engagementBody": "Article view counts and reactions are deduplicated using a hashed identifier derived from your IP address and browser, so the same visitor isn't counted twice. We do not set tracking cookies.",
+    "deletionHeading": "Requesting data deletion",
+    "deletionBody": "To request deletion of your contact messages or engagement data, email {email} from the address you used, and mention the approximate date of your visit."
   },
   "blog": {
     "backToPortfolio": "Back to portfolio",
