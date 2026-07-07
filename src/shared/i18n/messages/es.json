@@ -15,6 +15,7 @@
       "skills": "Habilidades",
       "projects": "Proyectos",
       "articles": "Artículos",
+      "githubActivity": "GitHub",
       "contact": "Contacto"
     },
     "hero": {
@@ -113,6 +114,15 @@
         "description": "Tutoriales y procesos reales de desarrollo. Suscríbete para ver cómo construyo lo que aparece aquí.",
         "cta": "Ver canal"
       }
+    },
+    "githubActivity": {
+      "heading": "Actividad en GitHub",
+      "subheading": "Una foto en vivo de lo que he estado construyendo, directo desde GitHub.",
+      "publicRepos": "{count} repos públicos",
+      "followers": "{count} seguidores",
+      "recentActivity": "{count} eventos recientes",
+      "unavailable": "La actividad de GitHub no está disponible en este momento.",
+      "loading": "Cargando actividad de GitHub…"
     },
     "contact": {
       "heading": "Contáctame",

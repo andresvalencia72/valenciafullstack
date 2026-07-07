@@ -36,13 +36,16 @@ describe("SectionNav", () => {
       "href",
       "#articles",
     );
+    expect(
+      screen.getByRole("link", { name: "GitHub" }),
+    ).toHaveAttribute("href", "#github-activity");
     expect(screen.getByRole("link", { name: "Contacto" })).toHaveAttribute(
       "href",
       "#contact",
     );
   });
 
-  it("renders links in section order, implemented sections only", () => {
+  it("renders links in section order, implemented sections only (home-page: Section Composition — full nine-section set from PR10)", () => {
     renderWithIntl();
 
     const links = screen.getAllByRole("link");
@@ -52,6 +55,7 @@ describe("SectionNav", () => {
       "#skills",
       "#projects",
       "#articles",
+      "#github-activity",
       "#contact",
     ]);
   });
