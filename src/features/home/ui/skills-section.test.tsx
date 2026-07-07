@@ -58,4 +58,30 @@ describe("SkillsSection", () => {
       }
     }
   });
+
+  it("renders the design-reference-matched devicon brand icon for every card (design-system: Token Derivation)", () => {
+    const { container } = renderWithIntl();
+
+    const expectedIconsByOrder = [
+      "javascript",
+      "php",
+      "postgresql",
+      "git",
+      "nextjs",
+      "docker",
+      "figma",
+    ];
+    const dataIcons = Array.from(
+      container.querySelectorAll("svg[data-icon]"),
+    ).map((svg) => svg.getAttribute("data-icon"));
+
+    // Main-stack card renders first (React, TypeScript, Node.js), then
+    // the seven single/wide skill cards in skills-data.ts's declared order.
+    expect(dataIcons).toEqual([
+      "react",
+      "typescript",
+      "nodejs",
+      ...expectedIconsByOrder,
+    ]);
+  });
 });

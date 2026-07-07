@@ -1,32 +1,34 @@
+import { SKILL_ICONS, type IconName } from "./icons";
+
 interface SkillBadgeProps {
-  label: string;
+  icon: IconName;
   tone?: "default" | "inverted";
 }
 
 /**
- * Monogram badge standing in for a technology's brand icon.
+ * Brand-icon badge for a technology (devicon-derived, see icons/ and
+ * docs/third-party-assets.md).
  *
- * Deviation from design-reference/ (documented, not silent): the
- * reference uses `devicon`'s colored icon font. Self-hosting devicon's
- * font/CSS would either pull an external CDN (blocked by ADR-0007's
- * `style-src 'self'` CSP) or vendor a large multi-hundred-glyph icon
- * font for eight icons. A hand-typed brand SVG per skill risks visual
- * inaccuracy. This monogram badge is a deliberate, swappable
- * placeholder — replacing it with real brand SVGs/devicon assets later
- * only touches this one file.
+ * Resolves the deviation this component previously documented: the
+ * design-reference uses devicon's colored icon font, which would have
+ * required either an external CDN (blocked by ADR-0007's
+ * `style-src 'self'` CSP) or vendoring the entire multi-hundred-glyph
+ * font. Instead, only the exact SVGs this page needs are vendored as
+ * small React components and rendered directly — no font, no CDN.
  */
-export function SkillBadge({ label, tone = "default" }: SkillBadgeProps) {
+export function SkillBadge({ icon, tone = "default" }: SkillBadgeProps) {
   const toneClasses =
     tone === "inverted"
       ? "border-transparent bg-bg/15 text-bg"
       : "border-line bg-bg text-ink";
+  const Icon = SKILL_ICONS[icon];
 
   return (
     <span
       aria-hidden
-      className={`inline-flex h-9 items-center justify-center rounded-md border px-2 font-mono text-xs font-medium tracking-wide ${toneClasses}`}
+      className={`inline-flex h-9 w-9 items-center justify-center rounded-md border p-1.5 ${toneClasses}`}
     >
-      {label}
+      <Icon className="h-full w-full" />
     </span>
   );
 }

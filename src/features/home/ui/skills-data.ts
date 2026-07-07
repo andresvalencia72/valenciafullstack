@@ -1,3 +1,5 @@
+import type { IconName } from "./icons";
+
 export type SkillCategory =
   | "language"
   | "backend"
@@ -10,7 +12,7 @@ export type SkillCategory =
 export interface SkillEntry {
   category: SkillCategory;
   title: string;
-  badge: string;
+  icon: IconName;
   size: "default" | "wide";
 }
 
@@ -19,23 +21,24 @@ export interface SkillEntry {
  * grid (design-system: Token Derivation — content only, no ad hoc
  * colors). The "main stack" card (React/TypeScript/Node.js) renders
  * separately in `SkillsSection` since its shape (three stacked titles)
- * differs from the single-title cards below. Proper nouns (titles,
- * badges) are not translated — only category labels and descriptions
- * come from the `home.skills` message catalog.
+ * differs from the single-title cards below. Proper nouns (titles) are
+ * not translated — only category labels and descriptions come from the
+ * `home.skills` message catalog. `icon` indexes into
+ * `icons/`'s `SKILL_ICONS` map (devicon-derived brand marks, see
+ * docs/third-party-assets.md) and matches design-reference/'s
+ * `devicon-{name}-*` classes 1:1.
  */
 export const SKILLS: SkillEntry[] = [
-  { category: "language", title: "JavaScript", badge: "JS", size: "default" },
-  // Badges intentionally differ from the title text (e.g. "Ph" not "PHP")
-  // to keep each card's title and badge as distinct accessible strings.
-  { category: "backend", title: "PHP", badge: "Ph", size: "default" },
-  { category: "data", title: "SQL", badge: "Db", size: "default" },
-  { category: "workflow", title: "Git", badge: "Gt", size: "default" },
+  { category: "language", title: "JavaScript", icon: "javascript", size: "default" },
+  { category: "backend", title: "PHP", icon: "php", size: "default" },
+  { category: "data", title: "SQL", icon: "postgresql", size: "default" },
+  { category: "workflow", title: "Git", icon: "git", size: "default" },
   {
     category: "learning",
     title: "Next.js · App Router",
-    badge: "N",
+    icon: "nextjs",
     size: "wide",
   },
-  { category: "infra", title: "Docker", badge: "Do", size: "default" },
-  { category: "design", title: "Figma", badge: "Fi", size: "default" },
+  { category: "infra", title: "Docker", icon: "docker", size: "default" },
+  { category: "design", title: "Figma", icon: "figma", size: "default" },
 ];
