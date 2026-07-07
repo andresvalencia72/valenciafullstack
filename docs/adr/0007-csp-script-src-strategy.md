@@ -1,6 +1,6 @@
 # ADR-0007: CSP script-src strategy
 
-**Status**: Draft (stub — full rationale lands in PR11, task 11.5; header set ships in PR1, task 1.8)
+**Status**: Accepted (finalized in PR11, task 11.5; header set shipped in PR1, task 1.8)
 
 ## Decision
 
@@ -26,6 +26,16 @@ verifies the header set and Lighthouse.
 
 See `design.md` (Resolved Decisions) and `specs/security/spec.md` (Security Headers) for
 the full write-up.
+
+## Consequences
+
+Held through implementation with no further tightening, exactly as planned. PR11 (task 11.1)
+re-verified the full production header set byte-for-byte against this canonical policy — both
+at the unit level (`security-headers.test.ts`) and against a real HTTP response
+(`e2e/smoke.spec.ts`) — with zero drift since PR1. Lighthouse's Best Practices score (which
+includes CSP-adjacent audits) landed at 96-100 across the home page and an article page during
+PR11's budget run, consistent with the "bounded, not eliminated" risk this ADR accepts: no
+CSP-related Best Practices deduction was observed in practice.
 
 ## Dev-only exception: `'unsafe-eval'`
 
