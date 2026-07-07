@@ -77,6 +77,9 @@ for the full folder tree, boundary rules, and pattern rationale, and
    #CONTACT_EMAIL_TO=          # contact email destination address
    #CONTACT_EMAIL_FROM=Portfolio Contact <onboarding@resend.dev>
    #GITHUB_TOKEN=              # home GitHub activity section (absent = fallback message)
+   #                           # generate a fine-grained read-only PAT (no extra permissions
+   #                           # needed, public read access is enough):
+   #                           # https://github.com/settings/personal-access-tokens/new
    #NEXT_PUBLIC_SITE_URL=http://localhost:3000   # absolute origin for sitemap/RSS/canonical/OG URLs
    ```
 
