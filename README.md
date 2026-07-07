@@ -39,14 +39,65 @@ for the full folder tree, boundary rules, and pattern rationale, and
 
 ## Getting started
 
-```bash
-npm install
-cp .env.example .env   # then fill in DATABASE_URL / VISITOR_HASH_SECRET
-docker compose up -d   # local Postgres
-npm run dev
-```
+> **Note**: this repository intentionally ships no `.env.example` (the project's
+> automated tooling cannot write `.env*` paths), so the canonical env template
+> lives in this section — copy the block from step 3.
 
-Open [http://localhost:3000](http://localhost:3000).
+1. Install dependencies:
+
+   ```bash
+   npm install
+   ```
+
+2. Start the local Postgres (user, password, and database are all `portfolio` —
+   see [`compose.yaml`](compose.yaml)):
+
+   ```bash
+   docker compose up -d
+   ```
+
+3. Create a `.env` file at the repo root. These two variables are required, and
+   `DATABASE_URL` must carry the credentials from `compose.yaml` — without them
+   the Postgres client falls back to your OS username and fails with
+   `password authentication failed`:
+
+   ```bash
+   # .env — minimum working local configuration
+   DATABASE_URL=postgres://portfolio:portfolio@localhost:5432/portfolio
+   # any long random string, e.g. the output of: openssl rand -hex 32
+   VISITOR_HASH_SECRET=replace-with-a-long-random-string
+   ```
+
+   Optional variables (features degrade gracefully when absent — see
+   [Environment variables](#environment-variables)):
+
+   ```bash
+   #RESEND_API_KEY=            # contact email delivery (absent = HTTP 202, message still persisted)
+   #EMAIL_DRIVER=resend        # resend | fake (CI/e2e uses fake)
+   #CONTACT_EMAIL_TO=          # contact email destination address
+   #CONTACT_EMAIL_FROM=Portfolio Contact <onboarding@resend.dev>
+   #GITHUB_TOKEN=              # home GitHub activity section (absent = fallback message)
+   #NEXT_PUBLIC_SITE_URL=http://localhost:3000   # absolute origin for sitemap/RSS/canonical/OG URLs
+   ```
+
+4. Apply the database migrations (creates `contact_messages`, `article_views`,
+   `article_reactions`, `article_search`, and `rate_limits`):
+
+   ```bash
+   npm run db:migrate
+   ```
+
+5. Populate the full-text search index from the MDX content:
+
+   ```bash
+   npm run db:sync-search
+   ```
+
+6. Start the dev server and open [http://localhost:3000](http://localhost:3000):
+
+   ```bash
+   npm run dev
+   ```
 
 ## Scripts
 
@@ -68,7 +119,8 @@ Open [http://localhost:3000](http://localhost:3000).
 
 ## Environment variables
 
-See `.env.example` for the full list. `DATABASE_URL` and `VISITOR_HASH_SECRET` are
+See [Getting started](#getting-started) (step 3) for the copy-paste env template.
+`DATABASE_URL` and `VISITOR_HASH_SECRET` are
 required at runtime (server fails fast if missing); `RESEND_API_KEY`, `GITHUB_TOKEN`,
 and `CONTACT_EMAIL_TO` are optional — the affected features degrade gracefully when
 absent (the contact form still persists messages and returns HTTP 202 without a
