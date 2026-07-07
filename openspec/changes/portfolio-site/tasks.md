@@ -272,3 +272,9 @@ Supersedes "PR2 apply findings" from the original (now-closed) PR2 draft — sam
 - **Layers used**: Integration (pglite) 4 files/12 tests; no new Unit/E2E tests this phase
 - **Approval tests** (refactoring): None — no refactoring tasks
 - **Pure functions created**: 0 (all four are stateful repository factories over a DB handle, by nature — see Pure Function Preference note in strict-tdd.md: "don't force it where it doesn't fit")
+
+### CSP dev-mode hotfix findings (2026-07-07, post-PR5b)
+
+- **Out-of-plan hotfix on its own branch/PR**: `fix/csp-dev-unsafe-eval` (PR #10, base=`feat/pr5b-persistence-repos`, new chain tip). React's development runtime requires `eval()`, so the static ADR-0007 CSP shipped in task 1.8 broke `next dev` with console errors. Fixed by extracting a `buildSecurityHeaders(isDev)` builder in `src/shared/config/security-headers.ts`: `'unsafe-eval'` is appended to `script-src` only when `isDev` is true; the production header set remains byte-identical to ADR-0007. ADR-0007 (`docs/adr/0007-csp-script-src-strategy.md`) updated to document the dev-only exception.
+- **TDD**: test-first against `security-headers.test.ts` — dev build must include `'unsafe-eval'` in `script-src`, production build must not (asserted equal to the ADR-0007 header set). Full suite went 215/215 → **221/221** (coverage 97.48%/92.16%/97.95%/97.44%, no regression). Additionally verified at runtime via `curl` header inspection against a live `next dev` server.
+- **Relation to task 11.1**: no scope change — 11.1 still verifies the production header set, which this hotfix leaves unchanged.
