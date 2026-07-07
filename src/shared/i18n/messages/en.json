@@ -163,5 +163,15 @@
       "label": "Watch on YouTube",
       "watching": "Playing YouTube video"
     }
+  },
+  "engagement": {
+    "heading": "Article engagement",
+    "viewsLabel": "{count} views",
+    "unavailable": "Engagement data is temporarily unavailable.",
+    "reactions": {
+      "thumbs_up": "Thumbs up",
+      "heart": "Heart",
+      "fire": "Fire"
+    }
   }
 }

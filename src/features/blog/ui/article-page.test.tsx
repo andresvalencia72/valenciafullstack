@@ -54,8 +54,9 @@ const nextArticle: ArticleTeaser = {
 async function renderPage(
   result: Exclude<GetArticleResult, { kind: "not-found" }>,
   next: ArticleTeaser | null = null,
+  children: React.ReactNode = null,
 ) {
-  const element = await ArticlePage({ result, nextArticle: next });
+  const element = await ArticlePage({ result, nextArticle: next, children });
   return render(
     <NextIntlClientProvider locale="en" messages={en}>
       {element}
@@ -102,5 +103,17 @@ describe("ArticlePage", () => {
     await renderPage(foundResult, null);
 
     expect(screen.queryByText("Next article")).not.toBeInTheDocument();
+  });
+
+  it("renders children between the article body and the next-article card (composition-root slot for the engagement widget, task 7.5)", async () => {
+    await renderPage(foundResult, nextArticle, <div data-testid="engagement-slot" />);
+
+    expect(screen.getByTestId("engagement-slot")).toBeInTheDocument();
+  });
+
+  it("renders nothing extra when no children are passed", async () => {
+    await renderPage(foundResult, null, null);
+
+    expect(screen.queryByTestId("engagement-slot")).not.toBeInTheDocument();
   });
 });

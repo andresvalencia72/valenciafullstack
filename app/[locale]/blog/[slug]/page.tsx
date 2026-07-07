@@ -7,6 +7,7 @@ import { resolveArticleSeoAlternates } from "@/features/blog/application/resolve
 import type { ArticleLocale } from "@/features/blog/domain/article-repository";
 import { createMdxArticleRepository } from "@/features/blog/infrastructure/mdx-article-repository";
 import { ArticlePage } from "@/features/blog/ui/article-page";
+import { EngagementPanel } from "@/features/engagement/ui/engagement-panel";
 import { publicEnv } from "@/shared/config/env.public";
 import { mdxLoader } from "@/shared/content/mdx-loader";
 import { locales } from "@/shared/i18n/routing";
@@ -115,5 +116,9 @@ export default async function ArticleRoutePage({ params }: ArticleRouteProps) {
     result.article.locale,
   );
 
-  return <ArticlePage result={result} nextArticle={nextArticle} />;
+  return (
+    <ArticlePage result={result} nextArticle={nextArticle}>
+      <EngagementPanel slug={slug} />
+    </ArticlePage>
+  );
 }

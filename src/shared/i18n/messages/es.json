@@ -163,5 +163,15 @@
       "label": "Ver en YouTube",
       "watching": "Reproduciendo vídeo de YouTube"
     }
+  },
+  "engagement": {
+    "heading": "Interacción del artículo",
+    "viewsLabel": "{count} visitas",
+    "unavailable": "Los datos de interacción no están disponibles en este momento.",
+    "reactions": {
+      "thumbs_up": "Me gusta",
+      "heart": "Corazón",
+      "fire": "Fuego"
+    }
   }
 }
