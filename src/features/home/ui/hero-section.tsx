@@ -1,6 +1,5 @@
 import { useTranslations } from "next-intl";
 import { Magnetic } from "@/shared/ui/motion/magnetic";
-import { Reveal } from "@/shared/ui/motion/reveal";
 import { Tilt } from "@/shared/ui/motion/tilt";
 import { PhotoFrame } from "@/shared/ui/photo-frame/photo-frame";
 import { SocialIcon } from "./social-icon";
@@ -35,61 +34,57 @@ export function HeroSection() {
       aria-label={fullName}
       className="mx-auto grid max-w-6xl items-center gap-12 px-4 pt-32 pb-16 lg:grid-cols-2 lg:px-8 lg:pt-40"
     >
-      <Reveal>
-        <div>
-          <span className="mb-7 inline-flex items-center gap-2 rounded-full border border-line px-3.5 py-1.5 text-sm font-medium text-ink-soft">
-            <span
-              aria-hidden
-              className="h-1.5 w-1.5 rounded-full bg-coral"
-            />
-            {t("eyebrow")}
-          </span>
+      <div>
+        <span className="mb-7 inline-flex items-center gap-2 rounded-full border border-line px-3.5 py-1.5 text-sm font-medium text-ink-soft">
+          <span
+            aria-hidden
+            className="h-1.5 w-1.5 rounded-full bg-coral"
+          />
+          {t("eyebrow")}
+        </span>
 
-          <h1 className="font-display text-6xl leading-[0.96] font-bold tracking-tight lg:text-8xl">
-            <span className="block">{t("firstName")}</span>
-            <span className="block">{t("lastName")}</span>
-          </h1>
+        <h1 className="font-display text-6xl leading-[0.96] font-bold tracking-tight lg:text-8xl">
+          <span className="block">{t("firstName")}</span>
+          <span className="block">{t("lastName")}</span>
+        </h1>
 
-          <p className="mt-7 max-w-md text-lg leading-relaxed lg:text-xl">
-            <span className="relative font-semibold text-ink">
-              {t("role")}
-            </span>{" "}
-            <span className="text-ink-soft">{t("description")}</span>
-          </p>
+        <p className="mt-7 max-w-md text-lg leading-relaxed lg:text-xl">
+          <span className="relative font-semibold text-ink">
+            {t("role")}
+          </span>{" "}
+          <span className="text-ink-soft">{t("description")}</span>
+        </p>
 
-          <div className="mt-9 flex flex-wrap items-center gap-3.5">
-            <Magnetic>
+        <div className="mt-9 flex flex-wrap items-center gap-3.5">
+          <Magnetic>
+            <a
+              href="#contact"
+              className="inline-flex items-center gap-2 rounded-full bg-ink px-6.5 py-3.5 text-sm font-semibold text-bg"
+            >
+              {t("ctaPrimary")}
+            </a>
+          </Magnetic>
+
+          <div className="flex items-center gap-2">
+            {SOCIAL_LINKS.map((social) => (
               <a
-                href="#contact"
-                className="inline-flex items-center gap-2 rounded-full bg-ink px-6.5 py-3.5 text-sm font-semibold text-bg"
+                key={social.key}
+                href={social.href}
+                target="_blank"
+                rel="noopener"
+                aria-label={t(`social.${social.key}`)}
+                className="grid h-11.5 w-11.5 place-items-center rounded-full border border-line text-ink transition-colors hover:border-coral hover:text-coral"
               >
-                {t("ctaPrimary")}
+                <SocialIcon name={social.key} />
               </a>
-            </Magnetic>
-
-            <div className="flex items-center gap-2">
-              {SOCIAL_LINKS.map((social) => (
-                <a
-                  key={social.key}
-                  href={social.href}
-                  target="_blank"
-                  rel="noopener"
-                  aria-label={t(`social.${social.key}`)}
-                  className="grid h-11.5 w-11.5 place-items-center rounded-full border border-line text-ink transition-colors hover:border-coral hover:text-coral"
-                >
-                  <SocialIcon name={social.key} />
-                </a>
-              ))}
-            </div>
+            ))}
           </div>
         </div>
-      </Reveal>
+      </div>
 
-      <Reveal>
-        <Tilt>
-          <PhotoFrame label={t("photoAlt")} offset="right" />
-        </Tilt>
-      </Reveal>
+      <Tilt>
+        <PhotoFrame label={t("photoAlt")} offset="right" />
+      </Tilt>
     </section>
   );
 }
