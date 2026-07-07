@@ -1,4 +1,5 @@
 import { useTranslations } from "next-intl";
+import { Link } from "@/shared/i18n/navigation";
 
 const FOOTER_LINKS = [
   { href: "#about", labelKey: "about" as const },
@@ -42,6 +43,12 @@ export function SiteFooter() {
               {tNav(link.labelKey)}
             </a>
           ))}
+          <Link
+            href="/privacy"
+            className="text-sm text-ink-soft transition-colors hover:text-coral"
+          >
+            {tFooter("privacyLink")}
+          </Link>
           <a
             href="#home"
             className="inline-flex items-center gap-2 text-sm font-semibold text-ink"

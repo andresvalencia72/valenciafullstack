@@ -71,6 +71,24 @@ describe("getEnv", () => {
     expect(() => getEnv()).toThrowError();
   });
 
+  it("defaults CONTACT_EMAIL_FROM to the Resend sandbox sender when unset", () => {
+    process.env.DATABASE_URL = REQUIRED_ENV.DATABASE_URL;
+    process.env.VISITOR_HASH_SECRET = REQUIRED_ENV.VISITOR_HASH_SECRET;
+    delete process.env.CONTACT_EMAIL_FROM;
+
+    expect(getEnv().CONTACT_EMAIL_FROM).toBe(
+      "Portfolio Contact <onboarding@resend.dev>",
+    );
+  });
+
+  it("leaves CONTACT_EMAIL_TO undefined when unset (triangulation — optional, no default)", () => {
+    process.env.DATABASE_URL = REQUIRED_ENV.DATABASE_URL;
+    process.env.VISITOR_HASH_SECRET = REQUIRED_ENV.VISITOR_HASH_SECRET;
+    delete process.env.CONTACT_EMAIL_TO;
+
+    expect(getEnv().CONTACT_EMAIL_TO).toBeUndefined();
+  });
+
   it("caches the parsed result across calls", () => {
     process.env.DATABASE_URL = REQUIRED_ENV.DATABASE_URL;
     process.env.VISITOR_HASH_SECRET = REQUIRED_ENV.VISITOR_HASH_SECRET;

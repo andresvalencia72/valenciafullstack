@@ -121,12 +121,25 @@
       "messageLabel": "Mensaje",
       "messagePlaceholder": "Cuéntame tu idea...",
       "submit": "Enviar mensaje",
-      "submitTodo": "El envío todavía no está conectado — llega en una fase posterior del proyecto."
+      "successMessage": "Gracias — tu mensaje está en camino. Te responderé pronto.",
+      "errorGenericMessage": "Algo salió mal de nuestro lado. Por favor, intenta de nuevo en un momento.",
+      "errorRateLimitedMessage": "Estás enviando mensajes demasiado rápido. Por favor espera unos minutos e intenta de nuevo."
     }
   },
   "footer": {
     "tagline": "Hecho con criterio.",
-    "backToTop": "Volver arriba"
+    "backToTop": "Volver arriba",
+    "privacyLink": "Privacidad"
+  },
+  "privacy": {
+    "title": "Privacidad",
+    "intro": "Esta página explica qué datos personales almacena este sitio, por qué, y cómo solicitar su eliminación.",
+    "contactStorageHeading": "Mensajes de contacto",
+    "contactStorageBody": "Cuando envías el formulario de contacto, almacenamos tu nombre, correo electrónico, mensaje y una versión hasheada de tu dirección IP (nunca la IP sin procesar) — se conserva para ayudar a investigar abusos si este formulario llega a ser mal utilizado.",
+    "engagementHeading": "Vistas y reacciones de artículos",
+    "engagementBody": "Las vistas y reacciones de los artículos se deduplican usando un identificador hasheado derivado de tu IP y navegador, para que la misma persona no se cuente dos veces. No usamos cookies de rastreo.",
+    "deletionHeading": "Solicitar eliminación de datos",
+    "deletionBody": "Para solicitar la eliminación de tus mensajes de contacto o datos de interacción, escribe a {email} desde la dirección que usaste, mencionando la fecha aproximada de tu visita."
   },
   "blog": {
     "backToPortfolio": "Volver al portfolio",
