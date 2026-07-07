@@ -41,7 +41,7 @@ phases:
     status: pending
 
 next_recommended:
-  - "sdd-apply (PR9: SEO pack — OG images, RSS, sitemap; tasks 9.1-9.3, base=feat/pr8-search — new chain tip)"
+  - "sdd-apply (PR10: GitHub activity; tasks 10.1-10.4, base=feat/pr9-seo — new chain tip)"
 
 delivery_strategy: ask-on-risk
 chain_strategy: "feature-branch-chain (user-selected mid-apply at PR3a: merges deferred to project end, each PR targets its parent branch)"
