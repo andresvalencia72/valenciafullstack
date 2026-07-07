@@ -56,6 +56,13 @@ export default defineConfig({
         "src/**/*.d.ts",
         "src/shared/db/schema.ts",
         "src/shared/db/client.ts",
+        // Driver-agnostic type alias (zero runtime behavior) and the
+        // pglite test-database bootstrap used only by repository
+        // integration tests — same declarative/test-infra exclusion
+        // basis as the two files above (see persistence: Infrastructure
+        // Repository Implementations, PR5b).
+        "src/shared/db/database.ts",
+        "src/shared/db/create-pglite-test-db.ts",
         // `next/font/local` is a Next.js build-pipeline macro (SWC/Turbopack
         // font-loader transform) — it throws when imported outside that
         // pipeline (verified: `localFont(...)` is not a function under
