@@ -1,4 +1,4 @@
-import { render } from "@testing-library/react";
+import { render, waitFor } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import { SkillBadge } from "./skill-badge";
 
@@ -8,14 +8,20 @@ import { SkillBadge } from "./skill-badge";
  * deviation this component originally documented (self-hosting a
  * full icon font vs. a hand-typed monogram) is resolved by vendoring
  * only the SVGs actually needed.
+ *
+ * The icon itself loads via `LazyIcon` (dynamically imported,
+ * client-mounted — see icons/lazy-icon.tsx), so its presence is
+ * asserted with `waitFor` rather than synchronously.
  */
 describe("SkillBadge", () => {
-  it("renders the icon matching the given name, hidden from assistive tech", () => {
+  it("renders the icon matching the given name, hidden from assistive tech", async () => {
     const { container } = render(<SkillBadge icon="react" />);
 
-    const svg = container.querySelector('svg[data-icon="react"]');
-    expect(svg).not.toBeNull();
-    expect(svg).toHaveAttribute("aria-hidden", "true");
+    await waitFor(() => {
+      const svg = container.querySelector('svg[data-icon="react"]');
+      expect(svg).not.toBeNull();
+      expect(svg).toHaveAttribute("aria-hidden", "true");
+    });
   });
 
   it("applies the default tone classes by default", () => {

@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import { NextIntlClientProvider } from "next-intl";
 import { describe, expect, it } from "vitest";
 import en from "@/shared/i18n/messages/en.json";
@@ -59,7 +59,7 @@ describe("SkillsSection", () => {
     }
   });
 
-  it("renders the design-reference-matched devicon brand icon for every card (design-system: Token Derivation)", () => {
+  it("renders the design-reference-matched devicon brand icon for every card (design-system: Token Derivation)", async () => {
     const { container } = renderWithIntl();
 
     const expectedIconsByOrder = [
@@ -71,6 +71,14 @@ describe("SkillsSection", () => {
       "docker",
       "figma",
     ];
+
+    // Icons load via LazyIcon (dynamically imported, client-mounted —
+    // see icons/lazy-icon.tsx) rather than synchronously on first
+    // render, so assert once all 10 have appeared.
+    await waitFor(() => {
+      expect(container.querySelectorAll("svg[data-icon]")).toHaveLength(10);
+    });
+
     const dataIcons = Array.from(
       container.querySelectorAll("svg[data-icon]"),
     ).map((svg) => svg.getAttribute("data-icon"));

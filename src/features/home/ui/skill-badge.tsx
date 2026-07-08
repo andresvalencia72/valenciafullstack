@@ -1,4 +1,5 @@
-import { SKILL_ICONS, type IconName } from "./icons";
+import { LazyIcon } from "./icons/lazy-icon";
+import type { IconName } from "./icons";
 
 interface SkillBadgeProps {
   icon: IconName;
@@ -15,20 +16,24 @@ interface SkillBadgeProps {
  * `style-src 'self'` CSP) or vendoring the entire multi-hundred-glyph
  * font. Instead, only the exact SVGs this page needs are vendored as
  * small React components and rendered directly — no font, no CDN.
+ *
+ * The icon itself renders via `LazyIcon` (client-mounted, dynamically
+ * imported) rather than a direct `SKILL_ICONS[icon]` lookup — see
+ * `icons/lazy-icon.tsx` for why (quality-pipeline: Lighthouse
+ * Performance Budget, CRITICAL-2 resolve-blockers fix).
  */
 export function SkillBadge({ icon, tone = "default" }: SkillBadgeProps) {
   const toneClasses =
     tone === "inverted"
       ? "border-transparent bg-bg/15 text-bg"
       : "border-line bg-bg text-ink";
-  const Icon = SKILL_ICONS[icon];
 
   return (
     <span
       aria-hidden
       className={`inline-flex h-9 w-9 items-center justify-center rounded-md border p-1.5 ${toneClasses}`}
     >
-      <Icon className="h-full w-full" />
+      <LazyIcon icon={icon} />
     </span>
   );
 }
