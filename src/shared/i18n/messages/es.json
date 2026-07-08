@@ -83,7 +83,7 @@
         "portfolio": {
           "title": "Valencia Fullstack — este portfolio",
           "problem": "Necesitaba un portfolio rápido, bilingüe y con blog técnico propio, sin depender de un CMS externo.",
-          "solution": "Este mismo sitio: Next.js App Router con arquitectura gritona, contenido en MDX y Postgres para los datos dinámicos."
+          "solution": "Este mismo sitio: Next.js App Router con screaming architecture, contenido en MDX y Postgres para los datos dinámicos."
         },
         "placeholderTwo": {
           "title": "Proyecto 2 (placeholder)",
