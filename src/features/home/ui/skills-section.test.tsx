@@ -92,4 +92,83 @@ describe("SkillsSection", () => {
       ...expectedIconsByOrder,
     ]);
   });
+
+  it("positions the bento spans on the grid's own direct children, not on inner wrapper divs (design fidelity: main-stack card spans 2x2, learning-now card spans 2x1)", () => {
+    const { container } = renderWithIntl();
+
+    // grid-column/grid-row only apply to direct grid items — Reveal/Tilt
+    // are the actual direct children of the grid, so the span classes
+    // MUST live there, not on divs nested further inside them. Asserting
+    // on inner divs (as a prior version of this test did) can pass while
+    // the layout is silently broken, since dead CSS still exists in the
+    // DOM — it just never applies.
+    const grid = container.querySelector(".grid");
+    expect(grid).not.toBeNull();
+
+    const gridChildren = Array.from(grid?.children ?? []);
+    expect(gridChildren.length).toBe(8); // main-stack card + 7 skill cards
+
+    const mainStackCard = gridChildren[0];
+    expect(mainStackCard).toHaveClass("md:col-span-2", "md:row-span-2");
+
+    const learningCardIndex = gridChildren.findIndex((child) =>
+      child.textContent?.includes("Next.js"),
+    );
+    expect(learningCardIndex).toBeGreaterThan(0);
+    expect(gridChildren[learningCardIndex]).toHaveClass("md:col-span-2");
+    expect(gridChildren[learningCardIndex]).not.toHaveClass(
+      "md:row-span-2",
+    );
+
+    const defaultCards = gridChildren.filter(
+      (_, index) => index !== 0 && index !== learningCardIndex,
+    );
+    for (const card of defaultCards) {
+      expect(card).not.toHaveClass("md:col-span-2");
+      expect(card).not.toHaveClass("md:row-span-2");
+    }
+  });
+
+  it("renders the section eyebrow (coral dash + mono uppercase label) above the heading (design fidelity)", () => {
+    renderWithIntl();
+
+    expect(screen.getByText("Stack & tools")).toBeInTheDocument();
+  });
+
+  it("renders the heading word with a salmon highlight span (design fidelity)", () => {
+    renderWithIntl();
+
+    const heading = screen.getByRole("heading", { level: 2, name: /skills/i });
+    const highlight = heading.querySelector(".bg-salmon");
+    expect(highlight).not.toBeNull();
+    expect(highlight).toHaveTextContent("Skills");
+  });
+
+  it("renders a decorative blurred coral circle on the main-stack card, which stays overflow-hidden and relatively positioned (design fidelity)", () => {
+    const { container } = renderWithIntl();
+
+    const mainStackCard = screen.getByText("Main stack").closest("div.bg-ink");
+    expect(mainStackCard).toHaveClass("relative", "overflow-hidden");
+
+    const circle = mainStackCard?.querySelector(".bg-coral.rounded-full");
+    expect(circle).not.toBeNull();
+    expect(circle).toHaveAttribute("aria-hidden", "true");
+    void container;
+  });
+
+  it("renders the learning-now card's icon bare (no SkillBadge chrome), unlike every other card's boxed badge (design fidelity)", async () => {
+    const { container } = renderWithIntl();
+
+    await waitFor(() => {
+      expect(
+        container.querySelector('svg[data-icon="nextjs"]'),
+      ).not.toBeNull();
+    });
+
+    const nextjsIcon = container.querySelector('svg[data-icon="nextjs"]');
+    // A boxed SkillBadge wraps its icon in an `inline-flex ... rounded-md
+    // border` span; the learning-now card's icon must NOT have that
+    // ancestor — only the plain bare icon.
+    expect(nextjsIcon?.closest("span.rounded-md")).toBeNull();
+  });
 });

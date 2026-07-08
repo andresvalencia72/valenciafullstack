@@ -49,4 +49,17 @@ describe("Reveal", () => {
       "reduced",
     );
   });
+
+  it("forwards a className to the wrapping element, so callers can place it as a sized grid item", () => {
+    render(
+      <Reveal className="md:col-span-2 md:row-span-2">
+        <p>About me</p>
+      </Reveal>,
+    );
+
+    expect(screen.getByText("About me").closest("[data-motion]")).toHaveClass(
+      "md:col-span-2",
+      "md:row-span-2",
+    );
+  });
 });

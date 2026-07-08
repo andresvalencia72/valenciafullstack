@@ -7,6 +7,13 @@ import { usePrefersReducedMotion } from "./prefers-reduced-motion";
 interface TiltProps {
   children: ReactNode;
   maxDegrees?: number;
+  /**
+   * Optional layout classes forwarded to the wrapping element (e.g.
+   * `h-full` so a height set on an ancestor grid item keeps chaining
+   * down to `children`, since this wrapper otherwise has no intrinsic
+   * height of its own).
+   */
+  className?: string;
 }
 
 const NEUTRAL_TILT = { rotateX: 0, rotateY: 0 };
@@ -16,7 +23,7 @@ const NEUTRAL_TILT = { rotateX: 0, rotateY: 0 };
  * Motion Interactions). Disabled entirely — no listeners attached, no
  * transform applied — when `prefers-reduced-motion: reduce` is active.
  */
-export function Tilt({ children, maxDegrees = 10 }: TiltProps) {
+export function Tilt({ children, maxDegrees = 10, className }: TiltProps) {
   const ref = useRef<HTMLDivElement>(null);
   const prefersReducedMotion = usePrefersReducedMotion();
   const [rotation, setRotation] = useState(NEUTRAL_TILT);
@@ -43,6 +50,7 @@ export function Tilt({ children, maxDegrees = 10 }: TiltProps) {
   return (
     <div
       ref={ref}
+      className={className}
       data-motion={prefersReducedMotion ? "reduced" : "active"}
       onPointerMove={handlePointerMove}
       onPointerLeave={handlePointerLeave}

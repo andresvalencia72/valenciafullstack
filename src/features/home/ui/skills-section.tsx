@@ -1,6 +1,7 @@
 import { useTranslations } from "next-intl";
 import { Reveal } from "@/shared/ui/motion/reveal";
 import { Tilt } from "@/shared/ui/motion/tilt";
+import { LazyIcon } from "./icons/lazy-icon";
 import { SkillBadge } from "./skill-badge";
 import { SKILLS, type SkillEntry } from "./skills-data";
 
@@ -26,9 +27,20 @@ export function SkillsSection() {
       <div className="mx-auto max-w-6xl">
         <Reveal>
           <div className="mb-9 flex flex-wrap items-end justify-between gap-6">
-            <h2 className="font-display text-4xl leading-none font-semibold tracking-tight lg:text-7xl">
-              {t("heading")}.
-            </h2>
+            <div>
+              <div className="mb-4 flex items-center gap-3.5">
+                <span aria-hidden="true" className="h-0.75 w-8.5 bg-coral" />
+                <span className="font-mono text-xs tracking-widest text-ink-soft uppercase">
+                  {t("eyebrow")}
+                </span>
+              </div>
+              <h2 className="font-display text-4xl leading-none font-semibold tracking-tight lg:text-7xl">
+                <span className="relative rounded-[3px] bg-salmon px-1">
+                  {t("heading")}
+                </span>
+                .
+              </h2>
+            </div>
             <p className="max-w-sm text-sm leading-relaxed text-ink-soft">
               {t("subheading")}
             </p>
@@ -36,9 +48,9 @@ export function SkillsSection() {
         </Reveal>
 
         <div className="grid auto-rows-[minmax(148px,auto)] grid-cols-2 gap-3.5 md:grid-cols-4">
-          <Reveal>
-            <Tilt>
-              <div className="flex h-full min-h-78 flex-col justify-between gap-5 rounded-2xl bg-ink p-7 text-bg md:col-span-2 md:row-span-2">
+          <Reveal className="md:col-span-2 md:row-span-2">
+            <Tilt className="h-full">
+              <div className="relative flex h-full min-h-78 flex-col justify-between gap-5 overflow-hidden rounded-2xl bg-ink p-7 text-bg">
                 <div>
                   <span className="font-mono text-xs tracking-widest text-bg/60 uppercase">
                     {t("categories.mainStack")}
@@ -65,16 +77,18 @@ export function SkillsSection() {
                     <SkillBadge icon="nodejs" tone="inverted" />
                   </div>
                 </div>
+                <span
+                  aria-hidden="true"
+                  className="absolute -top-7.5 -right-7.5 h-30 w-30 rounded-full bg-coral opacity-[0.14] blur"
+                />
               </div>
             </Tilt>
           </Reveal>
 
           {SKILLS.map((skill) =>
             skill.size === "wide" ? (
-              <Reveal key={skill.category}>
-                <div
-                  className={`flex items-center justify-between gap-4 rounded-2xl bg-coral p-6 text-coral-ink ${SIZE_CLASSES.wide}`}
-                >
+              <Reveal key={skill.category} className={SIZE_CLASSES.wide}>
+                <div className="flex items-center justify-between gap-4 rounded-2xl bg-coral p-6 text-coral-ink">
                   <div>
                     <span className="font-mono text-xs tracking-widest text-coral-ink/85 uppercase">
                       {t(`categories.${skill.category}`)}
@@ -83,7 +97,10 @@ export function SkillsSection() {
                       {skill.title}
                     </h3>
                   </div>
-                  <SkillBadge icon={skill.icon} tone="inverted" />
+                  <LazyIcon
+                    icon={skill.icon}
+                    className="h-10.5 w-10.5 shrink-0 opacity-95"
+                  />
                 </div>
               </Reveal>
             ) : (
