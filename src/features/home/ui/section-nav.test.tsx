@@ -59,6 +59,21 @@ describe("SectionNav", () => {
       "#contact",
     ]);
   });
+
+  it("gives each link a coral hover color and an animated coral underline (design fidelity: header)", () => {
+    renderWithIntl();
+
+    const link = screen.getByRole("link", { name: "Inicio" });
+    expect(link).toHaveClass("hover:text-coral");
+
+    const underline = link.querySelector("[aria-hidden='true']");
+    expect(underline).not.toBeNull();
+    expect(underline).toHaveClass(
+      "bg-coral",
+      "scale-x-0",
+      "group-hover:scale-x-100",
+    );
+  });
 });
 
 // Real smooth-scroll + URL hash update behavior (home-page: In-Page
