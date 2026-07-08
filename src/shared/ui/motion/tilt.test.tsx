@@ -82,4 +82,16 @@ describe("Tilt", () => {
       "rotateX(0deg) rotateY(0deg)",
     );
   });
+
+  it("forwards a className to the wrapping element, so callers can chain height (e.g. h-full)", () => {
+    render(
+      <Tilt className="h-full">
+        <span>Card</span>
+      </Tilt>,
+    );
+
+    expect(screen.getByText("Card").closest("[data-motion]")).toHaveClass(
+      "h-full",
+    );
+  });
 });

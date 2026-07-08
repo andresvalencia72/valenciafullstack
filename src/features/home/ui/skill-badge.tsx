@@ -3,14 +3,19 @@ import type { IconName } from "./icons";
 
 interface SkillBadgeProps {
   icon: IconName;
-  tone?: "default" | "inverted";
 }
 
 /**
- * Brand-icon badge for a technology (devicon-derived, see icons/ and
- * docs/third-party-assets.md).
+ * Bare skill icon (devicon-derived, see icons/ and
+ * docs/third-party-assets.md), rendered directly on the card at the
+ * design-reference's `.pf-ic` size (`font-size:26px` — bare colored
+ * glyph, no box/border/background) — design fidelity fix, "iconos
+ * sueltos" (2026-07-08 Playwright computed-style comparison). This
+ * component previously wrapped the icon in a 36px bordered/filled
+ * badge span not present in the design; that chrome is now removed
+ * entirely.
  *
- * Resolves the deviation this component previously documented: the
+ * Resolves the deviation this component originally documented: the
  * design-reference uses devicon's colored icon font, which would have
  * required either an external CDN (blocked by ADR-0007's
  * `style-src 'self'` CSP) or vendoring the entire multi-hundred-glyph
@@ -20,20 +25,10 @@ interface SkillBadgeProps {
  * The icon itself renders via `LazyIcon` (client-mounted, dynamically
  * imported) rather than a direct `SKILL_ICONS[icon]` lookup — see
  * `icons/lazy-icon.tsx` for why (quality-pipeline: Lighthouse
- * Performance Budget, CRITICAL-2 resolve-blockers fix).
+ * Performance Budget, CRITICAL-2 resolve-blockers fix). Each vendored
+ * icon component already carries its own `aria-hidden`/`focusable`
+ * attributes, so no extra wrapper is needed for accessibility.
  */
-export function SkillBadge({ icon, tone = "default" }: SkillBadgeProps) {
-  const toneClasses =
-    tone === "inverted"
-      ? "border-transparent bg-bg/15 text-bg"
-      : "border-line bg-bg text-ink";
-
-  return (
-    <span
-      aria-hidden
-      className={`inline-flex h-9 w-9 items-center justify-center rounded-md border p-1.5 ${toneClasses}`}
-    >
-      <LazyIcon icon={icon} />
-    </span>
-  );
+export function SkillBadge({ icon }: SkillBadgeProps) {
+  return <LazyIcon icon={icon} className="h-6.5 w-6.5" />;
 }
