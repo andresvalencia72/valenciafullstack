@@ -60,9 +60,9 @@ export function SkillsSection() {
                     {t("descriptions.mainStack")}
                   </p>
                   <div className="flex shrink-0 gap-3.5">
-                    <SkillBadge label="Re" tone="inverted" />
-                    <SkillBadge label="TS" tone="inverted" />
-                    <SkillBadge label="Nd" tone="inverted" />
+                    <SkillBadge icon="react" tone="inverted" />
+                    <SkillBadge icon="typescript" tone="inverted" />
+                    <SkillBadge icon="nodejs" tone="inverted" />
                   </div>
                 </div>
               </div>
@@ -83,7 +83,7 @@ export function SkillsSection() {
                       {skill.title}
                     </h3>
                   </div>
-                  <SkillBadge label={skill.badge} tone="inverted" />
+                  <SkillBadge icon={skill.icon} tone="inverted" />
                 </div>
               </Reveal>
             ) : (
@@ -115,7 +115,7 @@ function SkillCard({ skill, categoryLabel, description }: SkillCardProps) {
         <span className="font-mono text-xs tracking-wide text-ink-faint uppercase">
           {categoryLabel}
         </span>
-        <SkillBadge label={skill.badge} />
+        <SkillBadge icon={skill.icon} />
       </div>
       <div>
         <h3 className="mb-1 font-display text-xl font-semibold tracking-tight">

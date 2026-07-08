@@ -144,3 +144,10 @@ preset — Performance >= 90, Accessibility >= 95, Best Practices >= 95, SEO >= 
 against the home page (`/es`, `/en`) and an article page. The e2e job also runs
 `npm run verify:no-client-secrets` against the built client bundle before starting the
 Playwright suite. See [`.github/workflows/ci.yml`](.github/workflows/ci.yml).
+
+## Credits
+
+The skills section's brand icons are vendored from
+[devicon](https://github.com/devicons/devicon) (MIT). See
+[`docs/third-party-assets.md`](docs/third-party-assets.md) for exact file
+provenance and licensing.
