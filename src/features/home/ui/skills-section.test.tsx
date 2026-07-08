@@ -171,4 +171,53 @@ describe("SkillsSection", () => {
     // ancestor — only the plain bare icon.
     expect(nextjsIcon?.closest("span.rounded-md")).toBeNull();
   });
+
+  it("renders every skill icon bare — no boxed badge chrome anywhere in the section (design fidelity: 'iconos sueltos')", async () => {
+    const { container } = renderWithIntl();
+
+    await waitFor(() => {
+      expect(container.querySelectorAll("svg[data-icon]")).toHaveLength(10);
+    });
+
+    // Not one icon in the section (main-stack card's react/typescript/
+    // nodejs, or any of the seven skill cards) is wrapped in the old
+    // 36px bordered/filled badge span — SkillBadge is bare now.
+    expect(container.querySelector("span.rounded-md")).toBeNull();
+
+    const mainStackIcons = ["react", "typescript", "nodejs"].map((name) =>
+      container.querySelector(`svg[data-icon="${name}"]`),
+    );
+    for (const icon of mainStackIcons) {
+      expect(icon).not.toBeNull();
+      expect(icon).toHaveClass("h-6.5", "w-6.5");
+      expect(icon?.closest("span")).toBeNull();
+    }
+  });
+
+  it("uses 18px corner radius on the skills bento cards, matching the design (not the 16px rounded-2xl default)", () => {
+    const { container } = renderWithIntl();
+
+    const mainStackCard = screen.getByText("Main stack").closest("div.bg-ink");
+    expect(mainStackCard).toHaveClass("rounded-[18px]");
+    expect(mainStackCard).not.toHaveClass("rounded-2xl");
+
+    const learningCard = screen
+      .getByText("Next.js · App Router")
+      .closest("div.bg-coral");
+    expect(learningCard).toHaveClass("rounded-[18px]");
+    expect(learningCard).not.toHaveClass("rounded-2xl");
+
+    const defaultCard = screen.getByText("JavaScript").closest("div.bg-card");
+    expect(defaultCard).toHaveClass("rounded-[18px]");
+    expect(defaultCard).not.toHaveClass("rounded-2xl");
+    void container;
+  });
+
+  it("uses 0.16em eyebrow letter-spacing, matching the design (not tracking-widest's 0.1em)", () => {
+    renderWithIntl();
+
+    const eyebrow = screen.getByText("Stack & tools");
+    expect(eyebrow).toHaveClass("tracking-[0.16em]");
+    expect(eyebrow).not.toHaveClass("tracking-widest");
+  });
 });

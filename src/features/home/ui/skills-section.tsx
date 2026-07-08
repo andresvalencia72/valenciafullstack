@@ -30,7 +30,7 @@ export function SkillsSection() {
             <div>
               <div className="mb-4 flex items-center gap-3.5">
                 <span aria-hidden="true" className="h-0.75 w-8.5 bg-coral" />
-                <span className="font-mono text-xs tracking-widest text-ink-soft uppercase">
+                <span className="font-mono text-xs tracking-[0.16em] text-ink-soft uppercase">
                   {t("eyebrow")}
                 </span>
               </div>
@@ -50,7 +50,7 @@ export function SkillsSection() {
         <div className="grid auto-rows-[minmax(148px,auto)] grid-cols-2 gap-3.5 md:grid-cols-4">
           <Reveal className="md:col-span-2 md:row-span-2">
             <Tilt className="h-full">
-              <div className="relative flex h-full min-h-78 flex-col justify-between gap-5 overflow-hidden rounded-2xl bg-ink p-7 text-bg">
+              <div className="relative flex h-full min-h-78 flex-col justify-between gap-5 overflow-hidden rounded-[18px] bg-ink p-7 text-bg">
                 <div>
                   <span className="font-mono text-xs tracking-widest text-bg/60 uppercase">
                     {t("categories.mainStack")}
@@ -72,9 +72,9 @@ export function SkillsSection() {
                     {t("descriptions.mainStack")}
                   </p>
                   <div className="flex shrink-0 gap-3.5">
-                    <SkillBadge icon="react" tone="inverted" />
-                    <SkillBadge icon="typescript" tone="inverted" />
-                    <SkillBadge icon="nodejs" tone="inverted" />
+                    <SkillBadge icon="react" />
+                    <SkillBadge icon="typescript" />
+                    <SkillBadge icon="nodejs" />
                   </div>
                 </div>
                 <span
@@ -88,7 +88,7 @@ export function SkillsSection() {
           {SKILLS.map((skill) =>
             skill.size === "wide" ? (
               <Reveal key={skill.category} className={SIZE_CLASSES.wide}>
-                <div className="flex items-center justify-between gap-4 rounded-2xl bg-coral p-6 text-coral-ink">
+                <div className="flex items-center justify-between gap-4 rounded-[18px] bg-coral p-6 text-coral-ink">
                   <div>
                     <span className="font-mono text-xs tracking-widest text-coral-ink/85 uppercase">
                       {t(`categories.${skill.category}`)}
@@ -127,7 +127,7 @@ interface SkillCardProps {
 
 function SkillCard({ skill, categoryLabel, description }: SkillCardProps) {
   return (
-    <div className="flex h-full flex-col justify-between gap-3.5 rounded-2xl border border-line bg-card p-5.5">
+    <div className="flex h-full flex-col justify-between gap-3.5 rounded-[18px] border border-line bg-card p-5.5">
       <div className="flex items-center justify-between">
         <span className="font-mono text-xs tracking-wide text-ink-faint uppercase">
           {categoryLabel}
