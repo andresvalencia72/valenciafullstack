@@ -703,3 +703,96 @@ Decided by the user after a design-vs-implementation comparison of the skills se
 - **~232 changed lines** across 9 files: 153 lines in 8 tracked files (`git diff --stat`: `skills-section.test.tsx` +79, `skills-section.tsx` +39/-13, `reveal.test.tsx` +13, `reveal.tsx` +11/-2, `tilt.test.tsx` +12, `tilt.tsx` +10/-1, `en.json`/`es.json` +1 each) + 79 lines in 1 new file (`e2e/skills-bento.spec.ts`) — well within the 400-line budget, single commit, no PR split needed. (Correcting a real, disclosed accuracy gap from the PR12-resolve-blockers entry above: that entry's "~85 changed lines" estimate was later found by `sdd-verify` to understate the real `git diff --stat` total of 151 — this entry's number is the actual measured `git diff --stat` total, not an eyeballed estimate.)
 
 **Next recommended**: `sdd-verify` over the combined PR1-PR12 scope, incl. this CRITICAL-2 fix, before `sdd-archive`.
+
+### PR13 extension: three remaining skills-fidelity deltas (2026-07-08, same branch/PR, user-approved)
+
+A follow-up Playwright computed-style comparison against the design (same scope as PR13 above — skills section only) found three more deltas after the bento-span/eyebrow/highlight/circle/learning-now-icon fixes above, all user-approved to fix on the same `feat/pr13-skills-fidelity` branch (extends the still-open PR #18, does not open a new PR):
+
+1. **Bare icons everywhere ("iconos sueltos")**: the design renders every devicon glyph bare at 26px (`.pf-ic{font-size:26px}`) directly on the card, colored, no box — not just on the learning-now card (already fixed above). `SkillBadge` (`src/features/home/ui/skill-badge.tsx`) previously wrapped every other icon (the 4 small default cards' icons, plus the 3 main-stack card icons — React/TypeScript/Node.js) in a 36px bordered/filled badge `<span>` not present in the design. Slimmed `SkillBadge` down to a single-purpose bare-icon-at-26px component: `export function SkillBadge({ icon }) { return <LazyIcon icon={icon} className="h-6.5 w-6.5" />; }` — no wrapping `<span>`, no `tone` prop (dropped entirely: icon colors are fixed brand colors baked into each vendored SVG, e.g. React's `#61DAFB`, not affected by the card's light/dark background, so the box's "inverted tone" purpose no longer exists once the box itself is gone). Updated both call sites that previously passed `tone="inverted"` (the main-stack card's three icons) to drop the prop. The learning-now card's already-bare 42px `LazyIcon` call (shipped in the PR13 base commit above) is untouched — it already matched the design and doesn't go through `SkillBadge`.
+2. **Corner radius**: design cards use 18px (`border-radius:18px`); ours used `rounded-2xl` (16px). Changed all three skills bento card shapes (main-stack, wide/learning-now, and the default `SkillCard`) to `rounded-[18px]`, skills section only — no other section's radii were touched.
+3. **Eyebrow letter-spacing**: design uses `letter-spacing:.16em` on every section eyebrow; ours used `tracking-widest` (Tailwind's 0.1em). Changed the skills section's eyebrow span to `tracking-[0.16em]`. Scoped to this one eyebrow — the design also uses 0.16em on other sections' eyebrows (hero, about, projects, articles, contact), but per the hard constraint on this session's scope (skills section only), those are left unchanged and flagged here as a disclosed, out-of-scope fidelity gap for a future session if the user wants full-page eyebrow consistency.
+
+**TDD**: RED confirmed for all three fixes before implementing — `skill-badge.test.tsx` rewritten to assert the bare 26px render (`toHaveClass("h-6.5", "w-6.5")`, no wrapping `<span>`, `svg.parentElement === container`), confirmed failing against the pre-fix boxed markup; `skills-section.test.tsx` gained three new cases (bare main-stack icons, 18px radius on all three card shapes, 0.16em eyebrow tracking), each confirmed failing against the pre-fix classes before the corresponding one-line class-name changes.
+
+#### TDD Cycle Evidence (PR13 extension)
+
+| Task | Test File | Layer | RED | GREEN | REFACTOR |
+|------|-----------|-------|-----|-------|----------|
+| Bare `SkillBadge` (26px, no box) | `skill-badge.test.tsx` (rewritten) | Unit (RTL) | ✅ Confirmed failing (`toHaveClass("h-6.5","w-6.5")` against the pre-fix `h-full w-full` on the inner `<svg>`, wrapped in a `<span class="inline-flex ... rounded-md border ...">`) | ✅ Passed | ➖ None needed (component simplified in the same edit, no separate refactor step) |
+| Bare main-stack icons (react/typescript/nodejs) | `skills-section.test.tsx` (new case) | Unit (RTL, structural) | ✅ Confirmed failing (`container.querySelector("span.rounded-md")` found the badge box) | ✅ Passed | ➖ None needed |
+| 18px corner radius (3 card shapes) | `skills-section.test.tsx` (new case) | Unit (RTL) | ✅ Confirmed failing (`toHaveClass("rounded-[18px]")` against the pre-fix `rounded-2xl`) | ✅ Passed | ➖ None needed |
+| 0.16em eyebrow tracking | `skills-section.test.tsx` (new case) | Unit (RTL) | ✅ Confirmed failing (`toHaveClass("tracking-[0.16em]")` against the pre-fix `tracking-widest`) | ✅ Passed | ➖ None needed |
+
+#### Test Summary (PR13 extension)
+- **Total tests written**: 4 net-new/rewritten unit test cases (1 `SkillBadge`, 3 `SkillsSection`)
+- **Total tests passing**: 469/469 unit+integration (up from 467/467)
+
+#### Verification (PR13 extension)
+- `npm run lint` — clean.
+- `npm run typecheck` — clean.
+- `npm run test:coverage` — **469/469 tests passing** (up from 467/467), coverage **97.54% / 93.52% / 96.38% / 97.49%** (stmts/branches/funcs/lines — branches nominally 0.05pp below the PR13-base 93.57%, statistical noise from the simplified `SkillBadge` losing one conditional branch (`tone`), still comfortably above the 80% gate on every metric).
+- `npm run build` — 22 routes (unchanged).
+- Full Lighthouse + e2e verification for this extension ran together with PR14 below (both work items verified in the same session, against the same final build) — see "Combined verification (PR13 extension + PR14)" under the PR14 section.
+
+#### Deviations from design
+- Card category labels (e.g. "Lenguaje", "Backend") keep their existing `tracking-wide` (Tailwind's 0.025em) rather than the design's `.12em`/`.14em` — out of scope for this session (only the section-level eyebrow's letter-spacing was in the user-approved scope), disclosed here as a residual fidelity gap.
+- Eyebrow 0.16em tracking applied to the skills section only, per the hard scope constraint — other sections' eyebrows (hero, about, projects, articles, contact) still use `tracking-widest` and are a disclosed out-of-scope gap (see item 3 above).
+
+#### Review budget (PR13 extension)
+- **~87 changed lines** across 4 files (`git diff --stat`: `skill-badge.test.tsx` +16/-16, `skill-badge.tsx` +19/-14, `skills-section.test.tsx` +49, `skills-section.tsx` +8/-6) — well within the 400-line budget, single commit (`fix(home): match skills section to design fidelity (bare icons, radius, tracking)`) on the existing `feat/pr13-skills-fidelity` branch, pushed to `origin/feat/pr13-skills-fidelity` (updates the still-open PR #18, no new PR opened).
+
+**Next recommended**: `sdd-verify` over the combined PR1-PR14 scope (see PR14 section below for the new header-fidelity work and the combined final verification run).
+
+## PR14: header fidelity (2026-07-08, user-approved scope addition, not a tasks.md phase)
+
+New branch `feat/pr14-header-fidelity`, base=`feat/pr13-skills-fidelity` (created after the PR13 extension above was committed; feature-branch-chain — targets its immediate parent branch, not `main`). Adapts the site header to design-reference/'s `<header data-nav>`, scoped to the header only (no other section touched).
+
+**Ships**:
+1. **New `SiteHeader` component** (`src/features/home/ui/site-header.tsx`) — extracted from the previously-inline header markup in `app/[locale]/page.tsx` so it's independently unit-testable (matching the codebase's existing pattern: `app/` composition roots stay thin, `home/ui` owns the tested markup). Renders the design's brand block — a 34px circular ink-background monogram "A" (Clash Display 700, 18px) + "Andrés Val." wordmark (Clash Display 600, 17px, `-0.01em` tracking) — linking to `#home`, plus the existing `SectionNav`/`LocaleSwitcher`/`ThemeToggle` islands. Container uses `max-w-6xl` + `px-4 lg:px-8`, matching every other section's container convention; vertical padding is `py-4` (16px), matching the design.
+2. **`SectionNav`**: nav links gain the design's coral hover color (already present) plus a new animated 2px coral underline (`scaleX(0)` -> `scaleX(1)` on hover, 0.3s, pure CSS via `group`/`group-hover:scale-x-100` — no JS scroll orchestration added).
+3. **`ThemeToggle`**: rebuilt as a 38px circular button (`h-9.5 w-9.5 rounded-full border border-line`, coral border on hover) containing a pure-CSS icon matching the design's `[data-ic-moon]`/`[data-ic-sun]` markup exactly — a crescent moon (`shadow-[inset_-5px_-3px_0_0_var(--ink)]`) while in light mode (click to switch to dark), a bordered circle (`border-2 border-ink`) while in dark mode (click to switch to light). The button's visible text label was removed (icon-only, matching the design); the exact same `t("switchToLight")`/`t("switchToDark")` copy that used to render as text now renders as `aria-label` instead, so the accessible name — and every existing test/e2e assertion keyed on it — is unchanged.
+4. **`LocaleSwitcher`** (user explicitly asked to adapt the ES/EN switcher to the design's idiom, since the design is Spanish-only and has no switcher of its own): compact "ES / EN" text buttons at the same 15px/500 weight as `SectionNav`'s links, separated by an `aria-hidden` "/" divider, active locale in coral, inactive in ink with the same coral hover treatment as the nav links. Visible text is the bare ISO code (`locale.toUpperCase()`, not translated — a code, not a word); the full locale name (`t(locale)`, e.g. "Spanish"/"Español") moved from visible text to `aria-label`, so the accessible name each existing test asserts by (`getByRole("button", { name: "Spanish" })`) is unchanged. Switching behavior (`router.replace(pathname, { locale })`) and `aria-pressed` semantics are byte-identical to before — no new client-only initial-render state was introduced (checked explicitly against the theme-toggle hydration-mismatch precedent from PR2a/PR2b: `useLocale()` resolves identically server- and client-side via `NextIntlClientProvider`, so there is nothing here that could diverge between SSR and the first client render).
+5. **`ScrollProgress`**: already existed (shipped un-styled, effectively invisible — no height was ever set) but is explicitly in the design's header spec, so it was styled to match: `fixed top-0 left-0 z-90 h-0.75 w-full bg-coral`, transform-driven (`scaleX(progress/100)`) rather than an animated `width`, matching the design's `data-progress` bar's own `transform:scaleX()` approach (cheaper for the browser — a compositor-only transform vs. a layout-triggering `width` change on every scroll event). Also newly hides itself entirely (`return null`) when `prefers-reduced-motion: reduce` is active, since a scroll-following bar is a decorative motion effect (design-system: Motion Interactions Respect Reduced Motion) — it previously had no reduced-motion handling at all.
+
+**Disclosed deviations from the design** (both deliberate, both to protect the Lighthouse Performance budget on this above-the-fold element):
+- Sticky positioning + `backdrop-blur-sm` are the pre-existing implementation's own choice, not in the design (the design's header is `position:fixed`, no blur) — kept as-is rather than replaced, since it was already shipped, already passing Lighthouse, and not something the user asked to change.
+- The design's scroll-aware header (`initNav`'s `onScroll` handler swaps a transparent background/border for a blurred, solid one past a 16px scroll threshold) was NOT implemented. A static `border-b border-line` is used instead. Rationale: implementing the scroll-aware swap would require new above-the-fold client JS (a scroll listener mutating header styles on every frame) on the single highest Lighthouse-risk element on the page; the fidelity gain is a subtle transition most visitors won't consciously notice, and the header task explicitly authorized this trade-off ("optional... choose what stays consistent and disclose").
+- The mobile burger menu remains deferred — same pre-existing decision as before this session, unchanged: the full nav still collapses below `lg`, anchors remain reachable via the footer and by scrolling.
+
+**TDD**: RED confirmed for every behavior change — `theme-toggle.test.tsx` gained 3 new cases (38px/border classes, moon-in-light-mode, sun-in-dark-mode), `locale-switcher.test.tsx` gained 2 new cases (ES/EN visible text, coral/ink coloring), `section-nav.test.tsx` gained 1 new case (hover color + animated underline classes), `scroll-progress.test.tsx` gained 3 new cases (fixed/coral/3px classes + scaleX transform, scaleX tracks scroll position, hidden under reduced motion), and `site-header.test.tsx` is an entirely new file (3 cases: brand block + link, composed children render, sticky/border classes) — every one of these confirmed failing against the pre-fix markup (or, for `site-header.test.tsx`, against the not-yet-created module) before the corresponding implementation.
+
+#### TDD Cycle Evidence (PR14)
+
+| Task | Test File | Layer | RED | GREEN | REFACTOR |
+|------|-----------|-------|-----|-------|----------|
+| `ScrollProgress` styling + scaleX + reduced-motion hide | `scroll-progress.test.tsx` (3 new cases) | Unit (RTL) | ✅ Confirmed failing (missing `fixed`/`h-0.75`/`bg-coral` classes; `toHaveStyle({transform: "scaleX(0.75)"})` against the pre-fix nested-`width%` markup; bar still rendered under mocked `usePrefersReducedMotion() === true`) | ✅ Passed | ➖ None needed |
+| `ThemeToggle` 38px circle + moon/sun icons | `theme-toggle.test.tsx` (3 new cases) | Unit (RTL) | ✅ Confirmed failing (button had no classes at all — pre-fix button carried none; `[data-icon="moon"]`/`[data-icon="sun"]` did not exist) | ✅ Passed | ➖ None needed |
+| `LocaleSwitcher` ES/EN compact styling | `locale-switcher.test.tsx` (2 new cases) | Unit (RTL) | ✅ Confirmed failing (visible text was "Spanish"/"English", not "ES"/"EN"; no `text-coral`/`text-ink` classes existed) | ✅ Passed | ➖ None needed |
+| `SectionNav` hover underline | `section-nav.test.tsx` (1 new case) | Unit (RTL) | ✅ Confirmed failing (no `aria-hidden` underline `<span>` existed inside the link) | ✅ Passed | ➖ None needed |
+| `SiteHeader` (new component) | `site-header.test.tsx` (new file, 3 cases) | Unit (RTL) | ✅ Confirmed failing (module did not exist — import error) | ✅ Passed | ➖ None needed |
+
+#### Test Summary (PR14)
+- **Total tests written**: 12 net-new unit test cases across 5 files (3 `ScrollProgress`, 3 `ThemeToggle`, 2 `LocaleSwitcher`, 1 `SectionNav`, 3 `SiteHeader`)
+- **Total tests passing**: 481/481 unit+integration (up from 469/469 after the PR13 extension above)
+
+#### Combined verification (PR13 extension + PR14)
+
+Both work items were verified together in the same session, against the final combined build (PR13 extension commit + PR14 commit):
+
+- `npm run lint` — clean.
+- `npm run typecheck` — clean.
+- `npm run test:coverage` — **481/481 tests passing**, coverage **97.55% / 93.66% / 96.4% / 97.5%** (stmts/branches/funcs/lines — at or above the PR13-extension baseline on every metric, comfortably above the 80% gate).
+- `npm run build` — 22 routes (unchanged — no new routes, `SiteHeader` is a `home/ui` component, not a route).
+- `npm run lighthouse` (`lhci autorun`, real production server, `numberOfRuns: 3`) — **PASSED, exit code 0**. `/es` Performance 0.89/0.90/0.90 (median 0.90), `/en` Performance 0.90/0.90/0.90 (median 0.90), `/es/blog/clean-architecture-nextjs` Performance 0.95/0.96/0.95 (median 0.95) — all above the `>= 0.90` gate, margin unchanged from the PR13-extension baseline. This was the highest-risk gate for PR14 (the header is above-the-fold on every page) — it held because every header change is either static CSS/markup (icon styling, radius, tracking, underline) or a styling-only change to an already-mounted, already-tested client component (`ScrollProgress`'s own scroll listener already existed; only its render output changed).
+- `npm run test:e2e` (`CI=1`, real Docker Postgres — `portfolio-postgres-1`, already running — after `npm run db:migrate` + `npm run db:sync-search`) — **50/50 passing** (unchanged from the PR13-extension baseline; no new e2e spec was added for the header — the existing `e2e/home-sections.spec.ts` "anchor nav scrolls to the target section" case already exercises `SectionNav`'s real click-through behavior against the new markup, and passed unchanged since the accessible name of each nav link is unaffected by the new `aria-hidden` underline span).
+- **Visual verification**: 1280px screenshots captured via a throwaway Playwright script against the real production server (`npm run build && npm run start`) — `header-pr14.png` (full header: brand mark, nav with visible active-state coral, "ES / EN" switcher with ES in coral, circular theme toggle showing the moon icon in light mode) and `skills-pr13-final.png` (skills section showing the PR13-extension bare-icon/18px-radius/0.16em-tracking fixes together). Both match the design reference closely.
+
+#### Deviations from design (PR14)
+- Scroll-aware header background/border swap not implemented — disclosed above (Lighthouse budget risk on an above-the-fold element).
+- Mobile burger menu remains deferred — pre-existing decision, unchanged.
+- Sticky + backdrop-blur kept as the pre-existing implementation's own choice rather than matching the design's plain `position:fixed`.
+
+#### Review budget (PR14)
+- **~317 changed lines** across 11 files (`git diff --stat`: `page.tsx` +3/-18, `section-nav.test.tsx` +15, `section-nav.tsx` +9/-2, `site-header.tsx` +56 new, `site-header.test.tsx` +53 new, `locale-switcher.test.tsx` +22, `locale-switcher.tsx` +42/-7, `scroll-progress.test.tsx` +40/-2, `scroll-progress.tsx` +16/-4, `theme-toggle.test.tsx` +35, `theme-toggle.tsx` +30/-3) — well within the 400-line budget, single commit (`feat(home): adapt site header to design fidelity (brand, nav, switcher, toggle)`) on the new `feat/pr14-header-fidelity` branch, pushed to `origin/feat/pr14-header-fidelity`. Opened as a non-draft PR against `feat/pr13-skills-fidelity` (feature-branch-chain — targets the immediate parent branch, not `main`).
+
+**Next recommended**: `sdd-verify` over the combined PR1-PR14 scope before `sdd-archive` — particular attention to the header changes (highest Lighthouse risk of this session, confirmed passing above) and the accessible-name-preservation claims for `ThemeToggle`/`LocaleSwitcher` (text-to-aria-label moves, confirmed unchanged by the unit tests re-using the same `getByRole({ name: ... })` queries as before).

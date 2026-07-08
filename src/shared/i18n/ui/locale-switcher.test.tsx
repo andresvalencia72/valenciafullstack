@@ -59,4 +59,26 @@ describe("LocaleSwitcher", () => {
     // with the target locale.
     expect(replace).toHaveBeenCalledWith("/en/about");
   });
+
+  it("shows compact locale codes (ES / EN) as visible text, matching the design's nav-link idiom", () => {
+    renderSwitcher("es");
+
+    expect(screen.getByRole("button", { name: "Spanish" })).toHaveTextContent(
+      "ES",
+    );
+    expect(screen.getByRole("button", { name: "English" })).toHaveTextContent(
+      "EN",
+    );
+  });
+
+  it("colors the active locale coral and the inactive locale ink (design fidelity: header)", () => {
+    renderSwitcher("es");
+
+    expect(screen.getByRole("button", { name: "Spanish" })).toHaveClass(
+      "text-coral",
+    );
+    expect(screen.getByRole("button", { name: "English" })).toHaveClass(
+      "text-ink",
+    );
+  });
 });

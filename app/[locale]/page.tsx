@@ -4,8 +4,8 @@ import { AboutSection } from "@/features/home/ui/about-section";
 import { ContactSection } from "@/features/home/ui/contact-section";
 import { HeroSection } from "@/features/home/ui/hero-section";
 import { ProjectsSection } from "@/features/home/ui/projects-section";
-import { SectionNav } from "@/features/home/ui/section-nav";
 import { SiteFooter } from "@/features/home/ui/site-footer";
+import { SiteHeader } from "@/features/home/ui/site-header";
 import { SkillsSection } from "@/features/home/ui/skills-section";
 import { StackStrip } from "@/features/home/ui/stack-strip";
 import type { HomeArticleSummary } from "@/features/home/domain/article-summary";
@@ -13,10 +13,8 @@ import { ContactForm } from "@/features/contact/ui/contact-form";
 import { GithubActivityLoading } from "@/features/github-activity/ui/github-activity-loading";
 import { listPublishedArticles } from "@/shared/content/list-published-articles";
 import { mdxLoader } from "@/shared/content/mdx-loader";
-import { LocaleSwitcher } from "@/shared/i18n/ui/locale-switcher";
 import type { Locale } from "@/shared/i18n/routing";
 import { ScrollProgress } from "@/shared/ui/scroll-progress/scroll-progress";
-import { ThemeToggle } from "@/shared/ui/theme/theme-toggle";
 import { ArticlesWithSearch } from "./_components/articles-with-search";
 import { GithubActivityAsync } from "./_components/github-activity-async";
 
@@ -71,22 +69,7 @@ export default async function HomePage({ params }: HomePageProps) {
   return (
     <main className="flex min-h-full flex-col">
       <ScrollProgress />
-      <header className="sticky top-0 z-40 flex items-center justify-between gap-4 border-b border-line bg-bg/90 px-4 py-4 backdrop-blur-sm lg:px-8">
-        {/* Nav collapses below `lg` — the full nav (home-page: In-Page
-         * Navigation) no longer fits a 375px header alongside the
-         * locale switcher and theme toggle now that projects/articles/
-         * contact were added (PR3b) and github activity (PR10). A
-         * mobile burger menu (present in design-reference/) is
-         * deferred; anchors remain reachable via the footer and by
-         * scrolling. */}
-        <div className="hidden lg:block">
-          <SectionNav />
-        </div>
-        <div className="flex items-center gap-4">
-          <LocaleSwitcher />
-          <ThemeToggle />
-        </div>
-      </header>
+      <SiteHeader />
       <HeroSection />
       <StackStrip />
       <AboutSection />

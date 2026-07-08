@@ -58,4 +58,39 @@ describe("ThemeToggle", () => {
     expect(document.documentElement.dataset.theme).toBe("light");
     expect(window.localStorage.getItem(THEME_STORAGE_KEY)).toBe("light");
   });
+
+  it("is a 38px circular button with a 1px border (design fidelity: header)", () => {
+    renderWithIntl();
+
+    const button = screen.getByRole("button", {
+      name: "Switch to dark theme",
+    });
+    expect(button).toHaveClass(
+      "h-9.5",
+      "w-9.5",
+      "rounded-full",
+      "border",
+      "border-line",
+    );
+  });
+
+  it("renders a pure-CSS moon icon in light mode", () => {
+    renderWithIntl();
+
+    expect(
+      screen.getByRole("button", { name: "Switch to dark theme" }),
+    ).toContainElement(document.querySelector('[data-icon="moon"]'));
+    expect(document.querySelector('[data-icon="sun"]')).toBeNull();
+  });
+
+  it("renders a pure-CSS sun icon in dark mode", () => {
+    document.documentElement.dataset.theme = "dark";
+
+    renderWithIntl();
+
+    expect(
+      screen.getByRole("button", { name: "Switch to light theme" }),
+    ).toContainElement(document.querySelector('[data-icon="sun"]'));
+    expect(document.querySelector('[data-icon="moon"]')).toBeNull();
+  });
 });
