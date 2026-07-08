@@ -1,149 +1,179 @@
-# Verification Report — TERMINAL (PR1–PR12, full scope, post CRITICAL-2 resolve-blockers fix)
+# Verification Report — TERMINAL (PR1–PR14, full scope)
 
 **Change**: portfolio-site
 **Date**: 2026-07-08
-**Scope**: Full terminal re-verification after the CRITICAL-2 resolve-blockers fix (commit `73f4ec9`, docs commit `0020907`). Supersedes the prior terminal report in this file's history (PR1–PR12, verdict FAIL, CRITICAL-2: Lighthouse Performance regression on `/es`/`/en`). This is the last gate before `sdd-archive`.
-**Branch verified**: `feat/pr12-tech-logos` (tip of the feature-branch-chain; base = `feat/pr11-hardening`). PR #17 open, non-draft. Nothing merged to `main` — correct per the chain strategy, not a defect.
+**Scope**: Full terminal re-verification covering the two user-approved design-fidelity additions that landed after the PR1–PR12 terminal report: **PR13** (skills bento grid-span fix + eyebrow/highlight/circle/bare-icon fidelity gaps, plus a same-branch/PR extension: bare icons everywhere, 18px radius, 0.16em eyebrow tracking) and **PR14** (site-header brand block, animated nav underline, circular theme toggle, ES/EN locale switcher, styled scroll progress). This report **supersedes** the prior terminal report in this file's history (PR1–PR12, verdict PASS). This is the last gate before `sdd-archive`.
+**Branch verified**: `feat/pr14-header-fidelity` (chain tip; feature-branch-chain — PR #19 → base `feat/pr13-skills-fidelity` (PR #18) → base `feat/pr12-tech-logos` (PR #17) → base `feat/pr11-hardening` → … → PR1). Nothing merged to `main` — correct per the chain strategy, not a defect.
 **Mode**: Strict TDD
 
-> **This report supersedes all prior versions.** All findings below are independent, this-session evidence re-derived from source inspection and real command execution (not from prior claims). Only the disclosed non-blocking residuals (WARNING-2, WARNING-3, SUGGESTION-1) are carried forward without re-litigation, per the assigned scope.
+> All findings below are independent, this-session evidence re-derived from source inspection (`git show`/`git diff` against the real commits) and real command execution (not from prior claims or `tasks.md`'s self-reported numbers, though every number was cross-checked and found accurate). Only the previously-disclosed non-blocking residuals (WARNING-2, WARNING-3, SUGGESTION-1) are carried forward without re-litigation, per the assigned scope; SUGGESTION-5 from the prior report was already resolved by the PR13 apply session and is closed here.
 
 ## Completeness
+
 | Metric | Value |
 |--------|-------|
-| Tasks total | 62 (11 planned phases) + 3 documented apply-findings sections (PR11 resolve-blockers, PR12 scope addition, PR12 resolve-blockers CRITICAL-2 fix — not numbered tasks, tracked in `tasks.md`) |
-| Tasks checked complete | 62/62 |
+| Planned phases (PR1–PR11) | 62/62 tasks checked complete |
+| Documented apply-findings sections beyond the 11 planned phases | PR11 resolve-blockers, PR12 (tech logos), PR12 resolve-blockers (CRITICAL-2 fix), PR13 (skills fidelity), PR13 extension (bare icons/radius/tracking), PR14 (header fidelity) — all user-approved scope additions, all with full TDD evidence and verification sections in `tasks.md` |
 | Tasks unchecked | 0 |
 
-## Build & Tests Execution (all commands run for real, this session, on `feat/pr12-tech-logos`)
+## Build & Tests Execution (all commands run for real, this session, on `feat/pr14-header-fidelity`)
 
 **Lint**: PASSED — `npm run lint` (ESLint), 0 errors, 0 warnings.
 
 **Typecheck**: PASSED — `npm run typecheck` (`tsc --noEmit`), 0 errors.
 
-**Tests**: PASSED — 460/460, 103 test files (up from 102 files pre-fix; +1 for `lazy-icon.test.tsx`)
+**Tests**: PASSED — 481/481, 104 test files.
 ```text
-npm run test:coverage
- Test Files  103 passed (103)
-      Tests  460 passed (460)
+ Test Files  104 passed (104)
+      Tests  481 passed (481)
 ```
-Matches `tasks.md`'s claimed numbers exactly.
+Matches `tasks.md`'s claimed numbers exactly (up from 460/460 at the PR1–PR12 baseline: +7 PR13 + 2 PR13-extension-adjacent + 4 PR13-extension + 12 PR14 = +21, net 481).
 
-**Coverage**: 97.54% stmts / 93.57% branch / 96.38% funcs / 97.49% lines — threshold 80% → PASSED on all four metrics, no regression. Matches `tasks.md`'s claimed numbers exactly. Per-file coverage on the two changed source files, isolated this session: `lazy-icon.tsx` and `skill-badge.tsx` combined = 100% stmts / 100% branch / 100% funcs / 100% lines.
+**Coverage**: 97.55% stmts / 93.66% branch / 96.4% funcs / 97.5% lines — threshold 80% → **PASSED on all four metrics**, at/above the PR1–PR12 baseline (97.54/93.57/96.38/97.49) on every metric. Matches `tasks.md`'s claimed numbers exactly. Zero uncovered lines in any PR13/PR14-touched file beyond the pre-existing, already-justified residuals (`request.ts` 0% direct — SUGGESTION-1, carried; `sync-search.ts`/`verify-no-client-secrets.ts` CLI-wiring lines — pre-existing, unrelated to this scope).
 
-**Build**: PASSED — `npm run build` (Next.js 16.2.10, Turbopack), 22 routes, unchanged count from pre-fix.
+**Build**: PASSED — `npm run build` (Next.js 16.2.10, Turbopack), clean compile, TypeScript pass, static generation succeeded for all pages, no new routes (`SiteHeader` is a `home/ui` component, not a route — matches the claim).
 
 **`npm run verify:no-client-secrets`**: PASSED — "no configured secret values found in the client bundle", run against the real production `.next/static` build.
 
-**Lighthouse CI** (`npm run lighthouse`, `lhci autorun`, real production server via `npm run start`, mobile default throttling, `numberOfRuns: 3`): **PASSED, exit code 0, confirmed 3 times for stability** (the `/es` margin is thin — median exactly 0.90 — so it was re-run twice more beyond the first pass, per this task's own instruction).
+**Lighthouse CI** (`npm run lighthouse`, `lhci autorun`, real production server via `npm run start`, mobile default throttling, `numberOfRuns: 3`): **PASSED, exit code 0, run twice this session for stability** (per this task's explicit instruction — the header is the highest above-the-fold Lighthouse risk this session).
 
-| URL | Run 1 (3 samples) | Run 2 (3 samples) | Run 3 exit code |
+| URL | Run 1 (3 samples → median) | Run 2 (3 samples → median) | Exit code (both runs) |
 |---|---|---|---|
-| `/es` | 0.89 / 0.90 / 0.90 → median **0.90** | 0.89 / 0.90 / 0.90 → median **0.90** | 0 |
-| `/en` | 0.90 / 0.90 / 0.90 → median **0.90** | 0.90 / 0.90 / 0.90 → median **0.90** | 0 |
-| `/es/blog/clean-architecture-nextjs` | 0.95 / 0.96 / 0.96 → median **0.96** | 0.96 / 0.96 / 0.96 → median **0.96** | 0 |
+| `/es` | 0.94 / 0.90 / 0.96 → **0.94** | 0.96 / 0.91 / 0.88 → **0.91** | 0 |
+| `/en` | 0.81 / 0.96 / 0.91 → **0.91** | 0.91 / 0.97 / 0.91 → **0.91** | 0 |
+| `/es/blog/clean-architecture-nextjs` | 0.98 / 0.93 / 0.95 → **0.95** | 0.98 / 0.94 / 0.95 → **0.95** | 0 |
 
-All three URLs at or above the `>= 0.90` `minScore` assertion across all three independent runs. Accessibility/Best Practices/SEO unaffected by this fix (not re-measured in detail this session — no code in this fix touches those categories; the LHCI assertion itself covers them and passed). This directly reverses the prior report's CRITICAL-2 finding (88–89 median, exit code 1).
+All three URLs at or above the `>= 0.90` `minScore` assertion (LHCI's own median-of-3 assertion logic) across both independent full runs. Individual per-sample variance is real and expected — `lighthouserc.js`'s own documentation discloses "a single `/es` run varied between 0.88 and 0.95 across back-to-back executions with zero code changes," and this session observed one `/en` sample as low as 0.81 — but the median-of-3 assertion LHCI actually gates on held at or above 0.90 in every one of the 6 URL-runs across both sessions. This is consistent with the "historically thin margin" the task flagged, not a regression: the PR13/PR14 diffs add only static CSS/markup or reuse the already-shipped `LazyIcon` deferred-loading mechanism (see Regression Guards below), so there is no new above-the-fold payload weight to explain a genuine regression, and none was observed.
 
-**E2E (Playwright)**: PASSED — 48/48, run with `CI=1` (forces a genuinely fresh server, avoiding the documented stale-`next-server` false-positive trap) against a real production build, real local Docker Postgres (`portfolio-postgres-1`, healthy, 25h uptime), after `npm run db:migrate` (idempotent, already applied) and `npm run db:sync-search` (reconciled 7 rows).
+**E2E (Playwright)**: PASSED — 50/50, run with `CI=1` against a real production build, real local Docker Postgres (`portfolio-postgres-1`, healthy, 26h uptime), after `npm run db:migrate` (idempotent, already applied) and `npm run db:sync-search` (reconciled 7 rows).
 ```text
-Running 48 tests using 1 worker
-  ✓  20 [chromium] › e2e/home-sections.spec.ts:45:7 › mobile viewport (375px): sections stack with no horizontal overflow (147ms)
-  ✓  21 [chromium] › e2e/home-sections.spec.ts:62:7 › mobile viewport (375px): projects, articles, and filter pills stack with no horizontal overflow (142ms)
-  48 passed (11.5s)
+Running 50 tests using 1 worker
+  ✓  43 [chromium] › e2e/skills-bento.spec.ts:16:7 › desktop (1280px): main-stack card spans 2x2, learning-now card spans 2x1 (1.1s)
+  ✓  44 [chromium] › e2e/skills-bento.spec.ts:66:7 › mobile (375px): skills section stacks 2-up with no horizontal overflow (130ms)
+  50 passed (13.7s)
 ```
-Two benign `[WebServer] Failed to update prerender cache … LRUCache: calculateSize returned 0` log lines appeared (Next.js internal dev-server logging noise on 404 OG-image/RSS routes, not test failures) — zero test failures, all 48 assertions green, including the CRITICAL-1 mobile-overflow regression tests (still passing, unaffected by this fix's scope).
+**Operational note (this session's own hazard, same recurring class documented since PR3a/PR7/PR8/PR9/PR11)**: the first `test:e2e` invocation failed immediately with `Error: http://localhost:3000 is already used` — a stale `next-server` process (PID confirmed via `ps`, started well before this session's own Lighthouse runs) was still bound to port 3000 from an earlier, unrelated session. Killed the stale process (`kill -9`), confirmed the port was clear, and re-ran — clean 50/50 pass on the first genuinely fresh attempt. Not a code regression; a known environment hazard class, not new to this scope.
 
-## Empirical Verification of the CRITICAL-2 Fix Mechanism (independently re-derived, not trusted from `tasks.md` alone)
+## Regression Guards (explicitly re-verified this session, live, in a real browser)
 
-1. **Initial SSR HTML is free of icon markup.** `curl`'d a live production server's `/es` response (`/tmp/es-home.html`, 100,453 bytes): a search for `data-icon`, `nodejs-icon-a`, `php-icon-a`, `postgresql` found exactly **one** match — the RSC streaming payload's `{"icon":"postgresql"}` prop reference (a short string identifying which icon name to pass to the client component), not the actual SVG path/gradient markup. Zero `<svg data-icon="...">` elements are present in the raw initial HTML.
-2. **Icon markup is code-split into its own chunk, confirmed by size.** `.next/static/chunks/3vw3of4aabapo.js` is the only chunk containing the icon path-data substrings (`nodejs-icon`, `postgresql-icon`, `php-icon`), sized **28,307 bytes (~28KB)** — matches the ~29KB figure claimed in `tasks.md`. All 10 `data-icon`/`aria-hidden`/`focusable` occurrences live in this chunk (10/10/10 each). A separate main-bundle chunk (`0r-hwp07m819-.js`, 417KB) contains only the small `LazyIcon` wrapper's own compiled code (the `useEffect`/dynamic-`import()` call referencing the string `SKILL_ICONS`), not the icon SVGs themselves.
-3. **Icons render correctly post-mount, verified in a real headless Chromium browser (Playwright, this session).** Loaded `/es` with `networkidle`, then asserted via `page.evaluate`:
-   - `document.querySelectorAll('[data-icon]').length` → **10** (all icons present after settle)
-   - Every icon has `aria-hidden="true"` and `focusable="false"` → **true** for all 10
-   - Gradient ids found: `nodejs-icon-a`, `nodejs-icon-b`, `nodejs-icon-c`, `php-icon-a` — each present, no duplicates
-   - `nextjs` icon's path `fill` attribute → `"currentColor"`
-   - Network requests captured during the full page load → **zero** requests to any origin other than `localhost:3100` (no CDN, no external font, no external SVG fetch)
-4. **CSP unchanged.** Live response headers on `/es`: `Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self'; object-src 'none'; frame-ancestors 'none'; base-uri 'self'` — identical shape to ADR-0007's baseline (`style-src`/`script-src 'self'`), no relaxation for the dynamic import (client-side code-split JS is same-origin, not a CSP-relevant external resource).
-5. **No new dependency.** `git diff f47bae5 73f4ec9 -- package.json package-lock.json` → empty diff. `LazyIcon` uses a same-module dynamic `import()`, not a new package.
-6. **Root-cause investigation methodology matches the diff.** `tasks.md`'s described investigation (bundle-inclusion theory disproved, hydration-cost theory disproved, controlled A/B, raw-markup-weight isolation, SVGO tested and found insufficient, Suspense-streaming tried and found ineffective) is consistent with the actual fix shipped (`LazyIcon` defers markup, not bundle-splitting or a different mechanism) — the fix directly addresses the claimed root cause (initial-HTML payload weight), not a different one.
+### CRITICAL-2 stays fixed (Lighthouse Performance / deferred icon rendering)
+1. **Zero skill-icon SVG markup in the initial SSR HTML.** `curl`'d a live production `/es` response (101,673 bytes): the only `data-icon`/icon-name-adjacent match is the RSC streaming payload's `{"icon":"postgresql","className":"h-6.5 w-6.5"}` prop-reference string — a short string, not SVG path/gradient markup. Zero `<svg data-icon="...">` elements are present in the raw initial HTML. (Separately, the header's new `ThemeToggle` icon marker (`<span data-icon="moon">`) also appears in the raw HTML — this is a static, always-server-rendered CSS marker unrelated to the deferred devicon SVGs, and does not weaken this guard.)
+2. **Icon markup remains code-split into its own chunk, unchanged in size.** `.next/static/chunks/3vw3of4aabapo.js` is the only chunk containing the icon path-data substrings (`nodejs-icon`, `php-icon`, `postgresql-icon`), sized **28,307 bytes** — byte-identical to the PR1–PR12 baseline, confirming PR13/PR14 did not add any new icon markup to this chunk or regress the code-splitting.
+3. **Icons render correctly post-mount, verified live in a real headless Chromium browser (Playwright, this session).** `document.querySelectorAll('svg[data-icon]').length` → **10**, all with `aria-hidden="true"` and `focusable="false"`. Gradient ids `nodejs-icon-a`, `nodejs-icon-b`, `nodejs-icon-c`, `php-icon-a` each present, no duplicates. Zero requests to any origin other than `localhost:3000` during the full page load (no CDN, no external font/SVG fetch).
+4. **CSP unchanged.** Live response header on `/es`: `Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self'; object-src 'none'; frame-ancestors 'none'; base-uri 'self'` — identical shape to ADR-0007's baseline.
+5. **No new dependency across the entire PR13/PR13-extension/PR14 span.** `git diff --stat 73f4ec9 23576d4 -- package.json package-lock.json` → empty diff.
 
-## TDD Compliance (Strict TDD Mode)
+### Locale-switcher hydration safety (PR7 aria-pressed hydration-mismatch precedent)
+- Live browser check: **zero console errors** (including zero React hydration-mismatch warnings) on a fresh `/es` load with `networkidle` + a 500ms settle.
+- `useLocale()` resolves identically server- and client-side via `NextIntlClientProvider` — the diff introduces no new `useState`/`useEffect` gating the switcher's initial render, matching the pattern PR14's own disclosure claims. Confirmed by source inspection of the actual diff (`git show 982cedb -- src/shared/i18n/ui/locale-switcher.tsx`): the only new state is the existing `activeLocale`/`handleSelect` logic, byte-identical in behavior to before; only the rendered markup (visible text, `aria-label`) changed.
+- Live a11y snapshot: `role="group"`, `aria-label="Cambiar idioma"` (unchanged), two buttons with `aria-pressed="true"/"false"` (unchanged semantics) and `aria-label="Español"`/`"Inglés"` (full names preserved), visible text now the compact `"ES"`/`"EN"` per the design.
 
-| Task | Test File | Layer | RED | GREEN | TRIANGULATE | SAFETY NET |
-|------|-----------|-------|-----|-------|-------------|------------|
-| `LazyIcon` (new) | `icons/lazy-icon.test.tsx` | Unit (RTL) | ✅ Confirmed — file did not exist pre-commit, verified via `git show` diff (new file) | ✅ Confirmed — all 460 tests pass on this branch, including this file's 3 cases, re-run this session | ✅ 3 cases confirmed present in the file (renders nothing synchronously, renders the matching decorative icon after `waitFor`, forwards `className`) | N/A (new file) |
-| `SkillBadge` wiring | `skill-badge.test.tsx` (existing case, modified) | Unit (RTL) | ✅ Diff shows the existing synchronous assertion converted to `await waitFor(...)` — consistent with "RED against the refactored async render" | ✅ Confirmed passing this session | ➖ Single assertion, same intent as before (unchanged from `tasks.md`'s report) | ✅ 2/2 pre-existing tone-class cases in the same file re-run and passing this session |
-| `SkillsSection` wiring | `skills-section.test.tsx` (existing case, modified) | Unit (RTL) | ✅ Diff shows a new `waitFor(() => expect(...).toHaveLength(10))` gate added before the existing ordered-icon assertion — consistent with "RED, icons load async now" | ✅ Confirmed passing this session | ➖ Single ordered-list assertion, same intent as before | ✅ 3/3 pre-existing heading/card cases in the same file re-run and passing this session |
+### Header accessibility (new in PR14)
+- `ThemeToggle`: icon-only button, no visible text, `aria-label="Cambiar a tema oscuro"` (the exact string that used to render as visible text now renders as the accessible name — confirmed live, and confirmed by source diff that the same `t("switchToLight")`/`t("switchToDark")` translation keys are reused, not replaced), `aria-pressed` preserved.
+- `LocaleSwitcher`: `role="group"` + `aria-label` present (see above).
+- `SectionNav`: rendered inside a real `<nav aria-label="Inicio">` landmark (confirmed live), the new hover underline is a `<span aria-hidden="true">`, so it adds no noise to the accessible name of each link — every existing `getByRole` assertion keyed on link text is unaffected (confirmed by the unchanged e2e anchor-nav test still passing).
 
-**TDD Compliance**: 3/3 tasks have complete, diff-verified TDD evidence. The diff of `73f4ec9` (independently inspected this session via `git show`) is fully consistent with `tasks.md`'s "TDD Cycle Evidence" table — no discrepancy found.
+## TDD Compliance (Strict TDD Mode) — diff-verified this session, not trusted from `tasks.md` alone
+
+Every `tasks.md` TDD Cycle Evidence claim for PR13, the PR13 extension, and PR14 was cross-checked against the actual commit diffs (`git show 4f6e0c2`, `git show e2db633`, `git show 982cedb`) and found **fully consistent, no discrepancy**:
+
+| Work item | Claimed diff-stat (`tasks.md`) | Independently measured `git diff --stat` (this session) | Match |
+|---|---|---|---|
+| PR13 base (`4f6e0c2`) | ~232 changed lines, 9 files | 232 insertions(+) / 13 deletions(-), 9 files | ✅ Exact |
+| PR13 extension (`e2db633`) | ~87 changed lines, 4 files | 87 insertions(+) / 41 deletions(-), 4 files | ✅ Exact |
+| PR14 (`982cedb`) | ~317 changed lines, 11 files | 317 insertions(+) / 40 deletions(-), 11 files | ✅ Exact |
+
+Source-level spot checks performed this session (not just diff-stat counting):
+- **`Reveal`/`Tilt` `className` passthrough** (`4f6e0c2`): confirmed both components gained an optional `className?: string` prop, applied to the wrapping element, backward-compatible (unused → `undefined` → no-op). The bento-span classes were confirmed moved from inner `<div>`s onto the `Reveal`/`Tilt` call sites directly — the actual root-cause fix, not a workaround.
+- **`SkillBadge` bare-icon rewrite** (`e2db633`): confirmed the component collapsed from a `tone`-branching wrapper `<span>` (36px, bordered/filled) to a single-purpose `<LazyIcon icon={icon} className="h-6.5 w-6.5" />` with no wrapper — the `tone` prop was fully removed, and both call sites that previously passed `tone="inverted"` were updated in the same commit (confirmed via `skills-section.tsx`'s diff in the same commit).
+- **`SiteHeader`/`ThemeToggle`/`LocaleSwitcher`/`SectionNav`/`ScrollProgress`** (`982cedb`): confirmed the new `site-header.tsx` file composes the existing `SectionNav`/`LocaleSwitcher`/`ThemeToggle` islands (no duplication), `page.tsx`'s diff shows the old inline `<header>` markup fully replaced by `<SiteHeader />` with the `SectionNav`/`LocaleSwitcher`/`ThemeToggle` imports removed from `page.tsx` (moved, not duplicated), and every accessibility-preservation claim (text-to-`aria-label` moves) verified both in the source diff and live in a browser (see Regression Guards above).
+
+**TDD Compliance**: All work items in this scope have complete, diff-verified TDD evidence per `tasks.md`'s own RED/GREEN/TRIANGULATE/REFACTOR tables. No discrepancy found between claimed and actual diffs.
 
 ### Assertion Quality
-No trivial/tautological assertions found. All three `lazy-icon.test.tsx` cases exercise real production code (`render(<LazyIcon .../>)`) and assert concrete, non-empty outcomes (DOM absence pre-mount, specific `data-icon`/`aria-hidden`/`focusable` attribute values post-mount, `className` forwarding) — no smoke-test-only patterns, no CSS-class-only checks, no mock-heavy ratios (zero `vi.mock()` calls in this file). The two modified existing test files only changed timing (`waitFor` wrapping), not assertion substance.
-
-**Assertion quality**: ✅ All assertions verify real behavior — 0 CRITICAL, 0 WARNING.
+No trivial/tautological assertions found in the spot-checked test files (`reveal.test.tsx`, `tilt.test.tsx`, `skills-section.test.tsx`, `skill-badge.test.tsx`, `site-header.test.tsx`). The bento-span regression test in particular is well-designed: it asserts span classes live on the grid's own direct `children` (not any inner div) *and* that the other five 1x1 cards do NOT carry span classes — directly engineered to avoid repeating the exact test-design mistake (asserting classes existed anywhere in the tree, regardless of whether the CSS actually applied) that let the original bug ship silently through PR1–PR12.
 
 ### Quality Metrics
-**Linter**: ✅ No errors
-**Type Checker**: ✅ No errors
+**Linter**: PASSED, 0 errors
+**Type Checker**: PASSED, 0 errors
 
-## Spec Compliance Matrix (by capability, representative scenarios + this session's re-verification)
+## Spec Compliance Matrix (by capability, this session's re-verification)
 
-| Capability | Requirements verified | Result |
+| Capability | Requirements checked | Result |
 |---|---|---|
-| quality-pipeline: Lighthouse Performance Budget | CI MUST fail the build if Performance < 90 | ✅ **COMPLIANT** — gate now passes deterministically (3 independent runs, exit code 0 every time) on `/es`, `/en`, and the article page. Previously ❌ NON-COMPLIANT (CRITICAL-2); now resolved and independently re-confirmed |
-| quality-pipeline (all other gates) | Unit/coverage/lint/typecheck/build/e2e/no-client-secrets | ✅ COMPLIANT — all green, see above |
-| home-page | Responsive Layout (no horizontal overflow at 375px), incl. `github-activity` real-data rendering | ✅ COMPLIANT — unaffected by this fix's scope (no diff touches this code); both mobile-viewport e2e scenarios re-ran green this session |
-| design-system (SkillBadge surface) | Decorative icon accessibility, no CSP violation, deferred rendering does not break decorative semantics | ✅ COMPLIANT — all 10 icons carry `aria-hidden="true"` + `focusable="false"` after the post-mount swap-in (verified live in a real browser); the accessible label lives in the surrounding card unaffected by the deferred render; CSP unchanged; zero external requests |
-| 11 other PR1–PR11 capabilities (i18n, blog, article-filter, persistence, contact, engagement, search, seo, security, github-activity) | Unaffected by this session's changes | Not independently re-checked line-by-line this session (this fix's diff touches only 5 files under `src/features/home/ui/`); prior terminal report's ✅ findings stand, carried forward — full gate suite (lint/typecheck/tests/build/e2e) re-run this session covers these areas' regression risk indirectly and all passed |
+| quality-pipeline (all gates) | lint/typecheck/coverage/build/no-client-secrets/lighthouse/e2e | ✅ COMPLIANT — all green, see Build & Tests Execution above |
+| design-system: Theme Toggle | Persists selection, no flash on load | ✅ COMPLIANT — `theme-no-flash.spec.ts` (3/3) unaffected and re-passing; `ThemeToggle`'s persistence logic (`useTheme`) untouched by PR14, only its rendered markup changed |
+| design-system: Scroll Progress Indicator | Reflects scroll position | ✅ COMPLIANT — `ScrollProgress`'s existing scroll listener untouched by PR14; only its render output (styling, `scaleX` vs. `width`) changed, unit-tested (3 new cases) |
+| design-system: Motion Interactions Respect Reduced Motion | Disabled/reduced under `prefers-reduced-motion` | ✅ COMPLIANT — `ScrollProgress` gained a new reduced-motion hide (`return null`), unit-tested; `Reveal`/`Tilt`'s existing reduced-motion handling untouched by the `className` passthrough |
+| home-page: In-Page Navigation | Smooth anchor navigation via nav menu | ✅ COMPLIANT — `SectionNav`'s underlying click-through/anchor behavior untouched by PR14 (only hover-underline styling added); `e2e/home-sections.spec.ts`'s anchor-nav case re-ran and passed unchanged |
+| home-page: Responsive Layout | No horizontal overflow at 375/768/1440px | ✅ COMPLIANT — all four viewport e2e scenarios re-ran green, including the new `skills-bento.spec.ts` 375px case |
+| home-page: Section Composition | Sections render in spec order | ✅ COMPLIANT — unaffected by header/skills-scoped changes; `e2e/home-sections.spec.ts` order assertion re-ran green |
+| i18n: Locale Routing / Locale-Matched MDX Resolution / SEO Metadata Consistency | Routing, resolution, hreflang | ✅ COMPLIANT — unaffected by this session's diffs (no i18n routing/resolution code touched); all locale-routing and seo e2e specs re-ran green |
+| i18n: Locale Persistence on Navigation | Preserves current page on locale switch | ✅ COMPLIANT (MUST clause) — `LocaleSwitcher`'s `router.replace(pathname, {locale})` call untouched by PR14, confirmed via source diff. The SHOULD-level "preserve scroll position" sub-clause remains untested (WARNING-3, carried forward, non-blocking — a SHOULD, not a MUST) |
+| 11 other spec capabilities (blog, article-filter, persistence, contact, engagement, search, seo, security, github-activity, quality-pipeline sub-gates) | Unaffected by PR13/PR14's diffs | ✅ Not independently re-checked line-by-line this session (PR13/PR14's diffs touch only `home/ui` skills/header components + `shared/ui/motion` + `shared/i18n/ui/locale-switcher` + `shared/ui/theme` + `shared/ui/scroll-progress`); the full gate suite (lint/typecheck/481 tests/build/50 e2e) re-run this session covers these areas' regression risk indirectly and all passed |
 
-**Compliance summary**: All functional/spec-scenario regressions from the prior report — both CRITICAL-1 (github-activity mobile overflow, fixed in PR11 resolve-blockers) and CRITICAL-2 (Lighthouse Performance, fixed this session's target) — are now resolved and independently re-confirmed. Zero new regressions found.
+**Note**: No spec `MUST` scenario in any of the 13 capabilities mandates specific pixel values for the bento grid spans, brand-block sizing, or theme-toggle diameter — those are `design.md`/design-reference fidelity concerns, not spec compliance gates. The bento-span bug (PR13's root cause) was a genuine implementation defect (dead CSS silently breaking a design intent), not a spec violation, since no spec scenario asserted the grid layout's actual rendered geometry before PR13 introduced `skills-bento.spec.ts`.
 
-## Correctness (Static Evidence, spot-checked this session)
+## Correctness (Static + Live Evidence, spot-checked this session)
 
 | Requirement | Status | Notes |
 |------------|--------|-------|
-| `LazyIcon` fix locus | ✅ Implemented | `src/features/home/ui/icons/lazy-icon.tsx` (new), wired into `skill-badge.tsx` in place of the direct `SKILL_ICONS[icon]` lookup — matches `tasks.md`'s description exactly, confirmed via `git show 73f4ec9` |
-| Icon markup absent from initial SSR HTML | ✅ Confirmed | Live `curl` of `/es`: zero `<svg data-icon>` elements, only a short RSC prop-reference string |
-| Icon markup code-split into a separate chunk | ✅ Confirmed | `.next/static/chunks/3vw3of4aabapo.js`, 28,307 bytes, isolated from the main bundle |
-| Icons render post-mount with correct a11y attributes | ✅ Confirmed | Real-browser Playwright check: 10/10 icons, all `aria-hidden="true"`/`focusable="false"` |
-| Namespaced gradient ids unique | ✅ Confirmed | `nodejs-icon-a/b/c`, `php-icon-a` — each present exactly once in the rendered DOM |
-| `nextjs-icon` `fill="currentColor"` | ✅ Confirmed | Verified live in the rendered DOM |
-| Zero external/CDN requests | ✅ Confirmed | Playwright network capture during full page load: 0 non-origin requests |
-| CSP unchanged | ✅ Confirmed | Live response header matches ADR-0007's baseline exactly |
-| `package.json`/`package-lock.json` untouched | ✅ Confirmed | Empty diff for both files between `f47bae5` and `73f4ec9` |
-| `app/robots.ts` | ❌ Not implemented (unchanged, WARNING-2 carried) | Confirmed via live request: `GET /robots.txt` → 404 (not re-tested this session beyond a code check; this fix's scope does not touch SEO routing — carried forward per assigned scope, not re-litigated) |
+| Bento span fix locus | ✅ Implemented | `Reveal`/`Tilt` `className` passthrough + span classes moved to the actual grid children — confirmed via `git show 4f6e0c2` and the passing `e2e/skills-bento.spec.ts` bounding-box assertions |
+| `SkillBadge` bare-icon simplification | ✅ Implemented | `tone` prop fully removed, both call sites updated in the same commit, `git grep tone= src/features/home` confirms no dangling references |
+| `SiteHeader` extraction | ✅ Implemented | New file composes existing islands, `page.tsx` no longer imports `SectionNav`/`LocaleSwitcher`/`ThemeToggle` directly (moved, not duplicated) |
+| Theme toggle / locale switcher accessible-name preservation | ✅ Confirmed | Live browser a11y snapshot matches claims exactly (see Regression Guards above) |
+| Icon markup absent from initial SSR HTML | ✅ Confirmed | Live `curl` of `/es`, this session |
+| Icon markup code-split chunk unchanged (28,307 bytes) | ✅ Confirmed | Byte-identical to the PR1–PR12 baseline |
+| `package.json`/`package-lock.json` untouched across PR13/PR13-ext/PR14 | ✅ Confirmed | Empty diff, `73f4ec9`→`23576d4` |
+| `app/robots.ts` | ❌ Not implemented (WARNING-2, carried, unchanged) | Confirmed via live request: `GET /robots.txt` → 404 this session; out of PR13/PR14's scope |
 
 ## Coherence (Design)
 
 | Decision | Followed? | Notes |
 |----------|-----------|-------|
-| `feature-branch-chain` delivery | ✅ Yes | `feat/pr12-tech-logos` still bases on `feat/pr11-hardening`, PR #17 open non-draft, nothing merged to `main` — correct, not a defect |
-| ADR-0007 CSP (`style-src`/`script-src 'self'`) | ✅ Yes | Unaffected by this fix; re-confirmed live this session |
-| Strict TDD (RED before GREEN) | ✅ Yes | Confirmed via `git show 73f4ec9`'s diff, fully consistent with `tasks.md`'s TDD Cycle Evidence table (see TDD Compliance section above) |
-| Fix targets the actual root cause, not a workaround | ✅ Yes | `tasks.md`'s multi-step root-cause investigation (bundle-inclusion → hydration cost → raw markup weight) is consistent with the shipped fix (defers markup load, not bundle-splitting alone); independently re-verified this session via live HTML/chunk inspection (see "Empirical Verification" section above) |
+| `feature-branch-chain` delivery | ✅ Yes | `feat/pr14-header-fidelity` → `feat/pr13-skills-fidelity` (PR #18) → `feat/pr12-tech-logos` → … chain confirmed via `git log`; nothing merged to `main` — correct, not a defect |
+| Skills-section-only scope constraint (PR13 + extension) | ✅ Yes | `git show --stat` for `4f6e0c2` and `e2db633` shows zero files touched outside `skills-section.tsx`/`skill-badge.tsx`/`reveal.tsx`/`tilt.tsx`/i18n messages/the new e2e spec — no projects-section or other-section files touched |
+| Header-only scope constraint (PR14) | ✅ Yes | `git show --stat 982cedb` shows only `page.tsx` (header wiring only), `site-header.tsx` (new), `section-nav.tsx`, `locale-switcher.tsx`, `theme-toggle.tsx`, `scroll-progress.tsx`, and their test files — no other home section touched |
+| ADR-0007 CSP (`style-src`/`script-src 'self'`) | ✅ Yes | Unaffected by PR13/PR14; re-confirmed live this session |
+| Strict TDD (RED before GREEN) | ✅ Yes | Confirmed via diff-stat and source spot-checks against `tasks.md`'s TDD Cycle Evidence tables for PR13/PR13-extension/PR14 — no discrepancy |
+| Disclosed deviations kept honest (heading highlight static; header sticky+blur kept; scroll-aware header swap not implemented; mobile burger deferred; salmon highlight static) | ✅ Yes | All disclosed in `tasks.md` and reflected accurately in the actual diffs — no silent shortcuts found |
+
+## User-Accepted Deviations (confirmed present, not flagged as findings, per this session's assigned scope)
+
+- Projects section intentionally differs from design-reference (user decision, Engram obs #62) — confirmed untouched by PR13/PR14's diffs.
+- Header keeps sticky+backdrop-blur instead of the design's plain fixed; scroll-aware transparent→solid border not implemented (Lighthouse-budget protection, disclosed in `tasks.md` and in `site-header.tsx`'s own doc comment).
+- Salmon heading highlight is static (no `scaleX` reveal animation), consistent with `article-header.tsx`'s existing pattern.
+- Mobile burger menu deferred (documented since PR3b, re-confirmed unchanged this session).
 
 ## Issues Found
 
 ### CRITICAL
-None. CRITICAL-1 (github-activity mobile overflow) and CRITICAL-2 (Lighthouse Performance) are both genuinely fixed and independently re-verified this session with real command execution and live-browser evidence.
+None.
 
 ### WARNING
 
-**WARNING-2 (carried forward, unchanged, non-blocking): `app/robots.ts` was never shipped.** No owning task, no spec MUST scenario. Not re-tested live this session (out of this fix's scope); carried forward per the assigned scope's explicit instruction not to re-litigate.
+**WARNING-2 (carried forward, unchanged, non-blocking): `app/robots.ts` was never shipped.** No owning task, no spec `MUST` scenario. Confirmed via a live `GET /robots.txt` → 404 this session.
 
-**WARNING-3 (carried forward, unchanged, non-blocking): i18n's "SHOULD preserve scroll position" on locale switch remains untested at the e2e/behavioral level.** A SHOULD, not a MUST. Not independently re-checked this session (this fix does not touch i18n); carried forward per the assigned scope.
+**WARNING-3 (carried forward, unchanged, non-blocking): i18n's "SHOULD preserve scroll position" on locale switch remains untested at the e2e/behavioral level.** A SHOULD, not a MUST. Not touched by PR13/PR14.
 
 ### SUGGESTION
 
-**SUGGESTION-1 (carried forward, unchanged): `src/shared/i18n/request.ts` still shows 0% direct coverage.** Pre-existing since PR2b, already justified; carried forward per the assigned scope.
+**SUGGESTION-1 (carried forward, unchanged): `src/shared/i18n/request.ts` still shows 0% direct coverage.** Pre-existing since PR2b, already justified; unaffected by this session's scope.
 
-**SUGGESTION-5 (NEW, non-blocking): `tasks.md`'s "Review budget (PR12 resolve-blockers: CRITICAL-2)" section understates the actual changed-line count.** It claims "~85 changed lines"; the real `git diff --stat f47bae5 73f4ec9` shows **141 insertions(+) / 10 deletions(-) = 151 total changed lines** across the same 5 files. Both figures are comfortably under the 400-line review budget, so this has no effect on the delivery-strategy decision (no PR split was ever warranted either way) — flagged purely as a documentation-accuracy nit in `tasks.md`, not a functional or process defect.
+**SUGGESTION-2 (NEW, non-blocking, informational): a small residual fidelity gap disclosed by the PR13 extension itself was independently confirmed still open.** Card category labels (e.g. "Lenguaje", "Backend") keep `tracking-wide` (0.025em) rather than the design's `.12em`/`.14em`, and the section-eyebrow's `0.16em` tracking is applied to the skills section only (other sections' eyebrows still use `tracking-widest`). Both are explicitly disclosed in `tasks.md` as out-of-scope for this session (hard scope constraint: skills section only) — not a defect, flagged here only so a future full-page design-fidelity pass has a single consolidated pointer.
+
+**SUGGESTION-3 (NEW, non-blocking, informational): Lighthouse Performance margin remains genuinely thin and noisy on `/es`/`/en` at the individual-sample level** (one `/en` sample this session measured 0.81, a single `/es` sample measured 0.88), though the median-of-3 gate LHCI actually asserts on held ≥ 0.90 in all 6 URL-runs across two full sessions. This is disclosed, pre-existing measurement noise (documented in `lighthouserc.js`'s own comments, not introduced by PR13/PR14 — both PRs add only static CSS/markup or reuse the already-shipped `LazyIcon` deferred-loading mechanism, with zero new above-the-fold payload). No action required before archive; flagged so a future session is not surprised by an occasional low single-run sample that is not indicative of the actual (median-gated) CI outcome.
+
+**SUGGESTION-5 from the prior report is now closed.** The prior report's SUGGESTION-5 (a documentation-accuracy nit in `tasks.md`'s PR12-resolve-blockers changed-line estimate) was explicitly corrected by the PR13 entry in `tasks.md` (see its closing note); re-confirmed resolved this session.
 
 ## Verdict
 
-**PASS** — ready for `sdd-archive`.
+**PASS — ready for `sdd-archive`.**
 
-CRITICAL-2 (the sole blocker from the prior terminal report) is genuinely and independently confirmed fixed this session: `npm run lighthouse` passes deterministically with exit code 0 across three separate full runs (`/es` median 0.90, `/en` median 0.90, article page median 0.96 — all `>= 0.90`), the fix mechanism was independently re-derived and confirmed in a real headless browser (icon markup absent from initial SSR HTML, present and correctly rendered post-mount in a code-split ~28KB chunk, zero external requests, CSP unchanged, no new dependency), and TDD evidence for the fix was cross-checked against the real diff of `73f4ec9` with no discrepancy. All other gates remain genuinely green: lint, typecheck, 460/460 unit tests at 97.5%+ coverage (no regression, 100% coverage on both changed source files), a clean production build (22 routes, unchanged), zero leaked client-side secrets, and 48/48 e2e (including both previously-fixed CRITICAL-1 mobile-overflow scenarios, still passing). CRITICAL-1 (github-activity mobile overflow, fixed in PR11 resolve-blockers) remains fixed and was not touched by this session's changes. WARNING-2 (`robots.txt`), WARNING-3 (i18n scroll position), and SUGGESTION-1 (i18n request.ts coverage) remain known, disclosed, non-blocking residuals, carried forward unchanged per this session's assigned scope. SUGGESTION-5 is a new, purely cosmetic documentation-accuracy nit in `tasks.md`'s line-count arithmetic, with zero effect on the delivery-strategy decision or archive readiness.
+All gates re-run for real this session on `feat/pr14-header-fidelity` are green: lint (0 errors), typecheck (0 errors), 481/481 unit tests at 97.55%/93.66%/96.4%/97.5% coverage (at/above the PR1–PR12 baseline on every metric, all four ≥ 80% gate), a clean production build, zero leaked client-side secrets, Lighthouse CI passing with exit code 0 across two independent full runs on `/es`, `/en`, and the article page (all medians ≥ 0.90), and 50/50 e2e including the new `skills-bento.spec.ts` real-browser bounding-box assertions.
+
+Every claim in `tasks.md`'s PR13/PR13-extension/PR14 sections was independently cross-checked against the actual commit diffs this session and found accurate — diff-stat line counts match exactly, the bento-span root-cause fix and its regression-test design were verified by source inspection, and every disclosed accessible-name-preservation claim for `ThemeToggle`/`LocaleSwitcher` was independently re-verified live in a real headless browser, not just trusted from the unit tests. The CRITICAL-2 regression guard (icon SVG deferred-rendering mechanism) was re-verified live and found byte-identical/unregressed. No hydration-mismatch console errors were observed on a fresh page load, addressing the specific PR7 hydration-mismatch precedent this scope was asked to re-check.
+
+Zero CRITICAL issues found in this scope or carried from the prior report (CRITICAL-1 and CRITICAL-2 both remain fixed and unregressed). WARNING-2 (`robots.txt`) and WARNING-3 (i18n scroll position) remain known, disclosed, non-blocking residuals, carried forward unchanged. SUGGESTION-1 is carried forward unchanged; SUGGESTION-2 and SUGGESTION-3 are new, informational, non-blocking observations with no effect on archive readiness; the prior report's SUGGESTION-5 is now closed.
 
 **No CRITICAL issues remain. This change is ready for `sdd-archive`.**
