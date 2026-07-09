@@ -1034,3 +1034,52 @@ Outstanding user action items, updated: (1) rotate the leaked
 live via this session's deploy log evidence, (3) create the 3 deploy
 secrets — **done** (`VPS_HOST`/`VPS_USER`/`VPS_SSH_KEY` now exist, this
 session's deploy run used them for real).
+
+### PR15 follow-up: CRITICAL-1 fix — X-Forwarded-For rate-limit bypass (2026-07-09, same branch/PR)
+
+Terminal verify over the combined PR1-PR15 scope returned **FAIL** with
+one CRITICAL, fixed immediately on `feat/pr15-infra` per this finding
+(full detail in `verify-report.md`):
+
+**Root cause**: both nginx configs (`default.ssl.conf` and
+`default.http-bootstrap.conf.disabled`) used `proxy_set_header
+X-Forwarded-For $proxy_add_x_forwarded_for;` — nginx's textbook
+**append-style** XFF variable, which appends `$remote_addr` to whatever
+value the client already sent rather than overwriting it.
+`src/shared/security/resolve-client-ip.ts` unconditionally trusts the
+**first** entry of `X-Forwarded-For`, which the `security` spec's own
+"Rate Limiting on Write/Query Endpoints" requirement explicitly says is
+safe **only** behind a sanitizing proxy (e.g. Vercel) and **MUST NOT**
+be trusted "on generic append-style proxies." PR15 silently changed the
+real production proxy from the design's assumed Vercel target to
+self-hosted nginx without re-validating that precondition — a real,
+previously-undisclosed regression: any external client could send
+`X-Forwarded-For: <fake-ip>` and have nginx forward `<fake-ip>,
+<real-ip>`, with the app taking the attacker-controlled first entry as
+the `ip_hash` rate-limiting key on all 5 rate-limited endpoints
+(`/api/contact`, `/api/engagement/[slug]`, `/api/engagement/views`,
+`/api/engagement/reactions`, `/api/search`) — defeating rate limiting
+entirely by rotating the header value per request.
+
+**Fix**: in both configs, changed `X-Forwarded-For` from append
+(`$proxy_add_x_forwarded_for`) to **reset** (`$remote_addr`) — nginx is
+the internet-facing edge with no further trusted proxy in front of it,
+so there is no upstream chain worth preserving; overwriting with the one
+value nginx itself observed (and the client cannot forge) closes the
+gap entirely. `X-Real-IP` was already correctly `$remote_addr` and
+needed no change. A comment was added at each `proxy_set_header
+X-Forwarded-For` line stating the security constraint explicitly, so a
+future edit can't silently reintroduce append-style forwarding without
+seeing why that would be wrong. **`resolve-client-ip.ts` was
+deliberately NOT touched** — its trust-the-first-entry contract is
+correct for a sanitizing edge; nginx (the edge) is what had to change to
+actually be one.
+
+**Verification**:
+- Both configs re-validated against real `nginx:1.27-alpine` containers on the local Docker network: bootstrap config (mounted as `default.conf`) — syntax OK; `default.ssl.conf` — fails specifically and only on the locally-missing certificate (same expected failure mode as every prior nginx verification in this PR, confirming the XFF fix introduced no syntax regression).
+- **Live spoofed-header test, not just a syntax check**: ran nginx (the fixed bootstrap config) in front of a real HTTP echo backend (`mccutchen/go-httpbin`, standing in for the app) on the local Docker network, then sent a request through nginx with `X-Forwarded-For: 1.2.3.4` set. The echo backend received `X-Forwarded-For: 192.168.65.1` (nginx's own observed `$remote_addr`) — **identical** to a control request sent with no `X-Forwarded-For` header at all. The spoofed value was fully discarded, not appended; nginx demonstrably overwrites rather than trusts client-supplied XFF values now.
+- Live spoof-verification against the real production endpoints (i.e. actually sending a forged header to `https://valenciafullstack.tech/api/...` and confirming the rate limit now holds) is deferred to the next scoped re-verify pass, per instruction — this session's local echo-backend test demonstrates the mechanism works, but was not repeated against the live site itself.
+
+**Commit**: `fix(infra): reset X-Forwarded-For at nginx edge to prevent rate-limit bypass` (2 files, 22 insertions/2 deletions) on `feat/pr15-infra`, pushed (updates PR #20). `feat/pr15-infra` merged into `develop` again and pushed — the deploy workflow's existing `nginx -t && nginx -s reload` step (added by the earlier TLS-cutover fix) applies this header-handling fix to production automatically, no manual server step needed.
+
+**Next recommended**: a scoped re-verify of CRITICAL-1 specifically (confirm the fix reached production and, if feasible within read-only constraints, that a spoofed `X-Forwarded-For` sent to the live site no longer survives past nginx), then `sdd-archive` if clean.
