@@ -1,4 +1,4 @@
-# Production stack for valenciafullstack.com — Hetzner VPS, single host.
+# Production stack for valenciafullstack.tech — Hetzner VPS, single host.
 # Deployed and operated per infra/README.md; NOT used for local development
 # (local dev uses `compose.yaml` + `npm run dev`, see the root README).
 #

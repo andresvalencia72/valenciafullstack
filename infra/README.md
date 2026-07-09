@@ -1,4 +1,4 @@
-# Production deployment — valenciafullstack.com
+# Production deployment — valenciafullstack.tech
 
 This stack runs the portfolio on a single Hetzner VPS: `nginx` terminates
 TLS and reverse-proxies to the `app` container, `app` talks to `postgres`
@@ -36,8 +36,8 @@ this change.
    docker compose -f docker-compose.prod.yml run --rm app npm run db:sync-search
    ```
 
-4. **Point DNS**: create an A record for `valenciafullstack.com` (and `www`)
-   at the server's IP. Wait for propagation (`dig valenciafullstack.com`
+4. **Point DNS**: create an A record for `valenciafullstack.tech` (and `www`)
+   at the server's IP. Wait for propagation (`dig valenciafullstack.tech`
    resolves correctly) before the next step — Let's Encrypt's HTTP-01
    challenge will fail otherwise.
 
@@ -47,7 +47,7 @@ this change.
    ```bash
    docker compose -f docker-compose.prod.yml run --rm certbot certonly \
      --webroot -w /var/www/certbot \
-     -d valenciafullstack.com -d www.valenciafullstack.com \
+     -d valenciafullstack.tech -d www.valenciafullstack.tech \
      --email <your-email> --agree-tos --no-eff-email
 
    mv infra/nginx/conf.d/default.ssl.conf.disabled infra/nginx/conf.d/default.ssl.conf
@@ -56,7 +56,7 @@ this change.
    docker compose -f docker-compose.prod.yml exec nginx nginx -s reload
    ```
 
-6. **Verify**: `https://valenciafullstack.com` loads over HTTPS, redirects
+6. **Verify**: `https://valenciafullstack.tech` loads over HTTPS, redirects
    `http://` to `https://`, and the `certbot` service is running (it
    renews automatically from here on — no further manual steps).
 
@@ -70,7 +70,7 @@ forward.
 |-------|----------|
 | Builds never run on the server | The VPS has 4GB RAM — GH-hosted runners build the image; the server only `docker compose pull`s the finished image. |
 | No host ports on `app`/`postgres` | Docker writes its own iptables rules and **bypasses ufw** for anything under `ports:`. Only `nginx` publishes 80/443 (the ports ufw allows); `app`/`postgres` use `expose:` — reachable from `nginx`/each other over the compose network only, never from the internet directly. |
-| Why TLS can't be part of first boot | `default.ssl.conf` references certificate files at `/etc/letsencrypt/live/valenciafullstack.com/...` that don't exist until certbot issues them — nginx refuses to start with a `ssl_certificate` pointing at a missing file. `default.conf` (HTTP-only) is the bootstrap default specifically so nginx can start, serve the ACME challenge, and let certbot obtain the first certificate; then the TLS bootstrap step (above) swaps configs and reloads. |
+| Why TLS can't be part of first boot | `default.ssl.conf` references certificate files at `/etc/letsencrypt/live/valenciafullstack.tech/...` that don't exist until certbot issues them — nginx refuses to start with a `ssl_certificate` pointing at a missing file. `default.conf` (HTTP-only) is the bootstrap default specifically so nginx can start, serve the ACME challenge, and let certbot obtain the first certificate; then the TLS bootstrap step (above) swaps configs and reloads. |
 | Image tagging / rollback | Every build is tagged with its short git SHA **and** `latest`. `IMAGE_TAG` in the server's `.env` pins which SHA `docker-compose.prod.yml` actually runs. To roll back: edit `IMAGE_TAG` in `.env` to a previous SHA, then `docker compose -f docker-compose.prod.yml pull && docker compose -f docker-compose.prod.yml up -d` (no rebuild, no migration re-run needed for a same-schema rollback). |
 | Why `IMAGE_TAG`, not just `latest` | `latest` always points at the newest build, which makes rollback (step above) impossible — you'd need a new build to "roll back". A SHA-pinned tag lets `.env` alone decide what's running. |
 | Deploy source is `develop`, not `main` | The 18-PR feature-branch chain is reviewed at the maintainer's own pace; `develop` is a separate, always-deployable branch (currently at the same tip) so production isn't blocked on that review. |
@@ -98,7 +98,7 @@ CONTACT_EMAIL_FROM=Portfolio Contact <onboarding@resend.dev>
 GITHUB_TOKEN=
 
 # --- build-safe public env (shared/config/env.public.ts) ---
-NEXT_PUBLIC_SITE_URL=https://valenciafullstack.com
+NEXT_PUBLIC_SITE_URL=https://valenciafullstack.tech
 
 # --- postgres container (must match DATABASE_URL above) ---
 POSTGRES_USER=portfolio
@@ -125,9 +125,9 @@ dedicated CI-only SSH keypair (never a personal key):
 - [ ] Server hardened (ufw 22/80/443, fail2ban, non-root `deploy` user, Docker Engine installed) — separate ops runbook, prerequisite
 - [ ] `/opt/valenciafullstack` cloned, `develop` checked out, `.env` created from the template above
 - [ ] `docker compose -f docker-compose.prod.yml up -d` running with `default.conf` (HTTP-only bootstrap)
-- [ ] DNS A records for `valenciafullstack.com` and `www` point at the server, propagated
+- [ ] DNS A records for `valenciafullstack.tech` and `www` point at the server, propagated
 - [ ] TLS bootstrap complete: `default.ssl.conf` active, `default.conf` removed, nginx reloaded
-- [ ] `https://valenciafullstack.com` loads, HTTP redirects to HTTPS
+- [ ] `https://valenciafullstack.tech` loads, HTTP redirects to HTTPS
 - [ ] `VPS_HOST`/`VPS_USER`/`VPS_SSH_KEY` repo secrets created
 - [ ] A push to `develop` triggers `.github/workflows/deploy.yml` and rolls the server forward automatically
 
