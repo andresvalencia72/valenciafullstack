@@ -1,10 +1,20 @@
-# Bootstrap config — active by default (this file ships with the standard
-# `.conf` extension nginx auto-loads). Serves the app over plain HTTP so the
-# site is reachable, and the ground truth, before any TLS certificate
-# exists. Once `infra/nginx/conf.d/default.ssl.conf.disabled` is enabled per
-# infra/README.md's TLS bootstrap step, DELETE or rename this file away from
-# `.conf` (both files must never be active at the same time — they'd both
-# try to `listen 80` for the same server_name).
+# DISABLED by default (the `.disabled` extension means nginx's
+# `include conf.d/*.conf` never loads this file as shipped). Kept ONLY for
+# a genuinely fresh server that has no TLS certificate yet — the repo's
+# ACTIVE config, `default.ssl.conf`, cannot start nginx without one.
+#
+# Fresh-server bootstrap use (see infra/README.md's TLS bootstrap section
+# for the full sequence): temporarily copy this file's content over a
+# LOCAL, UNCOMMITTED `default.conf` on the server (`cp
+# default.http-bootstrap.conf.disabled default.conf`) so nginx can start
+# and serve the ACME challenge, issue the certificate, then let it go —
+# do NOT commit this swap. The next `develop` deploy's
+# `git reset --hard && git clean -fd` (see .github/workflows/deploy.yml)
+# discards the local, uncommitted `default.conf` copy automatically and
+# restores `default.ssl.conf` as the sole active config, so this file
+# never needs to be renamed/deleted by hand and never risks coexisting
+# with `default.ssl.conf` past one deploy cycle (both `listen 80` for the
+# same `server_name` — they must never run at the same time).
 #
 # Does NOT set Content-Security-Policy, X-Frame-Options, or any other
 # security header here — the Next.js app already sets its full header set
