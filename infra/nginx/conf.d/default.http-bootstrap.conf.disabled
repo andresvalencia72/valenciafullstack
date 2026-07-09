@@ -1,0 +1,64 @@
+# DISABLED by default (the `.disabled` extension means nginx's
+# `include conf.d/*.conf` never loads this file as shipped). Kept ONLY for
+# a genuinely fresh server that has no TLS certificate yet — the repo's
+# ACTIVE config, `default.ssl.conf`, cannot start nginx without one.
+#
+# Fresh-server bootstrap use (see infra/README.md's TLS bootstrap section
+# for the full sequence): temporarily copy this file's content over a
+# LOCAL, UNCOMMITTED `default.conf` on the server (`cp
+# default.http-bootstrap.conf.disabled default.conf`) so nginx can start
+# and serve the ACME challenge, issue the certificate, then let it go —
+# do NOT commit this swap. The next `develop` deploy's
+# `git reset --hard && git clean -fd` (see .github/workflows/deploy.yml)
+# discards the local, uncommitted `default.conf` copy automatically and
+# restores `default.ssl.conf` as the sole active config, so this file
+# never needs to be renamed/deleted by hand and never risks coexisting
+# with `default.ssl.conf` past one deploy cycle (both `listen 80` for the
+# same `server_name` — they must never run at the same time).
+#
+# Does NOT set Content-Security-Policy, X-Frame-Options, or any other
+# security header here — the Next.js app already sets its full header set
+# on every response (see shared/config/security-headers.ts, ADR-0007);
+# nginx only adds proxy/forwarding headers and must not shadow or conflict
+# with the app's own CSP.
+
+server {
+    listen 80;
+    listen [::]:80;
+    server_name valenciafullstack.tech www.valenciafullstack.tech;
+
+    # certbot's HTTP-01 challenge — written into the shared webroot volume
+    # by the `certbot` service, read here so Let's Encrypt can verify
+    # domain ownership before any certificate exists.
+    location /.well-known/acme-challenge/ {
+        root /var/www/certbot;
+    }
+
+    location / {
+        proxy_pass http://app_upstream;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        # Reset, not append: nginx is the internet-facing edge with no
+        # further trusted proxy in front of it, and
+        # shared/security/resolve-client-ip.ts trusts the FIRST
+        # X-Forwarded-For entry unconditionally (safe only behind a
+        # sanitizing edge). `$proxy_add_x_forwarded_for` APPENDS to
+        # whatever the client already sent, so a client-supplied
+        # `X-Forwarded-For: <spoofed-ip>` would survive as the first
+        # entry and defeat ip_hash-keyed rate limiting on every
+        # rate-limited endpoint. Overwrite with `$remote_addr` instead —
+        # the one value nginx itself observed and the client cannot forge.
+        proxy_set_header X-Forwarded-For $remote_addr;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+    }
+
+    gzip on;
+    gzip_vary on;
+    gzip_min_length 1024;
+    gzip_types text/plain text/css application/json application/javascript
+        text/xml application/xml application/xml+rss text/javascript
+        image/svg+xml;
+}

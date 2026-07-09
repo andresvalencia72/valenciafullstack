@@ -4,6 +4,13 @@ import createNextIntlPlugin from "next-intl/plugin";
 import { securityHeaders } from "@/shared/config/security-headers";
 
 const nextConfig: NextConfig = {
+  // Emits `.next/standalone` (a self-contained server.js + traced
+  // node_modules subset) so the production Docker image (PR15,
+  // infra/README.md) doesn't need to ship the full source tree or a
+  // `next start`-capable node_modules. Safe to enable unconditionally —
+  // it only changes `next build`'s output shape, not `next dev`/`next start`
+  // run-from-source behavior used in local dev and CI.
+  output: "standalone",
   // Pin the workspace root explicitly so Next.js doesn't misdetect it from
   // unrelated lockfiles that may exist elsewhere on a developer's machine.
   turbopack: {
