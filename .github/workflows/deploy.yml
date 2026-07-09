@@ -1,0 +1,100 @@
+name: Deploy
+
+# Deploys from `develop`, not `main` — the 18-PR chain is reviewed at the
+# maintainer's own pace on the feature-branch chain; `develop` is the
+# separate, always-deployable production source. See infra/README.md.
+on:
+  push:
+    branches: [develop]
+  workflow_dispatch: {}
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: andresvalencia72/valenciafullstack
+
+jobs:
+  build-and-push:
+    name: Build and push image
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    outputs:
+      image_tag: ${{ steps.meta.outputs.tag }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Resolve image tag (short git SHA)
+        id: meta
+        run: echo "tag=${GITHUB_SHA::12}" >> "$GITHUB_OUTPUT"
+
+      - uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # Builds happen ONLY here, on a GH-hosted runner — never on the 4GB
+      # RAM VPS (see infra/README.md). The server only pulls the finished
+      # image.
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.meta.outputs.tag }}
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  deploy:
+    name: Deploy to VPS
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    steps:
+      # Required repo secrets (create manually — this workflow never creates
+      # or reads them from anywhere else, see infra/README.md):
+      #   VPS_HOST     — server IP or hostname
+      #   VPS_USER     — the non-root deploy user (NOT root)
+      #   VPS_SSH_KEY  — private half of a dedicated CI-only SSH keypair,
+      #                  authorized on the server for VPS_USER only
+      - name: Deploy over SSH
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            set -euo pipefail
+            cd /opt/valenciafullstack
+
+            # Pull the exact commit that produced this build (IaC in
+            # versioned files — compose file and nginx config always match
+            # the deployed app code, see infra/README.md).
+            git fetch origin develop
+            git reset --hard origin/develop
+
+            # Pin this deploy's image tag in the server-side .env, without
+            # assuming a prior IMAGE_TAG line exists (first-boot safe).
+            TAG="${{ needs.build-and-push.outputs.image_tag }}"
+            if grep -q '^IMAGE_TAG=' .env; then
+              sed -i "s/^IMAGE_TAG=.*/IMAGE_TAG=${TAG}/" .env
+            else
+              echo "IMAGE_TAG=${TAG}" >> .env
+            fi
+
+            docker compose -f docker-compose.prod.yml pull
+            docker compose -f docker-compose.prod.yml up -d
+
+            # Pipeline order per design.md: migrate -> sync-search -> promote.
+            # `up -d` above already promoted the new app container; these
+            # run as one-shot jobs against the same freshly-pulled image,
+            # on the same compose network, so they reach `postgres:5432`.
+            docker compose -f docker-compose.prod.yml run --rm app npm run db:migrate
+            docker compose -f docker-compose.prod.yml run --rm app npm run db:sync-search
+
+            docker image prune -f

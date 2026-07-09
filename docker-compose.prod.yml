@@ -1,0 +1,81 @@
+# Production stack for valenciafullstack.com — Hetzner VPS, single host.
+# Deployed and operated per infra/README.md; NOT used for local development
+# (local dev uses `compose.yaml` + `npm run dev`, see the root README).
+#
+# Security constraint (see infra/README.md "Why no host ports on app/postgres"):
+# Docker publishes ports directly via iptables, bypassing ufw. Only `nginx`
+# publishes to the host (80/443, the ports ufw is configured to allow);
+# `app` and `postgres` are reachable solely over the compose-internal
+# network via their service names.
+#
+# All secrets/config live in a server-side `.env` file (never committed —
+# see .gitignore's `.env*` rule and the env matrix in infra/README.md).
+
+services:
+  app:
+    image: ghcr.io/andresvalencia72/valenciafullstack:${IMAGE_TAG:-latest}
+    restart: unless-stopped
+    env_file:
+      - .env
+    expose:
+      - "3000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://localhost:3000/').then((r) => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+
+  postgres:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    env_file:
+      - .env
+    expose:
+      - "5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER:-portfolio} -d $${POSTGRES_DB:-portfolio}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  nginx:
+    image: nginx:1.27-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./infra/nginx/conf.d:/etc/nginx/conf.d:ro
+      - certbot-certs:/etc/letsencrypt:ro
+      - certbot-webroot:/var/www/certbot:ro
+    depends_on:
+      - app
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/.well-known/acme-challenge/"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+  # Renews certificates on a loop; issuance itself is a one-time manual step
+  # (see infra/README.md TLS bootstrap) since the webroot path only exists
+  # once nginx is already serving `/.well-known/acme-challenge/`.
+  certbot:
+    image: certbot/certbot:latest
+    restart: unless-stopped
+    volumes:
+      - certbot-certs:/etc/letsencrypt
+      - certbot-webroot:/var/www/certbot
+    entrypoint: >-
+      /bin/sh -c 'trap exit TERM; while :; do certbot renew --webroot -w
+      /var/www/certbot --quiet; sleep 12h & wait $${!}; done;'
+
+volumes:
+  postgres-data:
+  certbot-certs:
+  certbot-webroot:

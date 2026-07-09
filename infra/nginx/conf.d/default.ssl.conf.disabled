@@ -1,0 +1,70 @@
+# Post-TLS-bootstrap config — DISABLED by default (the `.disabled`
+# extension means nginx's `include conf.d/*.conf` never loads this file).
+#
+# Enable it per infra/README.md's TLS bootstrap step, AFTER certbot has
+# successfully issued a certificate for valenciafullstack.com (the
+# `ssl_certificate`/`ssl_certificate_key` paths below don't exist until
+# then — nginx refuses to start if they're missing, which is exactly why
+# this file starts disabled and default.conf (HTTP-only) is the bootstrap
+# default):
+#
+#   mv infra/nginx/conf.d/default.ssl.conf.disabled \
+#      infra/nginx/conf.d/default.ssl.conf
+#   rm infra/nginx/conf.d/default.conf
+#   git add -A && git commit -m "chore(infra): enable TLS nginx config"
+#   docker compose -f docker-compose.prod.yml exec nginx nginx -s reload
+#
+# Same "no security headers here" rule as default.conf — the app sets its
+# own full header set; nginx only proxies and redirects.
+
+server {
+    listen 80;
+    listen [::]:80;
+    server_name valenciafullstack.com www.valenciafullstack.com;
+
+    location /.well-known/acme-challenge/ {
+        root /var/www/certbot;
+    }
+
+    location / {
+        return 301 https://$host$request_uri;
+    }
+}
+
+server {
+    listen 443 ssl;
+    listen [::]:443 ssl;
+    http2 on;
+    server_name valenciafullstack.com www.valenciafullstack.com;
+
+    ssl_certificate     /etc/letsencrypt/live/valenciafullstack.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/valenciafullstack.com/privkey.pem;
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_ciphers HIGH:!aNULL:!MD5;
+    ssl_prefer_server_ciphers on;
+
+    # Kept for certbot's renewal requests, which still arrive over HTTP
+    # (the redirect above in the :80 server block only applies to browser
+    # traffic; certbot's own `renew --webroot` writes here directly).
+    location /.well-known/acme-challenge/ {
+        root /var/www/certbot;
+    }
+
+    location / {
+        proxy_pass http://app_upstream;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+    }
+
+    gzip on;
+    gzip_vary on;
+    gzip_min_length 1024;
+    gzip_types text/plain text/css application/json application/javascript
+        text/xml application/xml application/xml+rss text/javascript
+        image/svg+xml;
+}
