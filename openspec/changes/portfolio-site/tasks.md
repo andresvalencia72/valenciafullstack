@@ -842,3 +842,79 @@ Decided by the user after the PR1-PR14 chain: take the portfolio to production o
 - **~674 changed lines across 9 files** (`git diff --stat`: `.dockerignore` +46, `.github/workflows/deploy.yml` +100, `Dockerfile` +181, `docker-compose.prod.yml` +81, `infra/README.md` +139, `infra/nginx/conf.d/default.conf` +44, `infra/nginx/conf.d/default.ssl.conf.disabled` +70, `infra/nginx/conf.d/upstream.conf` +6, `next.config.ts` +7) — above the 400-line budget, **disclosed honestly per the orchestrator's own pre-authorization** ("infra boilerplate may exceed it — if so, disclose honestly... with atomic-unit justification") rather than force-split: the Dockerfile, compose file, nginx bootstrap/TLS configs, deploy workflow, and runbook are one interdependent unit — the runbook documents exact commands against the exact compose service/file names, so splitting across PRs would ship non-functional, non-independently-reviewable slices (same atomic-unit reasoning as PR12's vendored-icon precedent). Single commit (`feat(infra): add production deployment stack (Docker, nginx, GHA deploy)`) on `feat/pr15-infra`, pushed. PR #20 opened, non-draft, base=`feat/pr14-header-fidelity` — https://github.com/andresvalencia72/valenciafullstack/pull/20. `feat/pr15-infra` also merged into `develop` and pushed (triggers `.github/workflows/deploy.yml`'s build-and-push job for real; the subsequent SSH deploy step will fail cleanly until the 3 required repo secrets are created — expected, not a bug).
 
 **Next recommended**: `sdd-verify` over the combined PR1-PR15 scope before `sdd-archive`; separately, the user still needs to (1) rotate the `GITHUB_TOKEN` leaked into this session's `docker compose config` output (see finding #6 above), (2) run the manual TLS bootstrap once DNS is pointed at the server, and (3) create the 3 deploy secrets (`VPS_HOST`/`VPS_USER`/`VPS_SSH_KEY`) — all documented in `infra/README.md`.
+
+### PR15 follow-up: domain correction (2026-07-09, same branch/PR, user-caught error)
+
+The domain used throughout PR15's first commit was **wrong** —
+`valenciafullstack.com` does not exist / is not the registered domain.
+The real, registered domain is **`valenciafullstack.tech`** (registered
+at dinahosting); DNS for both the apex and `www` now resolve to
+167.233.170.232, confirmed by the user via `dig` before this fix was
+requested.
+
+**Fixed**: every `valenciafullstack.com` occurrence across the 4 PR15
+files that referenced it — `docker-compose.prod.yml` (header comment),
+`infra/nginx/conf.d/default.conf` (`server_name`),
+`infra/nginx/conf.d/default.ssl.conf.disabled` (`server_name` x2,
+`ssl_certificate`/`ssl_certificate_key` paths, one inline comment), and
+`infra/README.md` (title, DNS instructions, certbot issuance command,
+verify step, the "Why TLS can't be part of first boot" details-table
+row, the env template's `NEXT_PUBLIC_SITE_URL` example, and 2 checklist
+items) — swapped `.com` → `.tech`, 16 lines changed across 4 files.
+`.github/workflows/deploy.yml` was checked and needed no change — its
+only `valenciafullstack` references are the GHCR image name
+(`andresvalencia72/valenciafullstack`) and the server checkout path
+(`/opt/valenciafullstack`), neither of which is the website hostname.
+
+**Repo-wide search confirms this was an infra-only inconsistency, not a
+wider bug**: `rg -ni valenciafullstack` across the full repo (excluding
+`node_modules`/`.git`/`coverage`/`.next`) found `valenciafullstack.com`
+**only** inside the 4 PR15 files just fixed. The actual application
+source code — `app/[locale]/blog/[slug]/opengraph-image.tsx`,
+`src/shared/content/build-rss-feed.test.ts`,
+`src/features/blog/application/build-article-sitemap-entries.test.ts`,
+and `src/shared/config/env.public.test.ts` — already uses
+`valenciafullstack.tech` as its site-URL fixture, inherited unchanged
+from earlier PRs (PR9 SEO pack). So PR15 introduced the only wrong
+domain reference in the repo; it did not repeat or compound an
+earlier mistake.
+
+**One unrelated, pre-existing, out-of-scope finding surfaced by the same
+search** (left alone per instruction — a separate decision, not a PR15
+concern): `app/[locale]/privacy/page.tsx`'s
+`PRIVACY_CONTACT_EMAIL = "privacy@valenciafullstack.dev"` (and the
+matching `e2e/privacy.spec.ts` assertion) use a **third**, different TLD
+(`.dev`) as a documented placeholder email address — already flagged in
+this same file's PR6-era apply-findings entry above as "needing a real,
+monitored inbox before production launch." Now that the real domain
+(`.tech`) is confirmed, that placeholder is a candidate for a follow-up
+decision (e.g. `privacy@valenciafullstack.tech`), but changing a
+user-facing contact email is a product decision, not an infra fix —
+intentionally not touched here.
+
+**Verification**: `docker compose -f docker-compose.prod.yml config
+--quiet` — valid (exit 0; used `--quiet` specifically to avoid repeating
+the earlier `docker compose config` credential-materialization incident
+from PR15's first pass). Both nginx configs re-validated against a real
+`nginx:1.27-alpine` container on the local dev Docker network: the
+bootstrap config (`default.conf`) — syntax OK against a stub `app`
+network alias; the TLS config (`default.ssl.conf.disabled`) — confirmed
+it now fails **specifically and only** on the missing
+`/etc/letsencrypt/live/valenciafullstack.tech/fullchain.pem` (the
+updated path), not a syntax error, matching the same expected bootstrap
+behavior verified in PR15's first pass. No TS/application code was
+touched, so lint/typecheck/tests were not re-run (nothing in their scope
+changed).
+
+**Commit**: `fix(infra): correct production domain to valenciafullstack.tech`
+(4 files, 16 insertions/16 deletions) on `feat/pr15-infra`, pushed
+(updates PR #20). `feat/pr15-infra` merged into `develop` again and
+pushed (triggers the deploy workflow's build-and-push job for real; the
+image it builds and pushes to GHCR now carries the corrected nginx/runbook
+config, though the app image itself has no domain baked in — only nginx
+and the runbook referenced it as a literal string).
+
+**Next recommended**: unchanged from above — `sdd-verify` over the
+combined PR1-PR15 scope, plus the same 3 outstanding user action items
+(rotate the leaked `GITHUB_TOKEN`, run the TLS bootstrap, create the 3
+deploy secrets).
