@@ -74,9 +74,17 @@ jobs:
 
             # Pull the exact commit that produced this build (IaC in
             # versioned files — compose file and nginx config always match
-            # the deployed app code, see infra/README.md).
+            # the deployed app code, see infra/README.md). `git clean -fd`
+            # after the reset discards any local, uncommitted file (e.g. a
+            # throwaway fresh-server TLS-bootstrap nginx config swap, see
+            # infra/nginx/conf.d/default.http-bootstrap.conf.disabled) —
+            # every deploy always converges on exactly what's committed,
+            # nothing local ever silently persists past one deploy cycle.
+            # `.env` is untouched: it's gitignored, and `git clean -fd`
+            # (without `-x`) never removes ignored files.
             git fetch origin develop
             git reset --hard origin/develop
+            git clean -fd
 
             # Pin this deploy's image tag in the server-side .env, without
             # assuming a prior IMAGE_TAG line exists (first-boot safe).
@@ -96,5 +104,20 @@ jobs:
             # on the same compose network, so they reach `postgres:5432`.
             docker compose -f docker-compose.prod.yml run --rm app npm run db:migrate
             docker compose -f docker-compose.prod.yml run --rm app npm run db:sync-search
+
+            # nginx's conf.d is a bind mount (docker-compose.prod.yml), not
+            # baked into its image — `up -d` alone does NOT recreate the
+            # nginx container just because a mounted file changed underneath
+            # it (the image/config it was created from is unchanged from
+            # Compose's point of view), so a config swap delivered via
+            # `git reset --hard` above would otherwise never take effect.
+            # Validate before reloading so a broken config fails loudly
+            # instead of silently keeping the stale one running; brief
+            # `sleep` tolerates `nginx` being freshly created by `up -d`
+            # (e.g. this being the first-ever deploy) rather than an
+            # already-running container being reloaded.
+            sleep 2
+            docker compose -f docker-compose.prod.yml exec -T nginx nginx -t
+            docker compose -f docker-compose.prod.yml exec -T nginx nginx -s reload
 
             docker image prune -f
