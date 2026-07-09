@@ -918,3 +918,168 @@ and the runbook referenced it as a literal string).
 combined PR1-PR15 scope, plus the same 3 outstanding user action items
 (rotate the leaked `GITHUB_TOKEN`, run the TLS bootstrap, create the 3
 deploy secrets).
+
+### PR15 follow-up: real-server bootstrap defects, TLS cutover completed (2026-07-09, same branch/PR)
+
+The user manually bootstrapped the real server (stack up, HTTP working,
+DB migrated, search synced, `VPS_HOST`/`VPS_USER`/`VPS_SSH_KEY` repo
+secrets created, and a Let's Encrypt certificate issued manually into the
+`certbot-certs` volume — `/etc/letsencrypt/live/valenciafullstack.tech/
+{fullchain,privkey}.pem`, expires 2026-10-07). That process surfaced 4
+real defects in PR15, all fixed on `feat/pr15-infra`:
+
+1. **TLS bootstrap step conflicted with the deploy workflow.** The
+   runbook told the operator to `mv`/`rm` nginx configs and `git commit`
+   locally on the server, but `deploy.yml` runs `git reset --hard
+   origin/develop` on every deploy — a server-local commit would be
+   silently discarded (or, if the swap left an untracked file behind,
+   would coexist with the restored old config: two `listen 80` blocks
+   for the same `server_name`). **Fixed at the repo level**: renamed
+   `infra/nginx/conf.d/default.ssl.conf.disabled` → `default.ssl.conf`
+   (now the ACTIVE, committed config) and `default.conf` →
+   `default.http-bootstrap.conf.disabled` (now the normally-inactive
+   one, kept only for a genuinely fresh server with no certificate yet).
+   The runbook's TLS section was rewritten end to end: certificate
+   issuance happens on the server and lives in a Docker volume
+   (survives resets independently of the config), but the nginx *config*
+   cutover is now a normal repo change that rides the same deploy
+   pipeline as everything else. Fresh-server bootstrap = temporarily
+   activate the HTTP-only config locally on the server WITHOUT
+   committing, explicitly documented as throwaway state.
+2. **`deploy.yml` never reloaded nginx.** `nginx`'s `conf.d/` is a bind
+   mount; `docker compose up -d` does not recreate a container just
+   because a mounted file changed underneath it, so a config swap
+   arriving via `git reset --hard` would never take effect on its own.
+   **Fixed**: added `git clean -fd` right after the reset (so any local,
+   uncommitted fresh-server bootstrap swap from fix 1 is guaranteed
+   discarded — `.env` is untouched since it's gitignored and `clean -fd`
+   without `-x` never removes ignored files) and `nginx -t && nginx -s
+   reload` after `up -d` (validate before reload so a broken config
+   fails loudly instead of silently keeping the stale one running; a
+   `sleep 2` tolerates `nginx` being freshly created by `up -d` rather
+   than an already-running container being reloaded).
+3. **The runbook's `certonly` command was silently ignored by the
+   certbot service's own entrypoint**, hanging forever (verified live by
+   the user: the container sat for 20 minutes with no output).
+   `docker-compose.prod.yml` gives `certbot` a permanent renew-loop
+   `entrypoint` for its long-running service; `docker compose run
+   certbot certonly ...` without overriding that entrypoint passes
+   `certonly ...` as ignored arguments to the loop script, not to
+   `certbot` itself. **Fixed**: the runbook's issuance command now uses
+   `docker compose run --rm --entrypoint "" certbot certbot certonly
+   ...` — bypasses the loop for that one invocation only; the
+   long-running renew-loop service (started by `up -d`) is unaffected.
+4. **The `.env` template's empty optional lines broke env validation on
+   the real server** (found live: `db:sync-search` failed until the
+   blank lines were deleted). `RESEND_API_KEY=` with nothing after `=`
+   sets a real **empty string** via `env_file:`, which is different from
+   the variable being *absent* — `shared/config/env.ts`'s Zod schema
+   (`.min(1)`/`.email()`) rejects empty strings, it does not treat them
+   as "optional and unset". **Fixed**: the template now comments out
+   every optional variable (`# RESEND_API_KEY=...`) with an explicit
+   note that an uncommented-but-empty line is not the same as an absent
+   one.
+
+**Verification**: `docker compose -f docker-compose.prod.yml config
+--quiet` valid (again used `--quiet`, never the bare form). Both renamed
+nginx configs re-validated against a real `nginx:1.27-alpine` container
+on the local Docker network under their new names/roles — bootstrap
+config (mounted as `default.conf`) syntax OK; the now-active
+`default.ssl.conf` fails specifically and only on the *locally* missing
+certificate (expected — no real cert exists in this sandbox), confirming
+the cert path itself is correct. `deploy.yml`'s YAML was parsed
+(Ruby's stdlib `yaml`, since neither `pyyaml` nor a system Python
+install were writable in the sandbox) and its embedded shell script
+reviewed line by line before pushing.
+
+**Real end-to-end verification (the actual TLS cutover, not a local
+approximation)**: per instruction, this push to `develop` triggered the
+first genuinely real deploy (repo secrets now exist) — watched via
+`gh run watch` to completion rather than assumed. Both jobs succeeded:
+`Build and push image` (2m18s) and `Deploy to VPS` (48s, real SSH).
+Log evidence pulled directly from the run (`gh run view --log`):
+`db:migrate` → "migrations applied successfully!"; `db:sync-search` →
+"reconciled 7 article_search row(s)"; then **`nginx: the configuration
+file /etc/nginx/nginx.conf syntax is ok` / `configuration file
+/etc/nginx/nginx.conf test is successful`** (proves the real certificate
+at `/etc/letsencrypt/live/valenciafullstack.tech/...` loaded correctly —
+`nginx -t` fails specifically on a missing/unreadable cert, as
+independently confirmed by this session's own local sandbox test
+against the same config with no cert present) followed by **`[notice]
+448#448: signal process started`** (nginx's log line for having received
+and processed the `-s reload` signal). The TLS cutover completed
+automatically as designed, with no manual server access from this
+session (per instruction, no SSH was performed — every claim above is
+inferred from workflow log output, not direct server inspection).
+
+**Commits**: `fix(infra): fix TLS cutover, nginx reload, certbot
+entrypoint, env template` (5 files: 2 nginx config renames + edits,
+`deploy.yml`, `infra/README.md`, `upstream.conf` comment fix — 136
+insertions/47 deletions) on `feat/pr15-infra`, pushed (updates PR #20,
+now 5 commits). `feat/pr15-infra` merged into `develop` again and
+pushed — this is the push that triggered and completed the real deploy
+described above.
+
+**Still not covered by the runbook** (disclosed, not silently gapped):
+the runbook's fresh-server bootstrap flow (step 3) has not itself been
+exercised against a genuinely certificate-less server since the real
+server already has a certificate now — it remains verified only by
+local nginx syntax checks and code review, not a live fresh-boot run.
+Future new-domain/new-server setups following this runbook should treat
+that path as reviewed-but-not-live-tested.
+
+**Next recommended**: `sdd-verify` over the combined PR1-PR15 scope.
+Outstanding user action items, updated: (1) rotate the leaked
+`GITHUB_TOKEN` — still pending, (2) TLS bootstrap — **done**, confirmed
+live via this session's deploy log evidence, (3) create the 3 deploy
+secrets — **done** (`VPS_HOST`/`VPS_USER`/`VPS_SSH_KEY` now exist, this
+session's deploy run used them for real).
+
+### PR15 follow-up: CRITICAL-1 fix — X-Forwarded-For rate-limit bypass (2026-07-09, same branch/PR)
+
+Terminal verify over the combined PR1-PR15 scope returned **FAIL** with
+one CRITICAL, fixed immediately on `feat/pr15-infra` per this finding
+(full detail in `verify-report.md`):
+
+**Root cause**: both nginx configs (`default.ssl.conf` and
+`default.http-bootstrap.conf.disabled`) used `proxy_set_header
+X-Forwarded-For $proxy_add_x_forwarded_for;` — nginx's textbook
+**append-style** XFF variable, which appends `$remote_addr` to whatever
+value the client already sent rather than overwriting it.
+`src/shared/security/resolve-client-ip.ts` unconditionally trusts the
+**first** entry of `X-Forwarded-For`, which the `security` spec's own
+"Rate Limiting on Write/Query Endpoints" requirement explicitly says is
+safe **only** behind a sanitizing proxy (e.g. Vercel) and **MUST NOT**
+be trusted "on generic append-style proxies." PR15 silently changed the
+real production proxy from the design's assumed Vercel target to
+self-hosted nginx without re-validating that precondition — a real,
+previously-undisclosed regression: any external client could send
+`X-Forwarded-For: <fake-ip>` and have nginx forward `<fake-ip>,
+<real-ip>`, with the app taking the attacker-controlled first entry as
+the `ip_hash` rate-limiting key on all 5 rate-limited endpoints
+(`/api/contact`, `/api/engagement/[slug]`, `/api/engagement/views`,
+`/api/engagement/reactions`, `/api/search`) — defeating rate limiting
+entirely by rotating the header value per request.
+
+**Fix**: in both configs, changed `X-Forwarded-For` from append
+(`$proxy_add_x_forwarded_for`) to **reset** (`$remote_addr`) — nginx is
+the internet-facing edge with no further trusted proxy in front of it,
+so there is no upstream chain worth preserving; overwriting with the one
+value nginx itself observed (and the client cannot forge) closes the
+gap entirely. `X-Real-IP` was already correctly `$remote_addr` and
+needed no change. A comment was added at each `proxy_set_header
+X-Forwarded-For` line stating the security constraint explicitly, so a
+future edit can't silently reintroduce append-style forwarding without
+seeing why that would be wrong. **`resolve-client-ip.ts` was
+deliberately NOT touched** — its trust-the-first-entry contract is
+correct for a sanitizing edge; nginx (the edge) is what had to change to
+actually be one.
+
+**Verification**:
+- Both configs re-validated against real `nginx:1.27-alpine` containers on the local Docker network: bootstrap config (mounted as `default.conf`) — syntax OK; `default.ssl.conf` — fails specifically and only on the locally-missing certificate (same expected failure mode as every prior nginx verification in this PR, confirming the XFF fix introduced no syntax regression).
+- **Live spoofed-header test, not just a syntax check**: ran nginx (the fixed bootstrap config) in front of a real HTTP echo backend (`mccutchen/go-httpbin`, standing in for the app) on the local Docker network, then sent a request through nginx with `X-Forwarded-For: 1.2.3.4` set. The echo backend received `X-Forwarded-For: 192.168.65.1` (nginx's own observed `$remote_addr`) — **identical** to a control request sent with no `X-Forwarded-For` header at all. The spoofed value was fully discarded, not appended; nginx demonstrably overwrites rather than trusts client-supplied XFF values now.
+- Live spoof-verification against the real production endpoints (i.e. actually sending a forged header to `https://valenciafullstack.tech/api/...` and confirming the rate limit now holds) is deferred to the next scoped re-verify pass, per instruction — this session's local echo-backend test demonstrates the mechanism works, but was not repeated against the live site itself.
+
+**Commit**: `fix(infra): reset X-Forwarded-For at nginx edge to prevent rate-limit bypass` (2 files, 22 insertions/2 deletions) on `feat/pr15-infra`, pushed (updates PR #20). `feat/pr15-infra` merged into `develop` again and pushed — the deploy workflow's existing `nginx -t && nginx -s reload` step (added by the earlier TLS-cutover fix) applies this header-handling fix to production automatically, no manual server step needed.
+
+**Next recommended**: a scoped re-verify of CRITICAL-1 specifically (confirm the fix reached production and, if feasible within read-only constraints, that a spoofed `X-Forwarded-For` sent to the live site no longer survives past nginx), then `sdd-archive` if clean.

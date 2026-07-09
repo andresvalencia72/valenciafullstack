@@ -1,179 +1,188 @@
-# Verification Report — TERMINAL (PR1–PR14, full scope)
+# Verification Report — TERMINAL (PR1–PR15, full scope)
 
 **Change**: portfolio-site
-**Date**: 2026-07-08
-**Scope**: Full terminal re-verification covering the two user-approved design-fidelity additions that landed after the PR1–PR12 terminal report: **PR13** (skills bento grid-span fix + eyebrow/highlight/circle/bare-icon fidelity gaps, plus a same-branch/PR extension: bare icons everywhere, 18px radius, 0.16em eyebrow tracking) and **PR14** (site-header brand block, animated nav underline, circular theme toggle, ES/EN locale switcher, styled scroll progress). This report **supersedes** the prior terminal report in this file's history (PR1–PR12, verdict PASS). This is the last gate before `sdd-archive`.
-**Branch verified**: `feat/pr14-header-fidelity` (chain tip; feature-branch-chain — PR #19 → base `feat/pr13-skills-fidelity` (PR #18) → base `feat/pr12-tech-logos` (PR #17) → base `feat/pr11-hardening` → … → PR1). Nothing merged to `main` — correct per the chain strategy, not a defect.
-**Mode**: Strict TDD
+**Date**: 2026-07-09
+**Scope**: Full terminal re-verification extending the prior PR1–PR14 terminal report (verdict PASS, dated 2026-07-08) to cover **PR15**, the production infrastructure slice (PR #20, branch `feat/pr15-infra`, base `feat/pr14-header-fidelity`, 6 commits: main 674-line infra-stack commit + domain-correction fix + 4-defect TLS-cutover fix, each followed by an SDD apply-findings doc commit). This report **supersedes** the prior terminal report in this file's history in full. This is the gate before `sdd-archive`.
+**Branch verified**: `feat/pr15-infra` (current chain tip; feature-branch-chain — PR #20 → base `feat/pr14-header-fidelity` (PR #19) → … → PR1). `develop` (a separate, deploy-source-only branch) is a merge of this tip and was not independently re-verified — its content is identical to `feat/pr15-infra`'s tip by construction (fast-forward merges only, confirmed via `git log`).
+**Mode**: Strict TDD (PR1–PR14 code; PR15 is pure infra with no unit-test surface — see TDD Compliance below for the disclosed, project-precedented exception and this session's real-execution verification in its place)
 
-> All findings below are independent, this-session evidence re-derived from source inspection (`git show`/`git diff` against the real commits) and real command execution (not from prior claims or `tasks.md`'s self-reported numbers, though every number was cross-checked and found accurate). Only the previously-disclosed non-blocking residuals (WARNING-2, WARNING-3, SUGGESTION-1) are carried forward without re-litigation, per the assigned scope; SUGGESTION-5 from the prior report was already resolved by the PR13 apply session and is closed here.
+> All findings below are independent, this-session evidence re-derived from source inspection (`git show`/`git diff` against the real commits), real command execution (`npm`, `docker build`, `docker compose config --quiet`, `docker run ... nginx -t` against real `nginx:1.27-alpine` containers), and read-only external checks (`gh run view --log`, `curl`/`openssl s_client` against the live production site) — not from `tasks.md`'s or the prior apply-progress's self-reported claims alone, though every claim was cross-checked and, with one exception (see CRITICAL-1 below), found accurate. Prior PR1–PR14 non-blocking residuals (WARNING-2, WARNING-3, SUGGESTION-1) are carried forward without re-litigation, per the assigned scope, since PR15 did not touch their code paths.
 
 ## Completeness
 
 | Metric | Value |
 |--------|-------|
-| Planned phases (PR1–PR11) | 62/62 tasks checked complete |
-| Documented apply-findings sections beyond the 11 planned phases | PR11 resolve-blockers, PR12 (tech logos), PR12 resolve-blockers (CRITICAL-2 fix), PR13 (skills fidelity), PR13 extension (bare icons/radius/tracking), PR14 (header fidelity) — all user-approved scope additions, all with full TDD evidence and verification sections in `tasks.md` |
+| Planned phases (PR1–PR11) | 62/62 tasks checked complete (unchanged since the PR1–PR14 report) |
+| Documented apply-findings sections beyond the 11 planned phases | PR11–PR14 resolve-blockers/fidelity additions (all previously verified) + **PR15** (infra slice) + **PR15 domain-correction follow-up** + **PR15 real-server-bootstrap-defects follow-up** — all user-approved scope additions, all disclosed in `tasks.md` |
 | Tasks unchecked | 0 |
 
-## Build & Tests Execution (all commands run for real, this session, on `feat/pr14-header-fidelity`)
+## Build & Tests Execution (all commands run for real, this session, on `feat/pr15-infra`)
 
 **Lint**: PASSED — `npm run lint` (ESLint), 0 errors, 0 warnings.
 
 **Typecheck**: PASSED — `npm run typecheck` (`tsc --noEmit`), 0 errors.
 
-**Tests**: PASSED — 481/481, 104 test files.
+**Tests**: PASSED — 481/481, 104 test files. Byte-identical to the PR1–PR14 baseline (PR15 added zero test files — no coverage-eligible application code was touched, see below).
 ```text
  Test Files  104 passed (104)
       Tests  481 passed (481)
 ```
-Matches `tasks.md`'s claimed numbers exactly (up from 460/460 at the PR1–PR12 baseline: +7 PR13 + 2 PR13-extension-adjacent + 4 PR13-extension + 12 PR14 = +21, net 481).
 
-**Coverage**: 97.55% stmts / 93.66% branch / 96.4% funcs / 97.5% lines — threshold 80% → **PASSED on all four metrics**, at/above the PR1–PR12 baseline (97.54/93.57/96.38/97.49) on every metric. Matches `tasks.md`'s claimed numbers exactly. Zero uncovered lines in any PR13/PR14-touched file beyond the pre-existing, already-justified residuals (`request.ts` 0% direct — SUGGESTION-1, carried; `sync-search.ts`/`verify-no-client-secrets.ts` CLI-wiring lines — pre-existing, unrelated to this scope).
+**Coverage**: 97.55% stmts / 93.66% branch / 96.4% funcs / 97.5% lines — threshold 80% → **PASSED on all four metrics**, byte-identical to the PR1–PR14 baseline (97.55/93.66/96.4/97.5). Confirmed via `git diff --stat feat/pr14-header-fidelity..feat/pr15-infra -- 'src/**' 'scripts/**' 'app/**'`: **empty** — PR15 touched zero files under those trees. The only application-code change in the entire PR15 scope is `next.config.ts`'s `output: "standalone"` line (a build-output-shape config switch, already excluded from the coverage gate per the quality-pipeline spec, confirmed via source read).
 
-**Build**: PASSED — `npm run build` (Next.js 16.2.10, Turbopack), clean compile, TypeScript pass, static generation succeeded for all pages, no new routes (`SiteHeader` is a `home/ui` component, not a route — matches the claim).
+**Build**: PASSED — `npm run build` (Next.js 16.2.10, Turbopack), clean compile, TypeScript pass, 22 routes generated (unchanged route list vs. the PR14 baseline), and `.next/standalone` now emitted (confirmed present on disk: `server.js` + traced `node_modules`).
 
-**`npm run verify:no-client-secrets`**: PASSED — "no configured secret values found in the client bundle", run against the real production `.next/static` build.
+**Docker build**: PASSED — `docker build .` succeeds with **zero build-time secrets set** in this session's shell environment, confirming `shared/config/env.ts`'s lazy runtime-only validation design holds under Docker. Final image size: **758MB** — matches `tasks.md`'s claimed figure exactly.
 
-**Lighthouse CI** (`npm run lighthouse`, `lhci autorun`, real production server via `npm run start`, mobile default throttling, `numberOfRuns: 3`): **PASSED, exit code 0, run twice this session for stability** (per this task's explicit instruction — the header is the highest above-the-fold Lighthouse risk this session).
+**`docker compose -f docker-compose.prod.yml config --quiet`**: PASSED (exit 0). Per the assigned instruction, the bare `docker compose config` form (which interpolates real `.env` secrets into its output — the exact mechanism that leaked a live `GITHUB_TOKEN`/`VISITOR_HASH_SECRET` into an earlier session's transcript, per `tasks.md`'s own disclosed finding #6) was never run this session; only `--quiet` was used.
 
-| URL | Run 1 (3 samples → median) | Run 2 (3 samples → median) | Exit code (both runs) |
-|---|---|---|---|
-| `/es` | 0.94 / 0.90 / 0.96 → **0.94** | 0.96 / 0.91 / 0.88 → **0.91** | 0 |
-| `/en` | 0.81 / 0.96 / 0.91 → **0.91** | 0.91 / 0.97 / 0.91 → **0.91** | 0 |
-| `/es/blog/clean-architecture-nextjs` | 0.98 / 0.93 / 0.95 → **0.95** | 0.98 / 0.94 / 0.95 → **0.95** | 0 |
+**nginx config validation (real `nginx:1.27-alpine` containers, this session, with a stub `app`-aliased container on a real Docker network so upstream DNS resolution succeeds — a stricter test than a bare `nginx -t` with no upstream, which fails at DNS resolution before ever reaching the SSL cert lines)**:
+- `default.http-bootstrap.conf.disabled` (the fresh-server-only HTTP config, confirmed NOT loaded by default — `.disabled` extension, absent from the directory listing under an active name): `nginx: configuration file /etc/nginx/nginx.conf syntax is ok` / `test is successful`. **PASSED.**
+- `default.ssl.conf` (the ACTIVE, committed production config, confirmed loaded by default — standard `.conf` extension, present in `infra/nginx/conf.d/` alongside `upstream.conf`): fails **specifically and only** on the locally-missing certificate — `cannot load certificate "/etc/letsencrypt/live/valenciafullstack.tech/fullchain.pem": ... No such file or directory` — not a syntax error. **Matches the claimed/expected failure mode exactly**, confirming the two-stage bootstrap design (`default.http-bootstrap.conf.disabled` for a genuinely fresh, cert-less server; `default.ssl.conf` for every server that already has a cert) is real and correctly structured, and that the file rename disclosed in the apply-progress (`default.ssl.conf.disabled` → `default.ssl.conf`; `default.conf` → `default.http-bootstrap.conf.disabled`) was actually carried out, not just claimed.
 
-All three URLs at or above the `>= 0.90` `minScore` assertion (LHCI's own median-of-3 assertion logic) across both independent full runs. Individual per-sample variance is real and expected — `lighthouserc.js`'s own documentation discloses "a single `/es` run varied between 0.88 and 0.95 across back-to-back executions with zero code changes," and this session observed one `/en` sample as low as 0.81 — but the median-of-3 assertion LHCI actually gates on held at or above 0.90 in every one of the 6 URL-runs across both sessions. This is consistent with the "historically thin margin" the task flagged, not a regression: the PR13/PR14 diffs add only static CSS/markup or reuse the already-shipped `LazyIcon` deferred-loading mechanism (see Regression Guards below), so there is no new above-the-fold payload weight to explain a genuine regression, and none was observed.
+## Deploy Workflow — Live GitHub Actions Evidence (read-only, `gh run list`/`gh run view --log`)
 
-**E2E (Playwright)**: PASSED — 50/50, run with `CI=1` against a real production build, real local Docker Postgres (`portfolio-postgres-1`, healthy, 26h uptime), after `npm run db:migrate` (idempotent, already applied) and `npm run db:sync-search` (reconciled 7 rows).
+| Run | Trigger | Result | Duration | Note |
+|---|---|---|---|---|
+| `29025652909` | merge PR15 infra → `develop` | ❌ failure | 5m54s | `Deploy to VPS` step: `Error: missing server host` — **expected**, the 3 deploy secrets did not exist yet at this point in the session (disclosed, not a defect) |
+| `29027618788` | merge domain-correction fix → `develop` | ❌ failure | 2m52s | Same expected cause — secrets still not created |
+| `29033752355` | merge TLS-cutover-fix → `develop` | ✅ **success** | 3m13s | The real, secrets-now-present end-to-end deploy — the one apply-progress claims completed the TLS cutover |
+
+Full log of the successful run (`29033752355`), independently re-pulled this session via `gh run view --log`, confirms every claimed step, in order, with real timestamps:
 ```text
-Running 50 tests using 1 worker
-  ✓  43 [chromium] › e2e/skills-bento.spec.ts:16:7 › desktop (1280px): main-stack card spans 2x2, learning-now card spans 2x1 (1.1s)
-  ✓  44 [chromium] › e2e/skills-bento.spec.ts:66:7 › mobile (375px): skills section stacks 2-up with no horizontal overflow (130ms)
-  50 passed (13.7s)
+2026-07-09T16:34:34Z  HEAD is now at 1808dde ... (git reset --hard origin/develop succeeded)
+2026-07-09T16:34:34Z  Image nginx:1.27-alpine Pulling / Pulled
+2026-07-09T16:34:57Z  Container valenciafullstack-nginx-1 Running
+2026-07-09T16:35:08Z  [✓] migrations applied successfully!
+2026-07-09T16:35:11Z  sync-search: reconciled 7 article_search row(s).
+2026-07-09T16:35:15Z  nginx: the configuration file /etc/nginx/nginx.conf syntax is ok
+2026-07-09T16:35:15Z  nginx: configuration file /etc/nginx/nginx.conf test is successful
+2026-07-09T16:35:16Z  [notice] 448#448: signal process started
 ```
-**Operational note (this session's own hazard, same recurring class documented since PR3a/PR7/PR8/PR9/PR11)**: the first `test:e2e` invocation failed immediately with `Error: http://localhost:3000 is already used` — a stale `next-server` process (PID confirmed via `ps`, started well before this session's own Lighthouse runs) was still bound to port 3000 from an earlier, unrelated session. Killed the stale process (`kill -9`), confirmed the port was clear, and re-ran — clean 50/50 pass on the first genuinely fresh attempt. Not a code regression; a known environment hazard class, not new to this scope.
+This proves: the real TLS certificate at `/etc/letsencrypt/live/valenciafullstack.tech/...` loaded correctly in production (`nginx -t` fails specifically and only on a missing/unreadable cert, independently reproduced by this session's own local sandbox test above against the same config with no cert present), and the reload signal was delivered — the exact defect-2 fix (`nginx -t && nginx -s reload` after `up -d`) working as designed, live. **No SSH was performed by this session** — every claim above is read from workflow log output only, matching the assigned instruction.
 
-## Regression Guards (explicitly re-verified this session, live, in a real browser)
+## Live Site Verification (read-only, from outside, this session)
 
-### CRITICAL-2 stays fixed (Lighthouse Performance / deferred icon rendering)
-1. **Zero skill-icon SVG markup in the initial SSR HTML.** `curl`'d a live production `/es` response (101,673 bytes): the only `data-icon`/icon-name-adjacent match is the RSC streaming payload's `{"icon":"postgresql","className":"h-6.5 w-6.5"}` prop-reference string — a short string, not SVG path/gradient markup. Zero `<svg data-icon="...">` elements are present in the raw initial HTML. (Separately, the header's new `ThemeToggle` icon marker (`<span data-icon="moon">`) also appears in the raw HTML — this is a static, always-server-rendered CSS marker unrelated to the deferred devicon SVGs, and does not weaken this guard.)
-2. **Icon markup remains code-split into its own chunk, unchanged in size.** `.next/static/chunks/3vw3of4aabapo.js` is the only chunk containing the icon path-data substrings (`nodejs-icon`, `php-icon`, `postgresql-icon`), sized **28,307 bytes** — byte-identical to the PR1–PR12 baseline, confirming PR13/PR14 did not add any new icon markup to this chunk or regress the code-splitting.
-3. **Icons render correctly post-mount, verified live in a real headless Chromium browser (Playwright, this session).** `document.querySelectorAll('svg[data-icon]').length` → **10**, all with `aria-hidden="true"` and `focusable="false"`. Gradient ids `nodejs-icon-a`, `nodejs-icon-b`, `nodejs-icon-c`, `php-icon-a` each present, no duplicates. Zero requests to any origin other than `localhost:3000` during the full page load (no CDN, no external font/SVG fetch).
-4. **CSP unchanged.** Live response header on `/es`: `Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self'; object-src 'none'; frame-ancestors 'none'; base-uri 'self'` — identical shape to ADR-0007's baseline.
-5. **No new dependency across the entire PR13/PR13-extension/PR14 span.** `git diff --stat 73f4ec9 23576d4 -- package.json package-lock.json` → empty diff.
+| Check | Result |
+|---|---|
+| `https://valenciafullstack.tech/es` | `200`, valid TLS (`ssl_verify_result: 0`) |
+| `https://valenciafullstack.tech/en` | `200` |
+| `http://valenciafullstack.tech/` → | `301` → `https://valenciafullstack.tech/` |
+| `https://www.valenciafullstack.tech/` → | `308` → `/es` (served directly by the same TLS vhost/cert, not a separate apex redirect — both apex and `www` are in the cert's SAN list) |
+| TLS certificate | `CN=valenciafullstack.tech`, issuer Let's Encrypt, SAN = `valenciafullstack.tech, www.valenciafullstack.tech`, `notAfter: Oct 7 2026` — matches the disclosed `2026-10-07` expiry exactly |
+| Security headers on `/es` | `x-content-type-options: nosniff`, `x-frame-options: DENY`, `referrer-policy: strict-origin-when-cross-origin`, `strict-transport-security: max-age=63072000; includeSubDomains; preload`, `content-security-policy: ...` (ADR-0007 shape, unchanged) — **each header present exactly once**, confirming nginx does not duplicate or conflict with the app's own header set (nginx's two configs set no security headers of their own, confirmed by source read) |
+| `sitemap.xml` | `200` |
+| `/es/rss.xml` | `200` |
+| `/robots.txt` | `404` — **carried-forward WARNING-2**, unchanged, not touched by PR15 |
 
-### Locale-switcher hydration safety (PR7 aria-pressed hydration-mismatch precedent)
-- Live browser check: **zero console errors** (including zero React hydration-mismatch warnings) on a fresh `/es` load with `networkidle` + a 500ms settle.
-- `useLocale()` resolves identically server- and client-side via `NextIntlClientProvider` — the diff introduces no new `useState`/`useEffect` gating the switcher's initial render, matching the pattern PR14's own disclosure claims. Confirmed by source inspection of the actual diff (`git show 982cedb -- src/shared/i18n/ui/locale-switcher.tsx`): the only new state is the existing `activeLocale`/`handleSelect` logic, byte-identical in behavior to before; only the rendered markup (visible text, `aria-label`) changed.
-- Live a11y snapshot: `role="group"`, `aria-label="Cambiar idioma"` (unchanged), two buttons with `aria-pressed="true"/"false"` (unchanged semantics) and `aria-label="Español"`/`"Inglés"` (full names preserved), visible text now the compact `"ES"`/`"EN"` per the design.
+## Cross-Check: `tasks.md` Claims vs. Actual Commit Diffs (this session, `git show`/`git diff --stat`)
 
-### Header accessibility (new in PR14)
-- `ThemeToggle`: icon-only button, no visible text, `aria-label="Cambiar a tema oscuro"` (the exact string that used to render as visible text now renders as the accessible name — confirmed live, and confirmed by source diff that the same `t("switchToLight")`/`t("switchToDark")` translation keys are reused, not replaced), `aria-pressed` preserved.
-- `LocaleSwitcher`: `role="group"` + `aria-label` present (see above).
-- `SectionNav`: rendered inside a real `<nav aria-label="Inicio">` landmark (confirmed live), the new hover underline is a `<span aria-hidden="true">`, so it adds no noise to the accessible name of each link — every existing `getByRole` assertion keyed on link text is unaffected (confirmed by the unchanged e2e anchor-nav test still passing).
-
-## TDD Compliance (Strict TDD Mode) — diff-verified this session, not trusted from `tasks.md` alone
-
-Every `tasks.md` TDD Cycle Evidence claim for PR13, the PR13 extension, and PR14 was cross-checked against the actual commit diffs (`git show 4f6e0c2`, `git show e2db633`, `git show 982cedb`) and found **fully consistent, no discrepancy**:
-
-| Work item | Claimed diff-stat (`tasks.md`) | Independently measured `git diff --stat` (this session) | Match |
+| Commit | Claimed | Measured | Match |
 |---|---|---|---|
-| PR13 base (`4f6e0c2`) | ~232 changed lines, 9 files | 232 insertions(+) / 13 deletions(-), 9 files | ✅ Exact |
-| PR13 extension (`e2db633`) | ~87 changed lines, 4 files | 87 insertions(+) / 41 deletions(-), 4 files | ✅ Exact |
-| PR14 (`982cedb`) | ~317 changed lines, 11 files | 317 insertions(+) / 40 deletions(-), 11 files | ✅ Exact |
+| `c2e0218` (main infra stack) | 674 insertions, 9 files, 0 deletions | `674 insertions(+)`, 9 files | ✅ Exact |
+| `e596434` (domain fix) | 16 insertions/16 deletions, 4 files | `16 insertions(+), 16 deletions(-)`, 4 files | ✅ Exact |
+| `13006a5` (TLS-cutover 4-defect fix) | 136 insertions/47 deletions, 5 files | `136 insertions(+), 47 deletions(-)`, 5 files | ✅ Exact |
+| Total commits on `feat/pr15-infra` | 6 (3 code + 3 docs) | 6, confirmed via `git log feat/pr14-header-fidelity..feat/pr15-infra` | ✅ Exact |
 
-Source-level spot checks performed this session (not just diff-stat counting):
-- **`Reveal`/`Tilt` `className` passthrough** (`4f6e0c2`): confirmed both components gained an optional `className?: string` prop, applied to the wrapping element, backward-compatible (unused → `undefined` → no-op). The bento-span classes were confirmed moved from inner `<div>`s onto the `Reveal`/`Tilt` call sites directly — the actual root-cause fix, not a workaround.
-- **`SkillBadge` bare-icon rewrite** (`e2db633`): confirmed the component collapsed from a `tone`-branching wrapper `<span>` (36px, bordered/filled) to a single-purpose `<LazyIcon icon={icon} className="h-6.5 w-6.5" />` with no wrapper — the `tone` prop was fully removed, and both call sites that previously passed `tone="inverted"` were updated in the same commit (confirmed via `skills-section.tsx`'s diff in the same commit).
-- **`SiteHeader`/`ThemeToggle`/`LocaleSwitcher`/`SectionNav`/`ScrollProgress`** (`982cedb`): confirmed the new `site-header.tsx` file composes the existing `SectionNav`/`LocaleSwitcher`/`ThemeToggle` islands (no duplication), `page.tsx`'s diff shows the old inline `<header>` markup fully replaced by `<SiteHeader />` with the `SectionNav`/`LocaleSwitcher`/`ThemeToggle` imports removed from `page.tsx` (moved, not duplicated), and every accessibility-preservation claim (text-to-`aria-label` moves) verified both in the source diff and live in a browser (see Regression Guards above).
+**Secret scan** (`git diff` across the full PR15 range, pattern-matched for key/token/password/PEM-header signatures): zero real secrets found. The only match is the compose file's documented placeholder `POSTGRES_PASSWORD=REPLACE_WITH_A_STRONG_PASSWORD` (a template value, not a real credential). `.env`/`.env.*` confirmed gitignored (`!.env.example` is the sole exception) and confirmed excluded from the Docker build context via `.dockerignore`.
 
-**TDD Compliance**: All work items in this scope have complete, diff-verified TDD evidence per `tasks.md`'s own RED/GREEN/TRIANGULATE/REFACTOR tables. No discrepancy found between claimed and actual diffs.
+**Runbook secrets table vs. `deploy.yml`**: `infra/README.md`'s secrets table lists exactly `VPS_HOST`, `VPS_USER`, `VPS_SSH_KEY` — matches `deploy.yml`'s `secrets.VPS_HOST`/`secrets.VPS_USER`/`secrets.VPS_SSH_KEY` usage exactly, no extra or missing entries.
+
+**`.env` template optional-var fix (defect 4)**: confirmed present in `infra/README.md` — `# RESEND_API_KEY=...`, `# CONTACT_EMAIL_TO=...`, `# GITHUB_TOKEN=...` are commented out with an explicit inline note distinguishing "commented out" from "present but empty" (the actual root cause of the live `db:sync-search` failure this defect fixed).
+
+## TDD Compliance (Strict TDD Mode)
+
+PR1–PR14 code retains its full, previously-verified TDD Cycle Evidence (unchanged, not re-litigated here). **PR15 is scoped as a disclosed TDD exception**, consistent with this project's own precedent (PR12's vendored-icon-asset handling): the entire PR15 diff touches only `Dockerfile`, `docker-compose.prod.yml`, `.dockerignore`, `infra/nginx/conf.d/*`, `.github/workflows/deploy.yml`, `infra/README.md`, and one config-only line in `next.config.ts` — zero `src/**`/`scripts/**`/`app/**` files, confirmed above via an empty `git diff --stat` against those trees. `tasks.md`'s PR15 entry explicitly discloses this ("TDD: not applicable per the orchestrator's own scoping instruction") and states the substitute verification mechanism (real command execution at every layer) rather than silently omitting test evidence. This session independently re-ran every one of those real-execution checks (docker build, compose config --quiet, both nginx configs against a real container, the live deploy log, the live site) rather than trusting the disclosure — all reproduced with matching results. This is an accepted, disclosed, and now independently re-verified exception, not a TDD-evidence gap.
 
 ### Assertion Quality
-No trivial/tautological assertions found in the spot-checked test files (`reveal.test.tsx`, `tilt.test.tsx`, `skills-section.test.tsx`, `skill-badge.test.tsx`, `site-header.test.tsx`). The bento-span regression test in particular is well-designed: it asserts span classes live on the grid's own direct `children` (not any inner div) *and* that the other five 1x1 cards do NOT carry span classes — directly engineered to avoid repeating the exact test-design mistake (asserting classes existed anywhere in the tree, regardless of whether the CSS actually applied) that let the original bug ship silently through PR1–PR12.
+Not applicable to PR15 (zero test files added or modified). PR1–PR14's assertion quality audit (no trivial/tautological assertions found) stands unchanged.
+
+### Test Layer Distribution
+Unchanged from the PR1–PR14 report (PR15 added no tests): Unit/Integration/E2E counts identical, 481 total unit/integration tests + 50 e2e tests.
+
+### Changed File Coverage
+Not applicable — PR15 touched zero coverage-eligible files. `next.config.ts` is a build config file, out of the coverage gate's scope per the quality-pipeline spec (confirmed by source read, not merely assumed).
 
 ### Quality Metrics
 **Linter**: PASSED, 0 errors
 **Type Checker**: PASSED, 0 errors
 
-## Spec Compliance Matrix (by capability, this session's re-verification)
+## Spec Compliance Matrix (PR15-relevant capabilities, this session's re-verification)
 
-| Capability | Requirements checked | Result |
+| Capability | Requirement | Result |
 |---|---|---|
-| quality-pipeline (all gates) | lint/typecheck/coverage/build/no-client-secrets/lighthouse/e2e | ✅ COMPLIANT — all green, see Build & Tests Execution above |
-| design-system: Theme Toggle | Persists selection, no flash on load | ✅ COMPLIANT — `theme-no-flash.spec.ts` (3/3) unaffected and re-passing; `ThemeToggle`'s persistence logic (`useTheme`) untouched by PR14, only its rendered markup changed |
-| design-system: Scroll Progress Indicator | Reflects scroll position | ✅ COMPLIANT — `ScrollProgress`'s existing scroll listener untouched by PR14; only its render output (styling, `scaleX` vs. `width`) changed, unit-tested (3 new cases) |
-| design-system: Motion Interactions Respect Reduced Motion | Disabled/reduced under `prefers-reduced-motion` | ✅ COMPLIANT — `ScrollProgress` gained a new reduced-motion hide (`return null`), unit-tested; `Reveal`/`Tilt`'s existing reduced-motion handling untouched by the `className` passthrough |
-| home-page: In-Page Navigation | Smooth anchor navigation via nav menu | ✅ COMPLIANT — `SectionNav`'s underlying click-through/anchor behavior untouched by PR14 (only hover-underline styling added); `e2e/home-sections.spec.ts`'s anchor-nav case re-ran and passed unchanged |
-| home-page: Responsive Layout | No horizontal overflow at 375/768/1440px | ✅ COMPLIANT — all four viewport e2e scenarios re-ran green, including the new `skills-bento.spec.ts` 375px case |
-| home-page: Section Composition | Sections render in spec order | ✅ COMPLIANT — unaffected by header/skills-scoped changes; `e2e/home-sections.spec.ts` order assertion re-ran green |
-| i18n: Locale Routing / Locale-Matched MDX Resolution / SEO Metadata Consistency | Routing, resolution, hreflang | ✅ COMPLIANT — unaffected by this session's diffs (no i18n routing/resolution code touched); all locale-routing and seo e2e specs re-ran green |
-| i18n: Locale Persistence on Navigation | Preserves current page on locale switch | ✅ COMPLIANT (MUST clause) — `LocaleSwitcher`'s `router.replace(pathname, {locale})` call untouched by PR14, confirmed via source diff. The SHOULD-level "preserve scroll position" sub-clause remains untested (WARNING-3, carried forward, non-blocking — a SHOULD, not a MUST) |
-| 11 other spec capabilities (blog, article-filter, persistence, contact, engagement, search, seo, security, github-activity, quality-pipeline sub-gates) | Unaffected by PR13/PR14's diffs | ✅ Not independently re-checked line-by-line this session (PR13/PR14's diffs touch only `home/ui` skills/header components + `shared/ui/motion` + `shared/i18n/ui/locale-switcher` + `shared/ui/theme` + `shared/ui/scroll-progress`); the full gate suite (lint/typecheck/481 tests/build/50 e2e) re-run this session covers these areas' regression risk indirectly and all passed |
+| quality-pipeline | lint/typecheck/coverage/build all green | ✅ COMPLIANT |
+| persistence: env validation lazy at runtime, not build time | `next build`/`docker build` MUST NOT require `DATABASE_URL` | ✅ COMPLIANT — `docker build .` succeeds with zero secrets set, confirmed this session |
+| security: Rate Limiting on Write/Query Endpoints — client IP resolution | "on generic append-style proxies, the first `x-forwarded-for` entry is client-controlled and **MUST NOT be trusted**"; the platform-provided-header exception applies only "behind a platform-managed proxy that sanitizes headers before the request reaches the app (e.g. Vercel)" | ❌ **NOT COMPLIANT — see CRITICAL-1 below** |
+| security: headers (ADR-0007 CSP, HSTS, etc.) | App-level headers must reach the client unmodified/unduplicated | ✅ COMPLIANT — confirmed live, single instance of each header |
+| seo: sitemap/RSS reachability | Reachable in production | ✅ COMPLIANT — confirmed live, `200` |
+| seo: robots.txt | Not in PR15's scope | ❌ Not implemented — carried-forward WARNING-2, unaffected by PR15 |
 
-**Note**: No spec `MUST` scenario in any of the 13 capabilities mandates specific pixel values for the bento grid spans, brand-block sizing, or theme-toggle diameter — those are `design.md`/design-reference fidelity concerns, not spec compliance gates. The bento-span bug (PR13's root cause) was a genuine implementation defect (dead CSS silently breaking a design intent), not a spec violation, since no spec scenario asserted the grid layout's actual rendered geometry before PR13 introduced `skills-bento.spec.ts`.
-
-## Correctness (Static + Live Evidence, spot-checked this session)
+## Correctness (Static + Live Evidence, this session)
 
 | Requirement | Status | Notes |
 |------------|--------|-------|
-| Bento span fix locus | ✅ Implemented | `Reveal`/`Tilt` `className` passthrough + span classes moved to the actual grid children — confirmed via `git show 4f6e0c2` and the passing `e2e/skills-bento.spec.ts` bounding-box assertions |
-| `SkillBadge` bare-icon simplification | ✅ Implemented | `tone` prop fully removed, both call sites updated in the same commit, `git grep tone= src/features/home` confirms no dangling references |
-| `SiteHeader` extraction | ✅ Implemented | New file composes existing islands, `page.tsx` no longer imports `SectionNav`/`LocaleSwitcher`/`ThemeToggle` directly (moved, not duplicated) |
-| Theme toggle / locale switcher accessible-name preservation | ✅ Confirmed | Live browser a11y snapshot matches claims exactly (see Regression Guards above) |
-| Icon markup absent from initial SSR HTML | ✅ Confirmed | Live `curl` of `/es`, this session |
-| Icon markup code-split chunk unchanged (28,307 bytes) | ✅ Confirmed | Byte-identical to the PR1–PR12 baseline |
-| `package.json`/`package-lock.json` untouched across PR13/PR13-ext/PR14 | ✅ Confirmed | Empty diff, `73f4ec9`→`23576d4` |
-| `app/robots.ts` | ❌ Not implemented (WARNING-2, carried, unchanged) | Confirmed via live request: `GET /robots.txt` → 404 this session; out of PR13/PR14's scope |
+| `next.config.ts` `output: "standalone"` | ✅ Implemented | Confirmed via `git diff`, `.next/standalone` present on disk post-build |
+| Multi-stage `Dockerfile` (deps/builder/tools/runner, non-root, HEALTHCHECK) | ✅ Implemented | `docker build .` succeeds, 758MB final image, matches claim |
+| `.dockerignore` excludes `.env*`/`node_modules`/`.next`/`design-reference/`/`openspec/`/`docs/` | ✅ Confirmed | Read directly; `.env`/`.env.*` present with `!.env.example` exception |
+| `docker-compose.prod.yml`: only `nginx` publishes host ports | ✅ Confirmed | `config --quiet` validates; source read confirms `app`/`postgres` use `expose:` only |
+| nginx TLS cutover: `default.ssl.conf` active, `default.http-bootstrap.conf.disabled` inactive | ✅ Confirmed | Directory listing + real `nginx -t` results above |
+| `deploy.yml`: `git reset --hard` + `git clean -fd` + `nginx -t && nginx -s reload` after `up -d` | ✅ Confirmed | Source read + live log evidence above, both present and executed in order |
+| certbot one-shot bypasses renew-loop entrypoint (`--entrypoint ""`) | ✅ Confirmed | `infra/README.md` runbook read directly |
+| `.env` template comments out optional vars | ✅ Confirmed | `infra/README.md` read directly |
+| Domain corrected to `valenciafullstack.tech` across all 4 originally-wrong files | ✅ Confirmed | `git show e596434`, live TLS cert CN/SAN both show `.tech` |
+| **Client IP resolution (`resolveClientIp`) trust model** | ❌ **Broken by this PR's infra change, undisclosed** | See CRITICAL-1 |
 
 ## Coherence (Design)
 
 | Decision | Followed? | Notes |
 |----------|-----------|-------|
-| `feature-branch-chain` delivery | ✅ Yes | `feat/pr14-header-fidelity` → `feat/pr13-skills-fidelity` (PR #18) → `feat/pr12-tech-logos` → … chain confirmed via `git log`; nothing merged to `main` — correct, not a defect |
-| Skills-section-only scope constraint (PR13 + extension) | ✅ Yes | `git show --stat` for `4f6e0c2` and `e2db633` shows zero files touched outside `skills-section.tsx`/`skill-badge.tsx`/`reveal.tsx`/`tilt.tsx`/i18n messages/the new e2e spec — no projects-section or other-section files touched |
-| Header-only scope constraint (PR14) | ✅ Yes | `git show --stat 982cedb` shows only `page.tsx` (header wiring only), `site-header.tsx` (new), `section-nav.tsx`, `locale-switcher.tsx`, `theme-toggle.tsx`, `scroll-progress.tsx`, and their test files — no other home section touched |
-| ADR-0007 CSP (`style-src`/`script-src 'self'`) | ✅ Yes | Unaffected by PR13/PR14; re-confirmed live this session |
-| Strict TDD (RED before GREEN) | ✅ Yes | Confirmed via diff-stat and source spot-checks against `tasks.md`'s TDD Cycle Evidence tables for PR13/PR13-extension/PR14 — no discrepancy |
-| Disclosed deviations kept honest (heading highlight static; header sticky+blur kept; scroll-aware header swap not implemented; mobile burger deferred; salmon highlight static) | ✅ Yes | All disclosed in `tasks.md` and reflected accurately in the actual diffs — no silent shortcuts found |
-
-## User-Accepted Deviations (confirmed present, not flagged as findings, per this session's assigned scope)
-
-- Projects section intentionally differs from design-reference (user decision, Engram obs #62) — confirmed untouched by PR13/PR14's diffs.
-- Header keeps sticky+backdrop-blur instead of the design's plain fixed; scroll-aware transparent→solid border not implemented (Lighthouse-budget protection, disclosed in `tasks.md` and in `site-header.tsx`'s own doc comment).
-- Salmon heading highlight is static (no `scaleX` reveal animation), consistent with `article-header.tsx`'s existing pattern.
-- Mobile burger menu deferred (documented since PR3b, re-confirmed unchanged this session).
+| `feature-branch-chain` delivery | ✅ Yes | `feat/pr15-infra` → `feat/pr14-header-fidelity` (PR #19) → … confirmed via `git log`; PR15 also merges into the separate `develop` deploy-source branch, a disclosed one-time deviation from the pure chain pattern, justified and accurate |
+| `design.md`'s "Target: Vercel-class" / Postgres "Neon/Supabase" | ⚠️ Superseded, disclosed | `design.md` itself is unamended (out of scope, correctly disclosed as a separate concern from apply execution) — self-hosted Docker Compose on Hetzner was a user mid-project decision, recorded separately |
+| Review budget (674 lines, above the 400-line default) | ✅ Disclosed, justified | Atomic-infra-unit reasoning (same precedent as PR12's vendored icons) — accepted, not silently exceeded |
+| Strict TDD applied where applicable | ✅ Yes, with a disclosed exception | See TDD Compliance above |
+| Security header ownership (app sets, nginx passes through) | ✅ Yes | Confirmed live, no duplication |
+| **Client-IP trust model carried over unchanged from the Vercel-target assumption into a self-hosted-nginx production target** | ❌ **No — not re-validated, not disclosed** | See CRITICAL-1 |
 
 ## Issues Found
 
 ### CRITICAL
-None.
+
+**CRITICAL-1 (NEW, this session, undisclosed by PR15's apply findings): rate limiting on all 5 write/query endpoints is trivially bypassable via a spoofed `X-Forwarded-For` header in production.**
+
+- `src/shared/security/resolve-client-ip.ts` unconditionally trusts the **first** entry of the `x-forwarded-for` header. Its own doc comment and the `security` spec (`specs/security/spec.md`, "Rate Limiting on Write/Query Endpoints") are explicit that this is safe **only** "behind a platform-managed proxy that sanitizes headers before the request reaches the app (e.g. Vercel)" and that "on generic append-style proxies, the first `x-forwarded-for` entry is client-controlled and **MUST NOT be trusted**."
+- PR15 changed the actual production proxy from the assumed Vercel target (`design.md`'s "Target: Vercel-class", still unamended) to a **self-hosted nginx** reverse proxy. Both `infra/nginx/conf.d/default.ssl.conf` and `default.http-bootstrap.conf.disabled` set `proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;` — nginx's `$proxy_add_x_forwarded_for` is a textbook **append-style** proxy variable: it appends `$remote_addr` to whatever `X-Forwarded-For` value the client already sent, it does **not** overwrite/sanitize it. This is exactly the "generic append-style proxy" case the spec's own MUST NOT clause describes.
+- Net effect: any external client can send `X-Forwarded-For: 1.2.3.4` and nginx will forward `X-Forwarded-For: 1.2.3.4, <real-client-ip>` to the app; `resolveClientIp()` takes the first entry (`1.2.3.4`, fully attacker-controlled) as the rate-limiting/dedup key for **all 5** endpoints that call it (`app/api/contact/route.ts`, `app/api/engagement/[slug]/route.ts`, `app/api/engagement/views/route.ts`, `app/api/engagement/reactions/route.ts`, `app/api/search/route.ts`). Rotating that header value on every request defeats the `ip_hash`-keyed rate limit entirely — contact-form spam, engagement view/reaction stat poisoning, and search-endpoint DB-query abuse are all now unthrottled in production.
+- Verified by source + config cross-check this session (nginx config `proxy_set_header` directives read directly; `resolveClientIp`'s own trust precondition read directly and compared against the actual proxy's real behavior); not exploited live against production, per the assigned read-only-only instruction.
+- This is a genuine regression introduced by PR15's infra decision, not a pre-existing/already-accepted gap: `tasks.md`'s own PR6-era note (line 292) explicitly frames the trust assumption as "correct in production behind Vercel's sanitizing proxy" — a precondition PR15 silently invalidated by switching the actual production proxy without revisiting or disclosing the consequence anywhere in its "Non-obvious findings," "Deviations from design," or the two follow-up defect-fix entries (which found and fixed 4 *other* real defects via live testing, but this one was not among them because it requires no visible symptom under normal traffic to surface — only under active abuse).
+- **Fix is out of scope for this report** (verify does not fix issues), but the two standard remedies are: (a) nginx's `ngx_http_realip_module` (`set_real_ip_from <trusted-upstream-cidr>; real_ip_header X-Forwarded-For; real_ip_recursive on;`) — not applicable here since nginx itself is the edge, so instead (b) reset rather than append the header at the edge (`proxy_set_header X-Forwarded-For $remote_addr;`, discarding any client-supplied value outright, since nginx is directly internet-facing with no further trusted proxy in front of it).
 
 ### WARNING
 
 **WARNING-2 (carried forward, unchanged, non-blocking): `app/robots.ts` was never shipped.** No owning task, no spec `MUST` scenario. Confirmed via a live `GET /robots.txt` → 404 this session.
 
-**WARNING-3 (carried forward, unchanged, non-blocking): i18n's "SHOULD preserve scroll position" on locale switch remains untested at the e2e/behavioral level.** A SHOULD, not a MUST. Not touched by PR13/PR14.
+**WARNING-3 (carried forward, unchanged, non-blocking): i18n's "SHOULD preserve scroll position" on locale switch remains untested at the e2e/behavioral level.** A SHOULD, not a MUST. Not touched by PR15.
+
+**WARNING-4 (NEW, non-blocking, disclosed by the project itself, re-confirmed this session): the runbook's fresh-server bootstrap path (`default.http-bootstrap.conf.disabled` activated locally on a genuinely certificate-less server) has never been exercised live** — the real server already had a certificate by the time this path would have been tested. Verified only by this session's own local nginx syntax check (PASSED, see above) and code review, not a live fresh-boot run. Carried forward as explicitly disclosed in `apply-progress`, not rediscovered.
 
 ### SUGGESTION
 
-**SUGGESTION-1 (carried forward, unchanged): `src/shared/i18n/request.ts` still shows 0% direct coverage.** Pre-existing since PR2b, already justified; unaffected by this session's scope.
+**SUGGESTION-1 (carried forward, unchanged): `src/shared/i18n/request.ts` still shows 0% direct coverage.** Pre-existing since PR2b, already justified; unaffected by PR15.
 
-**SUGGESTION-2 (NEW, non-blocking, informational): a small residual fidelity gap disclosed by the PR13 extension itself was independently confirmed still open.** Card category labels (e.g. "Lenguaje", "Backend") keep `tracking-wide` (0.025em) rather than the design's `.12em`/`.14em`, and the section-eyebrow's `0.16em` tracking is applied to the skills section only (other sections' eyebrows still use `tracking-widest`). Both are explicitly disclosed in `tasks.md` as out-of-scope for this session (hard scope constraint: skills section only) — not a defect, flagged here only so a future full-page design-fidelity pass has a single consolidated pointer.
+**SUGGESTION-2 (carried forward, unchanged, informational): minor pre-existing design-fidelity residuals disclosed by the PR13 extension** (card category label tracking, non-skills-section eyebrow tracking) remain open, explicitly out of that session's hard scope constraint. Not touched by PR15.
 
-**SUGGESTION-3 (NEW, non-blocking, informational): Lighthouse Performance margin remains genuinely thin and noisy on `/es`/`/en` at the individual-sample level** (one `/en` sample this session measured 0.81, a single `/es` sample measured 0.88), though the median-of-3 gate LHCI actually asserts on held ≥ 0.90 in all 6 URL-runs across two full sessions. This is disclosed, pre-existing measurement noise (documented in `lighthouserc.js`'s own comments, not introduced by PR13/PR14 — both PRs add only static CSS/markup or reuse the already-shipped `LazyIcon` deferred-loading mechanism, with zero new above-the-fold payload). No action required before archive; flagged so a future session is not surprised by an occasional low single-run sample that is not indicative of the actual (median-gated) CI outcome.
+**SUGGESTION-3 (carried forward, unchanged, informational): Lighthouse Performance margin remains genuinely thin and noisy on `/es`/`/en` at the individual-sample level**, pre-existing measurement noise, not introduced by PR13/PR14/PR15.
 
-**SUGGESTION-5 from the prior report is now closed.** The prior report's SUGGESTION-5 (a documentation-accuracy nit in `tasks.md`'s PR12-resolve-blockers changed-line estimate) was explicitly corrected by the PR13 entry in `tasks.md` (see its closing note); re-confirmed resolved this session.
+**SUGGESTION-4 (NEW, non-blocking, informational): the leaked `GITHUB_TOKEN` PAT rotation, disclosed by `tasks.md`'s finding #6, remains an outstanding user action item** — confirmed still open (not something this session's read-only scope could verify remediation of; flagged here only as a pointer, since it's security-adjacent to CRITICAL-1's theme but is a distinct, already-disclosed, already-tracked item, not re-discovered).
 
 ## Verdict
 
-**PASS — ready for `sdd-archive`.**
+**FAIL — one CRITICAL issue (CRITICAL-1) must be resolved before `sdd-archive`.**
 
-All gates re-run for real this session on `feat/pr14-header-fidelity` are green: lint (0 errors), typecheck (0 errors), 481/481 unit tests at 97.55%/93.66%/96.4%/97.5% coverage (at/above the PR1–PR12 baseline on every metric, all four ≥ 80% gate), a clean production build, zero leaked client-side secrets, Lighthouse CI passing with exit code 0 across two independent full runs on `/es`, `/en`, and the article page (all medians ≥ 0.90), and 50/50 e2e including the new `skills-bento.spec.ts` real-browser bounding-box assertions.
+Every quality gate re-run for real this session on `feat/pr15-infra` is green: lint (0 errors), typecheck (0 errors), 481/481 unit tests at byte-identical 97.55%/93.66%/96.4%/97.5% coverage, a clean production build (both plain and Docker), a valid `docker compose config --quiet`, both nginx configs behaving exactly as designed against real containers, a live-confirmed successful production deploy (GitHub Actions log evidence, real SSH, real TLS cutover), and a live, externally-reachable production site with valid TLS, correct HTTP→HTTPS redirect, and an unduplicated app-owned security header set. Every `tasks.md` PR15 claim — line counts, file renames, the 4 real-server bootstrap defects and their fixes, the domain correction, the deploy log evidence — was independently cross-checked against actual commits/live evidence this session and found accurate, with **one exception**: CRITICAL-1, a genuine, previously-undisclosed rate-limiting bypass caused by PR15's silent change of the production reverse-proxy from the assumed Vercel (header-sanitizing) model to a self-hosted, non-sanitizing nginx proxy, in direct conflict with the `security` spec's own explicit MUST NOT clause.
 
-Every claim in `tasks.md`'s PR13/PR13-extension/PR14 sections was independently cross-checked against the actual commit diffs this session and found accurate — diff-stat line counts match exactly, the bento-span root-cause fix and its regression-test design were verified by source inspection, and every disclosed accessible-name-preservation claim for `ThemeToggle`/`LocaleSwitcher` was independently re-verified live in a real headless browser, not just trusted from the unit tests. The CRITICAL-2 regression guard (icon SVG deferred-rendering mechanism) was re-verified live and found byte-identical/unregressed. No hydration-mismatch console errors were observed on a fresh page load, addressing the specific PR7 hydration-mismatch precedent this scope was asked to re-check.
+CRITICAL-1 does not block the site from being live or functioning correctly for legitimate traffic — it is an abuse-resistance gap, not an availability or correctness defect — but it is a genuine spec violation with real-world exploitability (a single custom request header, no authentication or special access required) affecting all 5 rate-limited endpoints, so per this skill's own decision gate ("Spec scenario has no passing covering test" / a design deviation that breaks a spec = CRITICAL), it is reported as CRITICAL rather than a WARNING.
 
-Zero CRITICAL issues found in this scope or carried from the prior report (CRITICAL-1 and CRITICAL-2 both remain fixed and unregressed). WARNING-2 (`robots.txt`) and WARNING-3 (i18n scroll position) remain known, disclosed, non-blocking residuals, carried forward unchanged. SUGGESTION-1 is carried forward unchanged; SUGGESTION-2 and SUGGESTION-3 are new, informational, non-blocking observations with no effect on archive readiness; the prior report's SUGGESTION-5 is now closed.
+WARNING-2/WARNING-3 (carried, non-blocking) and the new WARNING-4 (disclosed, non-blocking, informational) do not block archive on their own. SUGGESTION-1/2/3 are carried forward unchanged; SUGGESTION-4 is a pointer to an already-tracked outstanding user action item.
 
-**No CRITICAL issues remain. This change is ready for `sdd-archive`.**
+**Recommendation: route back to `sdd-apply` for a small, targeted fix to `infra/nginx/conf.d/default.ssl.conf` and `default.http-bootstrap.conf.disabled`'s `X-Forwarded-For` handling (reset rather than append, since nginx is the internet-facing edge with no further trusted proxy in front of it), then re-run this verification's CRITICAL-1 check specifically before `sdd-archive`.** No other part of the PR1–PR15 scope requires further work.

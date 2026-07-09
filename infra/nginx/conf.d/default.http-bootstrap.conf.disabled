@@ -39,7 +39,17 @@ server {
         proxy_http_version 1.1;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        # Reset, not append: nginx is the internet-facing edge with no
+        # further trusted proxy in front of it, and
+        # shared/security/resolve-client-ip.ts trusts the FIRST
+        # X-Forwarded-For entry unconditionally (safe only behind a
+        # sanitizing edge). `$proxy_add_x_forwarded_for` APPENDS to
+        # whatever the client already sent, so a client-supplied
+        # `X-Forwarded-For: <spoofed-ip>` would survive as the first
+        # entry and defeat ip_hash-keyed rate limiting on every
+        # rate-limited endpoint. Overwrite with `$remote_addr` instead —
+        # the one value nginx itself observed and the client cannot forge.
+        proxy_set_header X-Forwarded-For $remote_addr;
         proxy_set_header X-Forwarded-Proto $scheme;
         proxy_set_header Upgrade $http_upgrade;
         proxy_set_header Connection "upgrade";
