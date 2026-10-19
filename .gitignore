@@ -17,3 +17,8 @@ out/
 coverage/
 playwright-report/
 test-results/
+
+# Local agent artifacts
+.atl/
+.engram/
+
